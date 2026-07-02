@@ -23,10 +23,28 @@ docs/RESEARCH.md (hls.js, dash.js LoL+, WebRTC NetEQ, TCP BBR, Shaka).
 - **Suspensão graciosa só por travada real**: um resgate invisível não conta
   mais como stall.
 
+- **Catch-up até 2x no Super Ao Vivo** (teto hls.js), independente do
+  preset do Automático — a curva só encosta no teto quando muito atrás;
+  perto do alvo fica em passos suaves de 1,05-1,15x.
+
 ### Novo
+- **Sonda de delay (AIMD)**: com calmaria comprovada, o alvo desce abaixo
+  do pior caso medido rumo ao mínimo real da transmissão; um resgate é o
+  sinal de recuo (nível falho lembrado por 10 min, orçamento de 1 morte
+  por 10 min, nunca aposta contra o vale dos últimos 30s).
+- **Piso por episódios de vale**: um engasgo aberrante único do broadcast
+  não domina o piso (usa o 2º vale mais fundo da janela); gap que repete é
+  honrado; déficit permanente (halt na fonte) re-ancora a medição.
+- **Régua honesta no badge**: hover mostra "Piso desta live ~X,Xs" —
+  pipeline medido do canal + colchão mínimo medido. O usuário vê quando
+  está encostado no limite físico da classe de latência da live.
 - `engine/edge.js` — o cérebro do Super Ao Vivo extraído e coberto por
-  testes (`test/edge.test.mjs`, 10 cenários, incluindo o ciclo de entrega
-  4K medido em campo). Suíte: 40 testes.
+  testes (`test/edge.test.mjs`, incluindo o ciclo de entrega 4K medido em
+  campo). Suíte: 47 testes.
+
+### Validado em campo (2026-07-02, transmissão 4K60 de futebol)
+Delay 9,3s estável em 4K a 0,4s do limite físico estimado da live —
+paridade com a TV aberta pós-catch-up, sem os congelamentos dela.
 
 ## 1.0.0 — 2026-07-02
 
