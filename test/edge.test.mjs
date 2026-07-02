@@ -274,17 +274,20 @@ test('one freak delivery gap does not pin the floor; a repeating one does', () =
 
 test('quantile floor: the rare deepest valley does not tax every second', () => {
     const gov = createEdgeGovernor();
-    // many shallow valleys (~2s) + one deep (~5s) inside the window: the
-    // floor should track the shallow majority, leaving the tail to rescues
+    // mild recurring valleys (~0.8s) + ONE deep (5s) freak: the floor must
+    // track the mild majority (the freak goes to the rescue net), and the
+    // single event must cost at most a couple of rescues, never suspension
     const arrival = i => {
-        if (i >= 380 && i < 400) return 0;             // one 5s valley
-        if (i % 60 >= 52) return 0;                    // 2s valley every 15s
-        return i % 2 === 0 ? 0.6 : 0;                  // 1.2x surplus: valleys repay
+        if (i >= 780 && i < 800) return 0;             // one 5s valley
+        if (i % 60 >= 57) return 0;                    // 0.75s valley every 15s
+        return i % 2 === 0 ? 0.55 : 0;                 // surplus: valleys repay
     };
-    simulate(gov, { ticks: 960, arrivalFn: arrival, startReserve: 10 });
+    const log = simulate(gov, { ticks: 1600, arrivalFn: arrival, startReserve: 6 });
+    assert.ok(log.every(s => !s.suspended), 'one freak valley must never suspend');
+    const rescues = log.filter(s => s.rescue).length;
+    assert.ok(rescues <= 2, `the freak must cost at most 2 rescues, got ${rescues}`);
     const need = gov.getState().drawdown;
-    assert.ok(need < 4.0, `floor must follow the shallow majority, got ${need}`);
-    assert.ok(need >= 1.5, `floor must still honor the recurring valleys, got ${need}`);
+    assert.ok(need < 4.0, `floor must follow the mild majority, got ${need}`);
 });
 
 test('post-rescue hold is short once the valley closed; stalls keep the long gate', () => {

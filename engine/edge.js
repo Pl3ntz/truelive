@@ -116,7 +116,9 @@
         // episode always counts in full — it is happening right now.
         let episodes = [];            // completed valleys: {t, v}
         let ep_max = 0;               // depth of the ongoing valley
-        let ep_last_growth = 0;       // when the ongoing valley last deepened
+        let ep_last_growth = 0;       // when the ongoing valley last MOVED
+        let ep_heal_low = Infinity;   // lowest drawdown since the peak (healing =
+                                      // NEW lows, not segment-cadence wobble)
         let in_valley = false;
         let dd_now = 0;               // the resulting measured need (debug)
         let dd_recent_filter = winmax_create();
@@ -143,6 +145,7 @@
             episodes = [];
             ep_max = 0;
             ep_last_growth = 0;
+            ep_heal_low = Infinity;
             in_valley = false;
             rescued_this_valley = false;
             dd_now = 0;
@@ -188,18 +191,18 @@
         // 1. Quantile of the window's episodes + pad. The pad is PRESSURE-
         //    AWARE: lean (0.6s) while rescues are rare; when rescues repeat
         //    (3+/10min) it grows to clear the danger zone entirely.
-        // 2. STABILITY RULE (Owner, 2026-07-02): whatever happened in the
-        //    LAST 30s must pass without a rescue — descend only when the
-        //    recent delivery proves it's safe. Kills the dive-crash cycle:
-        //    on a rough night the target parks above the active valleys; on
-        //    a healthy feed dd_recent is small and the floor drops with it.
+        // 2. The valley of the LAST 30s with the same pad — the floor never
+        //    rests below what just happened. The pad is LEAN by default (the
+        //    morning-validated 0.6 — a fat preemptive pad taxed every stream
+        //    ~1.2s and regressed the healthy case, field 2026-07-02 night);
+        //    under real rescue pressure it fattens via the same escalation.
         function safe_floor(now) {
             rescue_times = rescue_times.filter(t => now - t < PROBE_RESCUE_WINDOW_MS);
             const pad = rescue_times.length >= 3 ? DANGER + 0.3 : MARGIN;
             return Math.min(HARD_CEIL, Math.max(
                 abs_gate(now),
                 dd_need(now) + pad,
-                dd_recent_now(now) + DANGER + 0.3,
+                dd_recent_now(now) + pad,
             ));
         }
 
@@ -213,10 +216,10 @@
             rescue_times = rescue_times.filter(t => now - t < PROBE_RESCUE_WINDOW_MS);
             if (rescue_times.length >= PROBE_MAX_RESCUES) return safe;
             const fail = now - probe_fail_t < PROBE_FAIL_TTL_MS ? probe_fail : 0;
-            // never bet against known data: the probe bottoms where the last
-            // 30s could still pass WITHOUT a rescue (danger zone cleared) —
-            // a stream that truly calmed lets it dive
-            return Math.min(safe, Math.max(abs_gate(now), fail, dd_recent_now(now) + DANGER + 0.3));
+            // never bet against known data: the probe bottoms at the deepest
+            // valley of the last 30s + margin (a stream that truly calmed
+            // lets it dive)
+            return Math.min(safe, Math.max(abs_gate(now), fail, dd_recent_now(now) + MARGIN));
         }
 
         function incident(now) {
@@ -286,7 +289,18 @@
                         const drawdown = cum_max - cum;
                         if (drawdown > 0.3) {
                             if (!in_valley) rescued_this_valley = false;
-                            if (!in_valley || drawdown > ep_max + 0.05) ep_last_growth = nowMs;
+                            // "alive" = deepening OR healing (making NEW
+                            // lows since the peak — cadence wobble of ±0.25
+                            // doesn't count); only a FLAT deficit for 10s is
+                            // a permanent offset (source-side halt). Closing
+                            // a slow repay mid-heal released an extra rescue.
+                            if (!in_valley || drawdown > ep_max + 0.05) {
+                                ep_last_growth = nowMs;
+                                ep_heal_low = drawdown;
+                            } else if (drawdown < ep_heal_low - 0.05) {
+                                ep_heal_low = drawdown;
+                                ep_last_growth = nowMs;
+                            }
                             in_valley = true;
                             ep_max = Math.max(ep_max, drawdown);
                             if (nowMs - ep_last_growth > 10000) {
