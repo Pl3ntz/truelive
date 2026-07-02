@@ -39,16 +39,42 @@
                     <a class="btn" href="#install">⬇ Install now (2 minutes)</a>
                 </div>
                 <p class="hero-note">Free · Open source (GPL-3.0) · Zero data collection · Works on Chrome, Edge, Brave, Opera and Firefox</p>
-                <div class="hero-shot">
-                    <img src="../assets/screenshot-1-hero.png" alt="YouTube player with the TrueLive badge showing 2.9 seconds of delay" />
+
+                <div class="race" aria-label="Simulation: the same goal reaching each screen at its measured delay">
+                    <div class="race-head">
+                        <span class="race-title">The same goal, on every screen</span>
+                        <span class="race-clock" aria-hidden="true">0.0s</span>
+                    </div>
+                    <div class="race-event"><span class="ball" aria-hidden="true">⚽</span> GOAL at the stadium!</div>
+                    <div class="lane hl" data-delay="3.2">
+                        <div class="lane-label">YouTube + <strong>TrueLive</strong></div>
+                        <div class="lane-screen"><span class="lane-wait">waiting for the signal…</span><span class="lane-goal">⚽ GOAL!</span></div>
+                        <div class="lane-stamp">3.2s</div>
+                    </div>
+                    <div class="lane" data-delay="4.0">
+                        <div class="lane-label">Broadcast TV (antenna)</div>
+                        <div class="lane-screen"><span class="lane-wait">waiting for the signal…</span><span class="lane-goal">⚽ GOAL!</span></div>
+                        <div class="lane-stamp">~4s</div>
+                    </div>
+                    <div class="lane" data-delay="7.0">
+                        <div class="lane-label">Plain YouTube</div>
+                        <div class="lane-screen"><span class="lane-wait">waiting for the signal…</span><span class="lane-goal">⚽ GOAL!</span></div>
+                        <div class="lane-stamp">7.0s</div>
+                    </div>
+                    <div class="lane" data-delay="19">
+                        <div class="lane-label">Big streaming channels (World Cup)</div>
+                        <div class="lane-screen"><span class="lane-wait">waiting for the signal… (seriously, wait)</span><span class="lane-goal">⚽ GOAL!</span></div>
+                        <div class="lane-stamp">~19s</div>
+                    </div>
+                    <p class="race-foot">Real-time simulation using measured delays — you feel the gap by waiting through it.</p>
                 </div>
             </div>
         </div>
 
         <section class="wrap" id="numbers">
-            <h2>Measured, not promised</h2>
-            <p class="lead">Same machine, same live stream, using the player's own ingestion clock.
-                Delay from the real moment to your screen:</p>
+            <h2 class="reveal">Measured, not promised</h2>
+            <p class="lead reveal reveal-d1">Same machine, same live stream, using the player's own
+                ingestion clock. Delay from the real moment to your screen:</p>
             <div class="bars">
                 <div class="bar-row hl">
                     <div class="bar-label">YouTube + TrueLive (Super Live mode)</div>
@@ -115,23 +141,23 @@
         </section>
 
         <section class="wrap" id="how">
-            <h2>How it works</h2>
-            <p class="lead">There's nothing to configure. Turn on Super Live and it handles the rest:</p>
+            <h2 class="reveal">How it works</h2>
+            <p class="lead reveal reveal-d1">There's nothing to configure. Turn on Super Live and it handles the rest:</p>
             <div class="cards">
-                <div class="card">
+                <div class="card reveal">
                     <div class="ico">📏</div>
                     <h3>Measures your real delay</h3>
                     <p>Uses the player's internal ingestion clock to know exactly how many seconds you
                         are behind the live edge — and shows it in a discreet badge, if you want.</p>
                 </div>
-                <div class="card">
+                <div class="card reveal reveal-d1">
                     <div class="ico">⚡</div>
                     <h3>Rides the live edge</h3>
                     <p>Part of the "future" video is already downloaded on your computer. TrueLive
                         repositions playback right at that edge — that's why it gets closer than any
                         extension that merely speeds up the video.</p>
                 </div>
-                <div class="card">
+                <div class="card reveal reveal-d2">
                     <div class="ico">🛡️</div>
                     <h3>Protects itself</h3>
                     <p>It measures your connection's "breathing" and keeps a safe distance. If your
@@ -139,6 +165,14 @@
                         video doesn't freeze. Genuinely weak connection? It suspends itself and returns
                         when it's safe.</p>
                 </div>
+            </div>
+            <div class="badge-demo reveal">
+                <span class="badge-pill"><span class="bolt" aria-hidden="true">⚡</span><span class="val">7.0s</span></span>
+                <span class="badge-demo-note">The in-player badge shows your real delay dropping, live — exactly like this.</span>
+            </div>
+            <div class="hero-shot reveal">
+                <img src="../assets/screenshot-1-hero.png" loading="lazy"
+                    alt="YouTube player with the TrueLive badge showing 2.9 seconds of delay" />
             </div>
         </section>
 

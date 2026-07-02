@@ -39,21 +39,47 @@
                     <a class="btn" href="#instalar">⬇ Instalar agora (2 minutos)</a>
                 </div>
                 <p class="hero-note">Grátis · Código aberto (GPL-3.0) · Zero coleta de dados · Funciona em Chrome, Edge, Brave, Opera e Firefox</p>
-                <div class="hero-shot">
-                    <img src="assets/screenshot-1-hero.png" alt="Player do YouTube com o badge do TrueLive mostrando 2,9 segundos de delay" />
+
+                <div class="race" aria-label="Simulação: o mesmo gol chegando em cada tela, no delay medido de cada uma">
+                    <div class="race-head">
+                        <span class="race-title">O mesmo gol, em cada tela</span>
+                        <span class="race-clock" aria-hidden="true">0,0s</span>
+                    </div>
+                    <div class="race-event"><span class="ball" aria-hidden="true">⚽</span> GOL no estádio!</div>
+                    <div class="lane hl" data-delay="3.2">
+                        <div class="lane-label">YouTube + <strong>TrueLive</strong></div>
+                        <div class="lane-screen"><span class="lane-wait">aguardando o sinal…</span><span class="lane-goal">⚽ GOOOL!</span></div>
+                        <div class="lane-stamp">3,2s</div>
+                    </div>
+                    <div class="lane" data-delay="4.0">
+                        <div class="lane-label">TV aberta (antena)</div>
+                        <div class="lane-screen"><span class="lane-wait">aguardando o sinal…</span><span class="lane-goal">⚽ GOOOL!</span></div>
+                        <div class="lane-stamp">~4s</div>
+                    </div>
+                    <div class="lane" data-delay="7.0">
+                        <div class="lane-label">YouTube padrão</div>
+                        <div class="lane-screen"><span class="lane-wait">aguardando o sinal…</span><span class="lane-goal">⚽ GOOOL!</span></div>
+                        <div class="lane-stamp">7,0s</div>
+                    </div>
+                    <div class="lane" data-delay="19">
+                        <div class="lane-label">CazéTV na Copa</div>
+                        <div class="lane-screen"><span class="lane-wait">aguardando o sinal… (é sério, espera)</span><span class="lane-goal">⚽ GOOOL!</span></div>
+                        <div class="lane-stamp">~19s</div>
+                    </div>
+                    <p class="race-foot">Simulação em tempo real com os delays medidos — você sente a diferença esperando junto.</p>
                 </div>
             </div>
         </div>
 
         <section class="wrap" id="numeros">
-            <h2>Medido, não prometido</h2>
-            <p class="lead">Comparamos na mesma máquina, na mesma live, com o relógio de ingestão do
-                próprio player. Delay do lance até a sua tela:</p>
+            <h2 class="reveal">Medido, não prometido</h2>
+            <p class="lead reveal reveal-d1">Comparamos na mesma máquina, na mesma live, com o relógio
+                de ingestão do próprio player. Delay do lance até a sua tela:</p>
             <div class="bars">
                 <div class="bar-row hl">
                     <div class="bar-label">YouTube + TrueLive (Super Ao Vivo)</div>
                     <div class="bar-track"><div class="bar-fill" style="width:16%"></div></div>
-                    <div class="bar-val">3,2s medido</div>
+                    <div class="bar-val"><span data-count="3.2" data-comma="1" data-suffix="s medido">3,2s medido</span></div>
                 </div>
                 <div class="bar-row">
                     <div class="bar-label">TV aberta (antena digital)</div>
@@ -120,29 +146,37 @@
         </section>
 
         <section class="wrap" id="como">
-            <h2>Como funciona</h2>
-            <p class="lead">Você não configura nada. Liga o Super Ao Vivo e ele cuida do resto:</p>
+            <h2 class="reveal">Como funciona</h2>
+            <p class="lead reveal reveal-d1">Você não configura nada. Liga o Super Ao Vivo e ele cuida do resto:</p>
             <div class="cards">
-                <div class="card">
+                <div class="card reveal">
                     <div class="ico">📏</div>
                     <h3>Mede o delay de verdade</h3>
                     <p>Usa o relógio interno do player pra saber exatamente quantos segundos você está
                         atrás do ao vivo — e mostra num badge discreto, se você quiser.</p>
                 </div>
-                <div class="card">
+                <div class="card reveal reveal-d1">
                     <div class="ico">⚡</div>
                     <h3>Cola na borda do vivo</h3>
                     <p>Parte do vídeo "do futuro" já está baixada no seu computador. O TrueLive
                         reposiciona a reprodução nessa borda — por isso chega mais perto que
                         qualquer extensão que só acelera o vídeo.</p>
                 </div>
-                <div class="card">
+                <div class="card reveal reveal-d2">
                     <div class="ico">🛡️</div>
                     <h3>Se protege sozinho</h3>
                     <p>Mede a "respiração" da sua conexão e mantém a distância segura. Se a internet
                         oscilar, ele recua na hora — a velocidade nunca cai e o vídeo não trava.
                         Internet fraca de verdade? Ele mesmo se suspende e volta quando dá.</p>
                 </div>
+            </div>
+            <div class="badge-demo reveal">
+                <span class="badge-pill"><span class="bolt" aria-hidden="true">⚡</span><span class="val">7,0s</span></span>
+                <span class="badge-demo-note">O badge no player mostra seu delay real caindo, ao vivo — assim, do jeito que você vai ver.</span>
+            </div>
+            <div class="hero-shot reveal">
+                <img src="assets/screenshot-1-hero.png" loading="lazy"
+                    alt="Player do YouTube com o badge do TrueLive mostrando 2,9 segundos de delay" />
             </div>
         </section>
 

@@ -100,6 +100,150 @@ a:hover { text-decoration: underline; }
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
 }
 
+/* ------------------------------------------------------------- race demo */
+/* "Corrida do gol": o gol acontece em t=0 e cada tela recebe no seu delay.
+   Motor de tempo em app.js; aqui só estados visuais (transform/opacity). */
+.race {
+    margin: 44px auto 0;
+    max-width: 860px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 26px 28px 22px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    text-align: left;
+}
+
+.race-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.race-title { font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-dim); }
+.race-clock {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    padding: 4px 12px;
+    border-radius: 999px;
+    min-width: 74px;
+    text-align: center;
+}
+
+.race-event {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 16px;
+    opacity: 0.45;
+    transition: opacity 200ms ease;
+}
+
+.race-event.fired { opacity: 1; }
+.race-event .ball { display: inline-block; font-size: 20px; }
+.race-event.fired .ball { animation: kick 700ms ease; }
+
+@keyframes kick {
+    0% { transform: translateX(0) rotate(0); }
+    60% { transform: translateX(14px) rotate(220deg) scale(1.25); }
+    100% { transform: translateX(0) rotate(360deg); }
+}
+
+.lane { display: grid; grid-template-columns: 190px 1fr 92px; gap: 14px; align-items: center; padding: 9px 0; border-top: 1px solid var(--border); }
+.lane-label { font-size: 13.5px; color: var(--text-dim); }
+.lane.hl .lane-label { color: var(--text); font-weight: 600; }
+
+.lane-screen {
+    position: relative;
+    height: 38px;
+    border-radius: 9px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--text-dim);
+}
+
+/* barra de progresso do sinal viajando até a tela */
+.lane-screen::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: scaleX(0);
+    transform-origin: left;
+    background: linear-gradient(90deg, transparent, var(--accent-soft));
+}
+
+.race.running .lane-screen::before {
+    transform: scaleX(1);
+    transition: transform var(--lane-delay, 3s) linear;
+}
+
+.lane-wait, .lane-goal { transition: opacity 150ms ease; }
+.lane-goal { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 800; opacity: 0; color: var(--text); }
+.lane.scored .lane-wait { opacity: 0; }
+.lane.scored .lane-goal { opacity: 1; animation: goal-pop 500ms cubic-bezier(0.2, 1.6, 0.4, 1); }
+.lane.scored .lane-screen { border-color: var(--accent); background: var(--accent-soft); }
+.lane.hl.scored .lane-screen { box-shadow: 0 0 22px rgba(41, 121, 255, 0.35); }
+
+@keyframes goal-pop {
+    0% { transform: scale(0.6); }
+    100% { transform: scale(1); }
+}
+
+.lane-stamp { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; text-align: right; color: var(--text-dim); opacity: 0.4; }
+.lane.scored .lane-stamp { opacity: 1; color: var(--text); }
+.lane.hl.scored .lane-stamp { color: var(--accent-strong); }
+
+.race-foot { margin-top: 14px; font-size: 12.5px; color: var(--text-dim); }
+
+/* ------------------------------------------------------------- badge demo */
+.badge-demo {
+    margin-top: 26px;
+    background: #000;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 440px;
+}
+
+.badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 5px 12px;
+    font: 500 13px/1.3 -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+
+.badge-pill .bolt { color: #4a90ff; animation: bolt-pulse 1.6s ease-in-out infinite; }
+
+@keyframes bolt-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.85); }
+}
+
+.badge-demo-note { font-size: 13px; color: var(--text-dim); }
+
+/* ------------------------------------------------------------- reveals */
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity 550ms ease, transform 550ms cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.in-view { opacity: 1; transform: none; }
+.reveal-d1 { transition-delay: 90ms; }
+.reveal-d2 { transition-delay: 180ms; }
+.reveal-d3 { transition-delay: 270ms; }
+
+.card { transition: transform 180ms ease, border-color 180ms ease; }
+.card:hover { transform: translateY(-4px); border-color: var(--accent); }
+
 /* ------------------------------------------------------------- sections */
 section { padding: 64px 0; }
 section.alt { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
@@ -115,7 +259,19 @@ h2 { font-size: 30px; letter-spacing: -0.01em; margin: 0 0 8px; }
 .bar-row.hl .bar-label { color: var(--text); font-weight: 600; }
 
 .bar-track { background: var(--surface-2); border-radius: 999px; height: 30px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 999px; background: #414a5c; }
+.bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: #414a5c;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bars.in-view .bar-fill { transform: scaleX(1); }
+.bars.in-view .bar-row:nth-child(2) .bar-fill { transition-delay: 120ms; }
+.bars.in-view .bar-row:nth-child(3) .bar-fill { transition-delay: 240ms; }
+.bars.in-view .bar-row:nth-child(4) .bar-fill { transition-delay: 360ms; }
+.bars.in-view .bar-row:nth-child(5) .bar-fill { transition-delay: 480ms; }
 .bar-row.hl .bar-fill { background: linear-gradient(90deg, #2979ff, #58a6ff); }
 .bar-row.bad .bar-fill { background: #7a4a4a; }
 
@@ -270,7 +426,17 @@ footer { padding: 44px 0 60px; border-top: 1px solid var(--border); font-size: 1
     .donate .qr { max-width: 220px; }
 }
 
+@media (max-width: 860px) {
+    .lane { grid-template-columns: 1fr; gap: 4px; }
+    .lane-stamp { text-align: left; }
+    .race { padding: 20px 18px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .btn { transition: none; }
+    .btn, .card, .bar-fill, .reveal { transition: none; }
+    .reveal { opacity: 1; transform: none; }
+    .bar-fill, .bars .bar-fill { transform: scaleX(1); }
+    .badge-pill .bolt, .race-event.fired .ball, .lane.scored .lane-goal { animation: none; }
+    .race.running .lane-screen::before { transition: none; transform: scaleX(1); }
 }
