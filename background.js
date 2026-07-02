@@ -7,25 +7,9 @@
 import * as common from './common.js';
 
 /**
- * Send the "jump to live" message to the active tab only. Any failure (no
- * active tab, not a YouTube tab, no content script listening) is swallowed —
- * the shortcut simply does nothing rather than falling back to a global signal.
- */
-function goLiveOnActiveTab() {
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-        const tab = tabs?.[0];
-        if (!tab?.id) return;
-        chrome.tabs.sendMessage(tab.id, { type: 'go-live' }, () => {
-            void chrome.runtime.lastError; // no listener on that tab — ignore
-        });
-    });
-}
-
-/**
  * Handle a keyboard command. `toggle-enabled` writes storage, which every
- * open tab's content script reacts to. `go-live` is scoped to the active tab
- * only, sent directly via chrome.tabs.sendMessage (see goLiveOnActiveTab).
- * @param {'toggle-enabled'|'go-live'} command - Command id from the manifest.
+ * open tab's content script reacts to.
+ * @param {'toggle-enabled'} command - Command id from the manifest.
  */
 function onCommand(command) {
     if (command === 'toggle-enabled') {
@@ -35,8 +19,6 @@ function onCommand(command) {
             if (remember) patch[common.lastModeKey] = remember;
             chrome.storage.local.set(patch);
         });
-    } else if (command === 'go-live') {
-        goLiveOnActiveTab();
     }
 }
 

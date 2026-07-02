@@ -1,97 +1,94 @@
 {
-    "appName": {
-        "message": "TrueLive"
-    },
-    "appDesc": {
-        "message": "Regardez les directs YouTube avec le délai le plus faible possible selon la diffusion et votre connexion. Aucune collecte."
-    },
-    "tagline": {
-        "message": "Le vrai direct — le délai le plus faible possible"
-    },
-    "sectionMode": {
-        "message": "Mode"
-    },
-    "modeOff": {
-        "message": "Désactivé"
-    },
-    "modeOffDesc": {
-        "message": "Lecture normale, sans réglages."
-    },
-    "modeAuto": {
-        "message": "Automatique"
-    },
-    "modeAutoDesc": {
-        "message": "Équilibre délai et stabilité selon votre connexion, tout seul."
-    },
-    "modeEdge": {
-        "message": "Super Ao Vivo"
-    },
-    "modeEdgeDesc": {
-        "message": "Le délai le plus faible que la diffusion et votre connexion permettent — recule tout seul si nécessaire."
-    },
-    "sectionIndicators": {
-        "message": "Indicateurs du lecteur"
-    },
-    "showPlaybackRate": {
-        "message": "Afficher la vitesse"
-    },
-    "showLatency": {
-        "message": "Afficher le délai réel"
-    },
-    "showHealth": {
-        "message": "Afficher le buffer"
-    },
-    "showPinned": {
-        "message": "Panneau de délai épinglé (toujours visible)"
-    },
-    "reset": {
-        "message": "Rétablir les réglages"
-    },
-    "resetHint": {
-        "message": "Maintenez 1 seconde pour rétablir."
-    },
-    "supportToggle": {
-        "message": "Soutenir le projet"
-    },
-    "supportTitle2": {
-        "message": "Offrez-moi un café via PIX"
-    },
-    "supportScan2": {
-        "message": "Scannez avec votre appli bancaire, ou copiez le code :"
-    },
-    "supportCopy2": {
-        "message": "Copier le code PIX"
-    },
-    "supportCopied": {
-        "message": "Copié !"
-    },
-    "commandToggleDesc": {
-        "message": "Activer/désactiver TrueLive"
-    },
-    "commandGoLiveDesc": {
-        "message": "Aller au direct"
-    },
-    "a11yPlaybackRate": {
-        "message": "Vitesse de lecture"
-    },
-    "a11yLatency": {
-        "message": "Délai du direct"
-    },
-    "a11yHealth": {
-        "message": "Buffer disponible"
-    },
-    "a11yEstimation": {
-        "message": "Heure estimée pour rejoindre le direct"
-    },
-    "a11yCurrent": {
-        "message": "Temps actuel (cliquer pour copier)"
-    },
-    "supportFree": {
-        "message": "Libre",
-        "description": "Open-amount chip: the payer types the value in the bank app"
-    },
-    "supportIntl": {
-        "message": "Faire un don en US$ (carte)",
-        "description": "International donation link (USD) for users without PIX"
-    }
+   "appName": {
+      "message": "TrueLive"
+   },
+   "appDesc": {
+      "message": "Regardez les directs YouTube avec le délai le plus faible possible selon la diffusion et votre connexion. Aucune collecte."
+   },
+   "tagline": {
+      "message": "Le vrai direct — le délai le plus faible possible"
+   },
+   "sectionMode": {
+      "message": "Mode"
+   },
+   "modeOff": {
+      "message": "Désactivé"
+   },
+   "modeOffDesc": {
+      "message": "Lecture normale, sans réglages."
+   },
+   "modeAuto": {
+      "message": "Automatique"
+   },
+   "modeAutoDesc": {
+      "message": "Équilibre délai et stabilité selon votre connexion, tout seul."
+   },
+   "modeEdge": {
+      "message": "Super Ao Vivo"
+   },
+   "modeEdgeDesc": {
+      "message": "Le délai le plus faible que la diffusion et votre connexion permettent — recule tout seul si nécessaire."
+   },
+   "sectionIndicators": {
+      "message": "Indicateurs du lecteur"
+   },
+   "showPlaybackRate": {
+      "message": "Afficher la vitesse"
+   },
+   "showLatency": {
+      "message": "Afficher le délai réel"
+   },
+   "showHealth": {
+      "message": "Afficher le buffer"
+   },
+   "showPinned": {
+      "message": "Panneau de délai épinglé (toujours visible)"
+   },
+   "reset": {
+      "message": "Rétablir les réglages"
+   },
+   "resetHint": {
+      "message": "Maintenez 1 seconde pour rétablir."
+   },
+   "supportToggle": {
+      "message": "Soutenir le projet"
+   },
+   "supportTitle2": {
+      "message": "Offrez-moi un café via PIX"
+   },
+   "supportScan2": {
+      "message": "Scannez avec votre appli bancaire, ou copiez le code :"
+   },
+   "supportCopy2": {
+      "message": "Copier le code PIX"
+   },
+   "supportCopied": {
+      "message": "Copié !"
+   },
+   "commandToggleDesc": {
+      "message": "Activer/désactiver TrueLive"
+   },
+   "a11yPlaybackRate": {
+      "message": "Vitesse de lecture"
+   },
+   "a11yLatency": {
+      "message": "Délai du direct"
+   },
+   "a11yHealth": {
+      "message": "Buffer disponible"
+   },
+   "a11yEstimation": {
+      "message": "Heure estimée pour rejoindre le direct"
+   },
+   "a11yCurrent": {
+      "message": "Temps actuel (cliquer pour copier)"
+   },
+   "supportFree": {
+      "message": "Libre",
+      "description": "Open-amount chip: the payer types the value in the bank app"
+   },
+   "supportIntl": {
+      "message": "Faire un don en US$ (carte)",
+      "description": "International donation link (USD) for users without PIX"
+   }
 }

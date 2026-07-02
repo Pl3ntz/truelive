@@ -37,12 +37,6 @@ test('isLiveChat detects only the live-chat popout URLs', () => {
     assert.equal(common.isLiveChat('https://www.youtube.com/watch?v=abc'), false);
 });
 
-test('emitGoLive writes the go-live nonce under its own key', () => {
-    let written = null;
-    common.emitGoLive(v => { written = v; }, 12345);
-    assert.deepEqual(written, { [common.goLiveSignalKey]: 12345 });
-});
-
 test('toggleEnabledAction turns an active mode off and remembers it', () => {
     const r = common.toggleEnabledAction(common.presets.edge, undefined);
     assert.equal(common.deriveMode(r.apply), 'off');

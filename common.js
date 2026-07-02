@@ -63,9 +63,6 @@ export const label = {
     a11yHealth: msg('a11yHealth', 'Saúde do buffer'),
     a11yEstimation: msg('a11yEstimation', 'Horário estimado para alcançar o ao vivo'),
     a11yCurrent: msg('a11yCurrent', 'Tempo atual (clique para copiar o link)'),
-
-    // Go-live quick action (popup button) — reuses the shortcut's i18n string.
-    goLiveBtn: msg('commandGoLiveDesc', 'Jump to live'),
 };
 
 // ---------------------------------------------------------------------------
@@ -85,27 +82,8 @@ export const storage = ['enabled', 'playbackRate', 'showPlaybackRate', 'showLate
 // of `donateKeys` ("Restore defaults" leaves them untouched).
 // ---------------------------------------------------------------------------
 
-/**
- * One-shot "jump to live" nonce; content.js forwards it to the engine.
- * Legacy/global signal: every open YouTube tab reacts to it, since
- * `chrome.storage.local` has no per-tab scoping. The "go-live" keyboard
- * shortcut no longer writes this key — it targets the active tab directly via
- * `chrome.tabs.sendMessage` (see background.js). Kept for any other caller
- * that still needs an all-tabs signal; do not use it for anything meant to
- * affect only the active tab.
- */
-export const goLiveSignalKey = 'goLiveSignal';
 /** Mode to restore when the toggle shortcut re-enables playback after Off. */
 export const lastModeKey = 'lastMode';
-
-/**
- * Write a one-shot "jump to live" signal to storage.
- * @param {(items: Object) => void} setter - `chrome.storage.local.set`, injected so this stays pure and unit-testable.
- * @param {number} [now] - Nonce value; defaults to `Date.now()`.
- */
-export function emitGoLive(setter, now = Date.now()) {
-    setter({ [goLiveSignalKey]: now });
-}
 
 /**
  * Compute the toggle shortcut's action: flip between Off and the last active mode.

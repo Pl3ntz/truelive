@@ -1,97 +1,94 @@
 {
-    "appName": {
-        "message": "TrueLive"
-    },
-    "appDesc": {
-        "message": "Watch YouTube live streams with the lowest delay the stream and your internet allow. Adapts on its own. No data collection."
-    },
-    "tagline": {
-        "message": "Truly live — the lowest possible delay"
-    },
-    "sectionMode": {
-        "message": "Mode"
-    },
-    "modeOff": {
-        "message": "Off"
-    },
-    "modeOffDesc": {
-        "message": "Normal playback, no adjustments."
-    },
-    "modeAuto": {
-        "message": "Automatic"
-    },
-    "modeAutoDesc": {
-        "message": "Balances delay and stability for your connection, automatically."
-    },
-    "modeEdge": {
-        "message": "Super Ao Vivo"
-    },
-    "modeEdgeDesc": {
-        "message": "The lowest delay this stream and your internet allow — backs off by itself when needed."
-    },
-    "sectionIndicators": {
-        "message": "Player indicators"
-    },
-    "showPlaybackRate": {
-        "message": "Show playback speed"
-    },
-    "showLatency": {
-        "message": "Show real delay"
-    },
-    "showHealth": {
-        "message": "Show buffer"
-    },
-    "showPinned": {
-        "message": "Pinned delay panel (always visible)"
-    },
-    "reset": {
-        "message": "Restore defaults"
-    },
-    "resetHint": {
-        "message": "Hold for 1 second to restore."
-    },
-    "supportToggle": {
-        "message": "Support the project"
-    },
-    "supportTitle2": {
-        "message": "Buy me a coffee via PIX"
-    },
-    "supportScan2": {
-        "message": "Scan with your bank's app, or copy the code:"
-    },
-    "supportCopy2": {
-        "message": "Copy PIX code"
-    },
-    "supportCopied": {
-        "message": "Copied!"
-    },
-    "commandToggleDesc": {
-        "message": "Toggle TrueLive on/off"
-    },
-    "commandGoLiveDesc": {
-        "message": "Jump to live"
-    },
-    "a11yPlaybackRate": {
-        "message": "Playback speed"
-    },
-    "a11yLatency": {
-        "message": "Live delay"
-    },
-    "a11yHealth": {
-        "message": "Buffer health"
-    },
-    "a11yEstimation": {
-        "message": "Estimated time to reach live"
-    },
-    "a11yCurrent": {
-        "message": "Current time (click to copy link)"
-    },
-    "supportFree": {
-        "message": "Any amount",
-        "description": "Open-amount chip: the payer types the value in the bank app"
-    },
-    "supportIntl": {
-        "message": "Donate in US$ (card)",
-        "description": "International donation link (USD) for users without PIX"
-    }
+   "appName": {
+      "message": "TrueLive"
+   },
+   "appDesc": {
+      "message": "Watch YouTube live streams with the lowest delay the stream and your internet allow. Adapts on its own. No data collection."
+   },
+   "tagline": {
+      "message": "Truly live — the lowest possible delay"
+   },
+   "sectionMode": {
+      "message": "Mode"
+   },
+   "modeOff": {
+      "message": "Off"
+   },
+   "modeOffDesc": {
+      "message": "Normal playback, no adjustments."
+   },
+   "modeAuto": {
+      "message": "Automatic"
+   },
+   "modeAutoDesc": {
+      "message": "Balances delay and stability for your connection, automatically."
+   },
+   "modeEdge": {
+      "message": "Super Ao Vivo"
+   },
+   "modeEdgeDesc": {
+      "message": "The lowest delay this stream and your internet allow — backs off by itself when needed."
+   },
+   "sectionIndicators": {
+      "message": "Player indicators"
+   },
+   "showPlaybackRate": {
+      "message": "Show playback speed"
+   },
+   "showLatency": {
+      "message": "Show real delay"
+   },
+   "showHealth": {
+      "message": "Show buffer"
+   },
+   "showPinned": {
+      "message": "Pinned delay panel (always visible)"
+   },
+   "reset": {
+      "message": "Restore defaults"
+   },
+   "resetHint": {
+      "message": "Hold for 1 second to restore."
+   },
+   "supportToggle": {
+      "message": "Support the project"
+   },
+   "supportTitle2": {
+      "message": "Buy me a coffee via PIX"
+   },
+   "supportScan2": {
+      "message": "Scan with your bank's app, or copy the code:"
+   },
+   "supportCopy2": {
+      "message": "Copy PIX code"
+   },
+   "supportCopied": {
+      "message": "Copied!"
+   },
+   "commandToggleDesc": {
+      "message": "Toggle TrueLive on/off"
+   },
+   "a11yPlaybackRate": {
+      "message": "Playback speed"
+   },
+   "a11yLatency": {
+      "message": "Live delay"
+   },
+   "a11yHealth": {
+      "message": "Buffer health"
+   },
+   "a11yEstimation": {
+      "message": "Estimated time to reach live"
+   },
+   "a11yCurrent": {
+      "message": "Current time (click to copy link)"
+   },
+   "supportFree": {
+      "message": "Any amount",
+      "description": "Open-amount chip: the payer types the value in the bank app"
+   },
+   "supportIntl": {
+      "message": "Donate in US$ (card)",
+      "description": "International donation link (USD) for users without PIX"
+   }
 }
