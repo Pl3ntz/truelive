@@ -135,13 +135,17 @@ const main = () => {
   console.log('  OK — estruturas PT e EN idênticas.')
 
   console.log('\n== Deploy (execute manualmente) ==')
+  // ORDEM IMPORTA: assets sobem ANTES dos HTMLs. O HTML referencia os assets
+  // pelo hash novo — se ele subir primeiro, um visitante (ou o próprio teste)
+  // busca a URL nova enquanto o asset ainda é o velho, e o Cloudflare cacheia
+  // o conteúdo errado sob o hash novo (aconteceu em 2026-07-02 com o CSS).
   const scpCommands = [
-    `scp ${relative(ROOT, HTML_PT)} ${REMOTE}/index.html`,
-    `scp ${relative(ROOT, HTML_EN)} ${REMOTE}/en/index.html`,
-    `scp site/sitemap.xml ${REMOTE}/sitemap.xml`,
     ...listAssets().map(
       (name) => `scp site/assets/${name} ${REMOTE}/assets/${name}`,
     ),
+    `scp site/sitemap.xml ${REMOTE}/sitemap.xml`,
+    `scp ${relative(ROOT, HTML_PT)} ${REMOTE}/index.html`,
+    `scp ${relative(ROOT, HTML_EN)} ${REMOTE}/en/index.html`,
   ]
   scpCommands.forEach((cmd) => console.log(`  ${cmd}`))
 }
