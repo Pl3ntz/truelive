@@ -85,31 +85,6 @@ export const storage = ['enabled', 'playbackRate', 'showPlaybackRate', 'showLate
 /** Mode to restore when the toggle shortcut re-enables playback after Off. */
 export const lastModeKey = 'lastMode';
 
-// ---------------------------------------------------------------------------
-// Channel memory: the engine's learned playback profile per channel (target
-// reserve, valley need, pipeline). LOCAL storage only — never leaves the
-// machine (zero-collection product law). Seeded back at attach so a known
-// channel starts on target instead of re-learning from scratch.
-export const channelMemoryKey = 'channelMemory';
-export const channelMemoryTtlMs = 7 * 24 * 3600 * 1000; // stale profiles expire
-export const channelMemoryCap = 20;                     // most-recent channels kept
-
-/**
- * Merge a channel's learned profile into the memory map. Pure: returns a NEW
- * map, pruned — entries past the TTL dropped, size capped keeping the newest.
- * @param {Object|undefined} map - Current map from storage.
- * @param {string} author - Channel name (player.getVideoData().author).
- * @param {{target: number, need: number, pipeline: number}} entry - Learned profile.
- * @param {number} [now] - Injected for testability.
- */
-export function mergeChannelMemory(map, author, entry, now = Date.now()) {
-    const merged = { ...(map || {}), [author]: { ...entry, t: now } };
-    const alive = Object.entries(merged)
-        .filter(([, v]) => now - (v?.t || 0) < channelMemoryTtlMs)
-        .sort((a, b) => b[1].t - a[1].t);
-    return Object.fromEntries(alive.slice(0, channelMemoryCap));
-}
-
 /**
  * Compute the toggle shortcut's action: flip between Off and the last active mode.
  * @param {Object} data - Resolved settings (as read from storage).
