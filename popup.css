@@ -148,10 +148,27 @@ body {
 }
 
 .brand-name {
+    display: inline-block;
     margin: 0;
     font-size: 16px;
     font-weight: 600;
     letter-spacing: -0.01em;
+}
+
+/* Selo de beta — mesmo chip da landing, honesto sobre a maturidade */
+.beta-chip {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 1px 7px;
+    vertical-align: 2px;
+    margin-left: 6px;
 }
 
 .brand-tagline {
