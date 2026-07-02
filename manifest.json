@@ -2,9 +2,7 @@
    "action": {
       "default_popup": "popup.html"
    },
-   "author": {
-      "email": "vitorribasplentz@gmail.com"
-   },
+   "author": "Vitor Plentz",
    "background": {
       "service_worker": "background.js",
       "type": "module"
