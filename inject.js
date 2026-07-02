@@ -205,6 +205,7 @@
     let edge_governor = edgeGovernorFactory ? edgeGovernorFactory() : null;
     let edge_self_seek_until = 0;  // our rescue seek fires 'waiting' — not a real stall
     let edge_quality_h = 0;        // last seen videoHeight (rendition watch)
+    let edge_pipeline_ema = null;  // smoothed ingest->edge pipeline (honest ruler)
 
     // Rendition switched: old measurements describe the old rendition, and the
     // buffer wipe of the switch must not read as danger. Re-learn from zero.
@@ -391,6 +392,12 @@
     pinned_full.className = 'tl-full';
 
     let pinned_suspended = false;
+    // Honest-ruler line for the badge: the minimum delay THIS live allows on
+    // THIS connection = measured pipeline (ingest->CDN->edge, set by the
+    // channel's latency class — no client can cut it) + the measured minimal
+    // cushion. Lets the viewer see "I'm at the physical limit" instead of
+    // blaming the extension for a normal-latency stream.
+    let pinned_floor_est = null;
     function update_pinned(latency, health) {
         if (!pinned_panel.contains(pinned_bolt)) {
             pinned_panel.append(pinned_bolt, pinned_short, pinned_full);
@@ -405,6 +412,13 @@
         const dim2 = document.createElement('span'); dim2.className = 'tl-dim'; dim2.textContent = ' · Buffer ';
         const n2 = document.createElement('span'); n2.className = 'tl-num'; n2.textContent = res;
         pinned_full.append(dim1, n1, dim2, n2);
+        if (Number.isFinite(pinned_floor_est)) {
+            const dim3 = document.createElement('span'); dim3.className = 'tl-dim';
+            dim3.textContent = ' · Piso desta live ~';
+            const n3 = document.createElement('span'); n3.className = 'tl-num';
+            n3.textContent = pinned_floor_est.toFixed(1).replace('.', ',') + 's';
+            pinned_full.append(dim3, n3);
+        }
         if (pinned_suspended) {
             const tag = document.createElement('span'); tag.className = 'tl-dim'; tag.textContent = ' · Estável';
             pinned_full.append(tag);
@@ -536,6 +550,7 @@
         if (caps.setRate && caps.getRate) {
             if (!settings.enabled) {
                 reset_playbackRate();
+                pinned_floor_est = null;
             } else if (settings.edge && edge_governor) {
                 // ONE buffer metric governs edge mode: the video.buffered
                 // reserve — the same one the governor measures arrivals on.
@@ -567,19 +582,36 @@
                         if (g.rescue) edge_execute_rescue(ev, g.rescueTo, now);
                         apply_playback_rate(g.rate);
                     }
+                    // Honest-ruler estimate for the badge: measured pipeline
+                    // (real end-to-end latency minus our local reserve) plus
+                    // the measured minimal cushion of THIS stream.
+                    const st = edge_governor.getState();
+                    const real_lat = progress_state && Number.isFinite(progress_state.ingestionTime)
+                        ? Date.now() / 1000 - progress_state.ingestionTime : NaN;
+                    const pipe = real_lat - (b_end - ev.currentTime);
+                    if (Number.isFinite(pipe) && pipe > 0) {
+                        edge_pipeline_ema = edge_pipeline_ema === null
+                            ? pipe : edge_pipeline_ema * 0.95 + pipe * 0.05;
+                    }
+                    pinned_floor_est = edge_pipeline_ema === null ? null
+                        : edge_pipeline_ema + Math.max(2.0, st.drawdown + 0.6);
                     // observability (page-world): diagnostics read the live state
                     window.__truelive_debug = {
                         v: 2, rate: g.rate, target: +g.target.toFixed(2),
                         floor: +g.floor.toFixed(2), reserve: +(b_end - ev.currentTime).toFixed(2),
-                        suspended: g.suspended, ...edge_governor.getState(),
+                        suspended: g.suspended,
+                        floorEst: pinned_floor_est === null ? null : +pinned_floor_est.toFixed(2),
+                        ...st,
                     };
                 }
             } else if (settings.edge) {
                 // governor unavailable (engine/edge.js failed to load) — the
                 // stable, buffered profile is the safe fallback
                 set_playbackRate(settings.playbackRate, latency, health, settings.bufferTarget, true);
+                pinned_floor_est = null;
             } else {
                 set_playbackRate(settings.playbackRate, latency, health, settings.bufferTarget, settings.auto);
+                pinned_floor_est = null;
             }
         }
 
@@ -694,6 +726,8 @@
         if (edgeGovernorFactory) edge_governor = edgeGovernorFactory();
         edge_self_seek_until = 0;
         edge_quality_h = 0;
+        edge_pipeline_ema = null;   // new stream: new pipeline, new honest ruler
+        pinned_floor_est = null;
 
         if (bound_video !== v) {
             // Detach the previous <video>'s listener before binding the new one,
