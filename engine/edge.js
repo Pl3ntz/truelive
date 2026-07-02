@@ -220,7 +220,12 @@
             if (target < floor) {
                 target = floor;                       // bound rose: respect it now
             } else if (nowMs - last_trouble > CALM_MS && target > floor) {
-                target = Math.max(floor, target - CREEP); // calm: creep back down
+                // Two-speed descent: ABOVE the safe floor the incident bump
+                // drains fast (the floor already covers the measured valleys —
+                // lingering above it is pure wasted delay); BELOW it, probing
+                // territory, keep the cautious creep.
+                const step = target > safe_floor(nowMs) + 1e-9 ? CREEP * 3 : CREEP;
+                target = Math.max(floor, target - step);
             }
             // A rescue restores toward the safe floor but each JUMP is capped:
             // a deep need is met by chained small steps (10s cooldown apart),

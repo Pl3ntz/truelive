@@ -551,7 +551,12 @@
                     apply_playback_rate(1.0);
                 } else if (ev && !ev.paused && ev.buffered.length) {
                     const b_end = ev.buffered.end(ev.buffered.length - 1);
-                    const g = edge_governor.tick(now, b_end, b_end - ev.currentTime, settings.playbackRate);
+                    // Edge mode's catch-up ceiling is 2.0x (hls.js cap), not the
+                    // Automático preset: minimum delay is the mode's whole point,
+                    // and the sigmoid only reaches the ceiling when FAR behind —
+                    // near the target it stays at gentle 1.05-1.15x steps.
+                    const g = edge_governor.tick(now, b_end, b_end - ev.currentTime,
+                        Math.max(2.0, settings.playbackRate));
                     edge_suspended = g.suspended;
                     if (g.suspended) {
                         // weak-connection handover: behave as Automático
