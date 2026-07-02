@@ -15,13 +15,20 @@ jogo, é a diferença entre ouvir o grito do vizinho e gritar junto.
 
 O TrueLive te deixa colado no ponto mais recente disponível:
 
-• Super Ao Vivo — força o menor atraso fisicamente possível (~3-4s do lance,
-  território de TV aberta), com 4 camadas de proteção automática: piso medido
-  pela sua conexão, reação preventiva a picos, freio suave em vez de travada, e
-  suspensão automática se a internet não aguentar.
+• Super Ao Vivo — o menor delay que A TRANSMISSÃO e a sua internet permitem,
+  com 4 camadas de proteção automática: piso medido pela sua conexão, reação
+  preventiva a picos, resgate instantâneo em vez de travada (a velocidade
+  nunca cai abaixo de 1,0x), e suspensão automática se a internet não aguentar.
 • Automático — equilíbrio sem pensar: analisa sua internet e ajusta sozinho.
 • Indicador de atraso real no player (opcional): veja em segundos o quão longe
   do vivo você está — medido de verdade, não estimado.
+
+Quanto você ganha depende da transmissão (quem escolhe a classe de latência é
+o canal): em streams de baixa latência (CazéTV, esports), medimos ~3-4s do
+lance — território de TV aberta, contra ~7s do player padrão. Em canais que
+transmitem em latência normal, o piso físico é maior (~10s+) e NENHUMA
+extensão fura esse limite — o TrueLive te garante o mínimo possível dali.
+Números medidos e verificados, com metodologia pública no repositório.
 
 Sem cadastro, sem coleta de dados, sem requisições externas — tudo acontece
 localmente no seu navegador. Código aberto (GPL-3.0).

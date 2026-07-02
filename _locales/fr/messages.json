@@ -27,7 +27,7 @@
         "message": "Super Ao Vivo"
     },
     "modeEdgeDesc": {
-        "message": "Le délai le plus faible possible — recule tout seul si nécessaire."
+        "message": "Le délai le plus faible que la diffusion et votre connexion permettent — recule tout seul si nécessaire."
     },
     "sectionIndicators": {
         "message": "Indicateurs du lecteur"

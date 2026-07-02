@@ -11,9 +11,26 @@ Copa 2026, isso significou ver o gol ~20 segundos depois da TV aberta.
 O TrueLive elimina esse excesso e te deixa colado no ponto mais recente
 disponível, com proteção automática contra travamentos.
 
+## Que delay você vai ter? (leia isto primeiro)
+
+O delay mínimo possível **não depende só do TrueLive — depende da transmissão**.
+Quem define a classe de latência é o **canal**, na hora de transmitir:
+
+| Classe da stream (escolha do canal) | Piso físico | Com TrueLive você fica em |
+|---|---|---|
+| Ultra-baixa latência | ~2-5s | **~3-4s** — nível TV aberta |
+| Baixa latência (CazéTV, esports) | ~5-10s | **~3-4s** — nível TV aberta |
+| Latência normal (padrão do YouTube) | ~10-30s | **o piso da stream** (~10s+) |
+
+Em latência normal, o vídeo mais novo **nem chega** ao seu computador antes
+disso — nenhuma extensão fura esse piso, e quem prometer o contrário está
+mentindo. O que o TrueLive garante: você fica **no menor delay que aquela
+transmissão e a sua internet permitem**, sempre. Se o badge mostra 10s num
+canal de latência normal, você JÁ está no mínimo possível.
+
 ## Números (medidos e verificados, não prometidos)
 
-Delays fim-a-fim (ingestão → sua tela) em stream low-latency, medidos com o
+Delays fim-a-fim (ingestão → sua tela) em **stream low-latency**, medidos com o
 relógio de ingestão do próprio player, mesma máquina e mesma stream:
 
 | Como você assiste | Delay | Comprovação |

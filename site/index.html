@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TrueLive — o ao vivo de verdade. Menor delay em lives do YouTube</title>
+    <meta name="description" content="Extensão gratuita e de código aberto que reduz o delay de lives do YouTube pro nível da TV aberta — 3,2s medidos. Sem coleta de dados, adapta-se sozinha à sua internet." />
+    <meta property="og:title" content="TrueLive — o ao vivo de verdade" />
+    <meta property="og:description" content="O gol 3,2 segundos depois do estádio — medido, não prometido. Extensão gratuita pro YouTube." />
+    <meta property="og:image" content="https://truelive.vitorplentz.com.br/assets/screenshot-1-hero.png" />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="assets/icon.png" />
+    <link rel="stylesheet" href="assets/style.css" />
+    <link rel="alternate" hreflang="en" href="https://truelive.vitorplentz.com.br/en/" />
+</head>
+
+<body>
+    <header class="wrap top">
+        <a class="brand" href="/"><img src="assets/icon.png" alt="" /> TrueLive</a>
+        <nav class="top-nav">
+            <a href="#instalar">Instalar</a>
+            <a href="#faq">Dúvidas</a>
+            <a href="https://github.com/Pl3ntz/truelive">GitHub</a>
+            <a class="lang" href="/en/">EN</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="hero">
+            <div class="wrap">
+                <h1>O gol, <em>3 segundos</em> depois do estádio.<br />Não 20.</h1>
+                <p class="sub">O YouTube te segura vários segundos atrás do ao vivo de propósito.
+                    O TrueLive elimina esse excesso e te deixa no menor delay que a
+                    <strong>transmissão e a sua internet</strong> permitem — medido de verdade, no player.</p>
+                <div class="cta-row">
+                    <a class="btn primary soon" href="#instalar">Chrome <span class="tag">em breve na loja</span></a>
+                    <a class="btn soon" href="#instalar">Firefox <span class="tag">em breve na loja</span></a>
+                    <a class="btn" href="#instalar">⬇ Instalar agora (2 minutos)</a>
+                </div>
+                <p class="hero-note">Grátis · Código aberto (GPL-3.0) · Zero coleta de dados · Funciona em Chrome, Edge, Brave, Opera e Firefox</p>
+                <div class="hero-shot">
+                    <img src="assets/screenshot-1-hero.png" alt="Player do YouTube com o badge do TrueLive mostrando 2,9 segundos de delay" />
+                </div>
+            </div>
+        </div>
+
+        <section class="wrap" id="numeros">
+            <h2>Medido, não prometido</h2>
+            <p class="lead">Comparamos na mesma máquina, na mesma live, com o relógio de ingestão do
+                próprio player. Delay do lance até a sua tela:</p>
+            <div class="bars">
+                <div class="bar-row hl">
+                    <div class="bar-label">YouTube + TrueLive (Super Ao Vivo)</div>
+                    <div class="bar-track"><div class="bar-fill" style="width:16%"></div></div>
+                    <div class="bar-val">3,2s medido</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">TV aberta (antena digital)</div>
+                    <div class="bar-track"><div class="bar-fill" style="width:20%"></div></div>
+                    <div class="bar-val">~3-5s</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">Outras extensões (só aceleram o vídeo)</div>
+                    <div class="bar-track"><div class="bar-fill" style="width:29%"></div></div>
+                    <div class="bar-val">4,5-7s</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">YouTube padrão, sem extensão</div>
+                    <div class="bar-track"><div class="bar-fill" style="width:36%"></div></div>
+                    <div class="bar-val">~7s</div>
+                </div>
+                <div class="bar-row bad">
+                    <div class="bar-label">CazéTV na Copa (medição da imprensa)</div>
+                    <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+                    <div class="bar-val">+15-20s atrás</div>
+                </div>
+            </div>
+            <p class="bars-foot">Redução real medida: <strong>~55%</strong> do delay — e não os "80%" que
+                outros prometem sem medir. Metodologia completa, 16 fontes e limitações declaradas no
+                <a href="https://github.com/Pl3ntz/truelive/blob/main/docs/DELAY-BENCHMARK.md">benchmark público</a>.
+                Somos a única extensão que reposiciona o vídeo na borda do que já foi baixado
+                (edge-riding) — todas as outras apenas aceleram a reprodução.</p>
+        </section>
+
+        <section class="alt" id="expectativa">
+            <div class="wrap">
+                <h2>Que delay VOCÊ vai ter?</h2>
+                <p class="lead">Sinceridade primeiro: o delay mínimo não depende só de nós — depende de
+                    como o canal transmite. Quem escolhe a "classe de latência" é o streamer:</p>
+                <table class="classes">
+                    <tr>
+                        <th>Como o canal transmite</th>
+                        <th>Piso físico</th>
+                        <th>Com TrueLive você fica em</th>
+                    </tr>
+                    <tr>
+                        <td>Ultra-baixa latência</td>
+                        <td>~2-5s</td>
+                        <td><strong>~3-4s</strong> — nível TV aberta</td>
+                    </tr>
+                    <tr>
+                        <td>Baixa latência (CazéTV, esports, a maioria)</td>
+                        <td>~5-10s</td>
+                        <td><strong>~3-4s</strong> — nível TV aberta</td>
+                    </tr>
+                    <tr class="dim">
+                        <td>Latência normal (padrão do YouTube)</td>
+                        <td>~10-30s</td>
+                        <td>o piso da stream (~10s+)</td>
+                    </tr>
+                </table>
+                <p class="honest"><strong>Por que não dá pra ir além?</strong> Em latência normal, o vídeo
+                    mais novo <em>nem chegou</em> ao seu computador antes de ~10s — não existe mágica que
+                    fure esse piso, e quem promete o contrário está mentindo. O que o TrueLive garante:
+                    você <strong>sempre</strong> no menor delay que aquela transmissão permite. O badge no
+                    player mostra seu delay real, medido — se marca 10s num canal de latência normal,
+                    você já está no mínimo possível.</p>
+            </div>
+        </section>
+
+        <section class="wrap" id="como">
+            <h2>Como funciona</h2>
+            <p class="lead">Você não configura nada. Liga o Super Ao Vivo e ele cuida do resto:</p>
+            <div class="cards">
+                <div class="card">
+                    <div class="ico">📏</div>
+                    <h3>Mede o delay de verdade</h3>
+                    <p>Usa o relógio interno do player pra saber exatamente quantos segundos você está
+                        atrás do ao vivo — e mostra num badge discreto, se você quiser.</p>
+                </div>
+                <div class="card">
+                    <div class="ico">⚡</div>
+                    <h3>Cola na borda do vivo</h3>
+                    <p>Parte do vídeo "do futuro" já está baixada no seu computador. O TrueLive
+                        reposiciona a reprodução nessa borda — por isso chega mais perto que
+                        qualquer extensão que só acelera o vídeo.</p>
+                </div>
+                <div class="card">
+                    <div class="ico">🛡️</div>
+                    <h3>Se protege sozinho</h3>
+                    <p>Mede a "respiração" da sua conexão e mantém a distância segura. Se a internet
+                        oscilar, ele recua na hora — a velocidade nunca cai e o vídeo não trava.
+                        Internet fraca de verdade? Ele mesmo se suspende e volta quando dá.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="alt" id="instalar">
+            <div class="wrap">
+                <h2>Instalar (2 minutos, sem conhecimento técnico)</h2>
+                <p class="easy-note">✓ Se você sabe baixar um arquivo e dar dois cliques, você consegue.</p>
+                <div class="tabs" role="tablist">
+                    <button class="tab-btn" role="tab" aria-selected="true" data-panel="p-chrome" type="button">Chrome</button>
+                    <button class="tab-btn" role="tab" aria-selected="false" data-panel="p-edge" type="button">Edge / Brave / Opera</button>
+                    <button class="tab-btn" role="tab" aria-selected="false" data-panel="p-firefox" type="button">Firefox</button>
+                </div>
+
+                <div class="tab-panel" id="p-chrome">
+                    <ol class="steps">
+                        <li><a href="https://github.com/Pl3ntz/truelive/releases/latest">Baixe o TrueLive aqui</a> — clique no arquivo <code>truelive-1.0.0.zip</code>.
+                            <span class="hint">Ele vai pra sua pasta de Downloads, como qualquer arquivo.</span></li>
+                        <li>Encontre o arquivo baixado e <strong>dê dois cliques</strong> nele.
+                            <span class="hint">Isso cria uma pasta chamada "truelive". Ela precisa continuar existindo — não apague depois.</span></li>
+                        <li>No Chrome, copie e cole isto na barra de endereço (onde você digita sites) e aperte Enter: <code>chrome://extensions</code></li>
+                        <li>No canto superior direito dessa página, ligue a chavinha <strong>"Modo do desenvolvedor"</strong>.
+                            <span class="hint">É só um nome assustador — não muda nada no seu Chrome.</span></li>
+                        <li>Clique no botão <strong>"Carregar sem compactação"</strong> que apareceu, e escolha a pasta "truelive" do passo 2.</li>
+                        <li>Pronto! Abra uma live no YouTube, clique no ícone de quebra-cabeça 🧩 no topo do Chrome e fixe o ⚡ TrueLive.
+                            <span class="hint">Clique no ⚡ e escolha "Super Ao Vivo". O badge no player mostra seu delay caindo.</span></li>
+                    </ol>
+                </div>
+
+                <div class="tab-panel" id="p-edge" hidden>
+                    <ol class="steps">
+                        <li><a href="https://github.com/Pl3ntz/truelive/releases/latest">Baixe o TrueLive aqui</a> — clique no arquivo <code>truelive-1.0.0.zip</code>.</li>
+                        <li>Dê <strong>dois cliques</strong> no arquivo baixado pra criar a pasta "truelive".
+                            <span class="hint">Não apague essa pasta depois — a extensão vive nela.</span></li>
+                        <li>Cole na barra de endereço e aperte Enter — no <strong>Edge</strong>: <code>edge://extensions</code> · no <strong>Brave</strong>: <code>brave://extensions</code> · no <strong>Opera</strong>: <code>opera://extensions</code></li>
+                        <li>Ligue o <strong>"Modo do desenvolvedor"</strong> (chavinha no canto da página).</li>
+                        <li>Clique em <strong>"Carregar sem compactação"</strong> e escolha a pasta "truelive".</li>
+                        <li>Pronto! Abra uma live, fixe o ⚡ TrueLive na barra e escolha "Super Ao Vivo".</li>
+                    </ol>
+                </div>
+
+                <div class="tab-panel" id="p-firefox" hidden>
+                    <ol class="steps">
+                        <li>No Firefox, a instalação segura é pela loja oficial — nossa versão está
+                            <strong>em análise pela Mozilla</strong>.
+                            <span class="hint">O Firefox exige que toda extensão seja assinada por eles, mesmo instalando por fora — é proteção sua, e nós seguimos a regra.</span></li>
+                        <li>Assim que aprovar, o botão aqui vira "Adicionar ao Firefox" — 1 clique e pronto.</li>
+                        <li>Não quer esperar? Use a versão do Chrome/Edge/Brave acima enquanto isso.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <section class="wrap" id="apoiar">
+            <h2>Grátis pra sempre. Se ajudou, me pague um café ☕</h2>
+            <p class="lead">O TrueLive é feito por uma pessoa, de graça e com código aberto.
+                Doação via PIX — você escolhe o valor no app do seu banco:</p>
+            <div class="donate">
+                <div class="qr"><img src="assets/pix-qr.svg" alt="QR Code PIX para doação" /></div>
+                <div>
+                    <p>Aponte a câmera do app do banco pro QR Code, ou copie o código:</p>
+                    <button class="copy-pix" type="button"
+                        data-done="Copiado! Cole no app do banco"
+                        data-code="00020126580014br.gov.bcb.pix013622890078-d19c-4a4f-92f1-d9fc9233c2f05204000053039865802BR5912VITOR PLENTZ6007JOACABA62070503***6304204A">Copiar código PIX</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="alt faq" id="faq">
+            <div class="wrap">
+                <h2>Dúvidas rápidas</h2>
+                <details>
+                    <summary>Vai travar meu vídeo?</summary>
+                    <p>Não — essa é a regra nº 1 do produto. O TrueLive mede sua conexão o tempo todo e
+                        mantém uma reserva de segurança que se adapta sozinha. Se a internet aperta, ele
+                        recua um pouco na hora (você quase não percebe) em vez de deixar travar. Se a
+                        conexão está ruim de verdade, ele se suspende sozinho por 10 minutos.</p>
+                </details>
+                <details>
+                    <summary>A qualidade do vídeo cai?</summary>
+                    <p>Não. O TrueLive não mexe em resolução nem em qualidade — só na distância entre
+                        você e o ponto mais recente da transmissão.</p>
+                </details>
+                <details>
+                    <summary>Vocês coletam meus dados?</summary>
+                    <p>Zero. A extensão não faz nenhuma conexão externa, não tem cadastro, não tem
+                        analytics. Tudo acontece no seu navegador. O código é aberto (GPL-3.0) —
+                        qualquer pessoa pode conferir.</p>
+                </details>
+                <details>
+                    <summary>Por que ainda tem 3 segundos? Não dava pra ser 0?</summary>
+                    <p>Não — nem a TV aberta é 0 (ela tem ~3-5s do estádio até sua antena). O sinal
+                        precisa sair do estádio, ser codificado, subir pro YouTube e chegar até você.
+                        Os ~3s são o limite físico do caminho — e é exatamente nele que o TrueLive te coloca.</p>
+                </details>
+                <details>
+                    <summary>Funciona em qualquer live?</summary>
+                    <p>Funciona em qualquer live do YouTube. O delay mínimo depende de como o canal
+                        transmite (veja a tabela acima): em canais de baixa latência você fica em ~3-4s;
+                        em canais de latência normal, o piso é ~10s+ pra todo mundo — o TrueLive te
+                        garante o mínimo dali. Twitch e outras plataformas estão no roadmap.</p>
+                </details>
+                <details>
+                    <summary>É seguro? Como confio?</summary>
+                    <p>O código é 100% aberto e auditável no GitHub, a extensão pede uma única permissão
+                        (armazenar suas preferências) e não acessa nada fora do player do YouTube.</p>
+                </details>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="wrap foot-grid">
+            <div>⚡ <strong>TrueLive</strong> — o ao vivo de verdade · GPL-3.0 · © 2026 Vitor Plentz</div>
+            <div>
+                <a href="https://github.com/Pl3ntz/truelive">Código-fonte</a> ·
+                <a href="https://github.com/Pl3ntz/truelive/blob/main/docs/DELAY-BENCHMARK.md">Benchmark</a> ·
+                <a href="https://github.com/Pl3ntz/truelive/blob/main/publishing/PRIVACY.md">Privacidade</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/app.js"></script>
+</body>
+
+</html>

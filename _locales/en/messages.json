@@ -27,7 +27,7 @@
         "message": "Super Ao Vivo"
     },
     "modeEdgeDesc": {
-        "message": "The lowest delay your internet allows — backs off by itself when needed."
+        "message": "The lowest delay this stream and your internet allow — backs off by itself when needed."
     },
     "sectionIndicators": {
         "message": "Player indicators"

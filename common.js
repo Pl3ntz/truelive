@@ -32,7 +32,7 @@ export const label = {
     modeAutoDesc: msg('modeAutoDesc', 'Equilibra delay e estabilidade pela sua internet, sozinho.'),
 
     modeEdge: msg('modeEdge', 'Super Ao Vivo'),
-    modeEdgeDesc: msg('modeEdgeDesc', 'O menor delay que sua internet permite — recua sozinho se precisar.'),
+    modeEdgeDesc: msg('modeEdgeDesc', 'O menor delay que a transmissão e sua internet permitem — recua sozinho se precisar.'),
 
     // Player indicators
     sectionIndicators: msg('sectionIndicators', 'Indicadores no player'),
