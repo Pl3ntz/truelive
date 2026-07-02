@@ -417,7 +417,8 @@ section.alt {
 .bars-foot { margin-top: 26px; font-size: 13.5px; color: var(--text-2); line-height: 1.7; max-width: 820px; }
 
 /* ------------------------------------------------------------------ expectativa */
-.classes { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.classes-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.classes { width: 100%; min-width: 520px; border-collapse: collapse; margin-top: 6px; }
 
 .classes th, .classes td { padding: 15px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: 15px; }
 .classes th { color: var(--text-3); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
@@ -676,18 +677,50 @@ footer a:hover { color: var(--text); }
 .reveal-d3 { transition-delay: 270ms; }
 
 /* ------------------------------------------------------------------ responsive */
+@media (max-width: 1024px) {
+    .cards { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .card { padding: 20px 18px; }
+    .bar-row { grid-template-columns: 200px 1fr 110px; }
+    .lane { grid-template-columns: 170px 1fr 76px; gap: 10px; }
+}
+
 @media (max-width: 860px) {
-    section { padding: 56px 0; }
-    .hero { padding: 32px 0 44px; }
-    .cards { grid-template-columns: 1fr; }
+    section { padding: 52px 0; }
+    .wrap { padding: 0 18px; }
+    .hero { padding: 24px 0 40px; }
+    .hero .sub { font-size: 16px; }
+    .cards { grid-template-columns: 1fr; gap: 12px; }
     .bar-row { grid-template-columns: 1fr; gap: 6px; }
     .bar-label { text-align: left; }
-    .donate { grid-template-columns: 1fr; padding: 22px; }
-    .donate .qr { max-width: 210px; }
-    .lane { grid-template-columns: 1fr; gap: 4px; }
+    .bar-val { text-align: right; margin-top: -24px; position: relative; z-index: 1; padding-right: 4px; }
+    .donate { grid-template-columns: 1fr; padding: 20px; gap: 20px; }
+    .donate .qr { max-width: 200px; }
+    .lane { grid-template-columns: 1fr; gap: 5px; padding: 10px 0; }
     .lane-stamp { text-align: left; }
-    .race { padding: 18px 16px 14px; }
-    .classes th, .classes td { padding: 12px 10px; font-size: 13.5px; }
+    .race { padding: 16px 14px 12px; margin-left: -4px; margin-right: -4px; }
+    .race-foot { font-size: 11.5px; }
+    .classes th, .classes td { padding: 11px 10px; font-size: 13px; }
+    .honest { padding: 16px 16px; font-size: 14px; }
+    .steps li { padding-left: 52px; font-size: 14.5px; }
+    .steps::before { left: 15px; }
+    .steps li::before { width: 31px; height: 31px; font-size: 13px; }
+    .top-nav { gap: 0; }
+    .top-nav a { padding: 8px 8px; }
+    .hero-note { padding: 0 8px; }
+}
+
+@media (max-width: 480px) {
+    .hero h1 { font-size: 31px; }
+    .eyebrow { font-size: 11.5px; padding: 5px 11px; }
+    .cta-row .btn { width: 100%; justify-content: center; }
+    .top-nav a:not(.lang) { display: none; }
+    .badge-demo { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .foot-grid { flex-direction: column; align-items: flex-start; gap: 10px; }
+}
+
+@media (min-width: 1600px) {
+    :root { --max: 1160px; }
+    .race { max-width: 940px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
