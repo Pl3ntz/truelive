@@ -240,6 +240,22 @@ test('old 4K valley expires: floor recovers after the window on a calm rendition
         `floor ${last.floor} must re-learn the calm rendition (was ${JSON.stringify(heavyFloor.drawdown)})`);
 });
 
+test('incident bump above the safe floor drains fast after calm', () => {
+    const gov = createEdgeGovernor();
+    // establish a calm baseline so the safe floor is low and stable
+    simulate(gov, { ticks: 400, arrivalFn: calmArrival, startReserve: 5, t0: 1_000_000 });
+    const t1 = 1_000_000 + 400 * TICK_MS;
+    gov.noteRescue(t1, 4.4); // incident: target jumps ~+1.5 above the floor
+    const bumped = gov.getState().target;
+    // resume calm; measure how long the bump takes to drain back to the floor
+    const log = simulate(gov, { ticks: 800, arrivalFn: calmArrival, startReserve: 4.4, t0: t1 + 250 });
+    const settled = log.findIndex(s => s.target <= bumped - 1.4);
+    assert.ok(settled >= 0, 'the bump never drained');
+    // CALM_MS (60s) + ~1.5s/0.0375-per-tick ≈ 240+40 ticks — assert well under
+    // the old single-speed pace (240 + 120 ticks)
+    assert.ok(settled < 320, `bump drained only at tick ${settled} (too slow)`);
+});
+
 test('buffer-first: no acceleration while the reserve is thin', () => {
     const gov = createEdgeGovernor();
     // reserve hovers just above danger with weak inflow — must rest at 1.0
