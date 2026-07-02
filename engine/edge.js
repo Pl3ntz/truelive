@@ -139,12 +139,21 @@
             inflow_ema = 0;
         }
 
-        // Measured need: deepest of {2nd-deepest completed valley, ongoing valley}.
+        // Measured need from completed valley episodes (ongoing always counts).
+        // Tail-tolerant quantile (NetEQ spirit): skip the deepest quarter — the
+        // rare tail valley is absorbed by the budgeted rescue net (jumps capped
+        // at 4.5s) instead of taxing EVERY second with worst-case cushion.
+        // Graceful degradation: under rescue pressure (3+/10min) the tail is
+        // clearly not rare — fall back to the full max.
         function dd_need(now) {
             const vs = episodes.filter(e => now - e.t < DD_WINDOW_MS)
                 .map(e => e.v).sort((a, b) => b - a);
-            const completed = vs.length >= 2 ? vs[1] : 0;
-            return Math.max(completed, ep_max);
+            if (vs.length < 2) return Math.max(0, ep_max); // single freak: discounted
+            rescue_times = rescue_times.filter(t => now - t < PROBE_RESCUE_WINDOW_MS);
+            const idx = rescue_times.length >= 3
+                ? 0
+                : Math.min(vs.length - 1, Math.max(1, Math.floor(vs.length * 0.25)));
+            return Math.max(vs[idx], ep_max);
         }
 
         function abs_gate(now) {
