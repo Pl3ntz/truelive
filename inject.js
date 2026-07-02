@@ -598,7 +598,12 @@
                     const real_lat = progress_state && Number.isFinite(progress_state.ingestionTime)
                         ? Date.now() / 1000 - progress_state.ingestionTime : NaN;
                     const pipe = real_lat - (b_end - ev.currentTime);
-                    if (Number.isFinite(pipe) && pipe > 0) {
+                    // Only measure the pipeline while the player is HUNGRY
+                    // (fetching at the live edge): with a fat reserve the
+                    // player stops fetching ahead and the unfetched backlog
+                    // beyond buffered.end reads as fake "pipeline" (field:
+                    // floorEst hit 19.6s during a delay pile-up).
+                    if (Number.isFinite(pipe) && pipe > 0 && (b_end - ev.currentTime) <= 6.0) {
                         edge_pipeline_ema = edge_pipeline_ema === null
                             ? pipe : edge_pipeline_ema * 0.95 + pipe * 0.05;
                     }

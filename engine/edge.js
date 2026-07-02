@@ -332,9 +332,13 @@
                 last_end = bufferedEnd;
             } else {
                 // fat reserve (lazy fetch) or grace: arrival data is not
-                // trustworthy — re-anchor and wait for the next hungry phase
+                // trustworthy — re-anchor and wait for the next hungry phase.
+                // Decay the inflow EMA instead of freezing it: a stale
+                // starving reading here blocked the catch-up FOREVER while
+                // the delay piled up (field bug: 25.9s, rate 1.0, target 2.5)
                 last_now = null;
                 last_end = null;
+                inflow_ema *= 0.8;
             }
 
             // --- adapt the target (Shaka dynamicTargetLatency + AIMD probe) ---
@@ -384,8 +388,12 @@
             const delta = smoothed - target;
             const deadband = Math.max(DEADBAND, 0.02 * target);
             const buffer_first = reserve < Math.max(DANGER + 0.5, target * 0.5);
+            // The drain brake only means something with FRESH hungry-phase
+            // data; with a fat reserve there is nothing to protect — always
+            // allow the grind (a stale brake let the delay pile unbounded).
+            const braked = hungry && inflow_ema <= DRAIN_BRAKE;
             if (!in_grace && !rescue && !buffer_first
-                && delta > deadband && inflow_ema > DRAIN_BRAKE) {
+                && delta > deadband && !braked) {
                 rate = sigmoid_rate(delta, maxRate);
             }
             return {
