@@ -624,7 +624,10 @@
                             document.dispatchEvent(new CustomEvent('_live_catch_up_learned', {
                                 detail: {
                                     author,
-                                    target: +g.target.toFixed(2),
+                                    // the RESTING bound, not the momentary target —
+                                    // saving mid-excursion peaks made the next
+                                    // session inherit a bumped worst case (field)
+                                    target: +g.floor.toFixed(2),
                                     need: +st.drawdown.toFixed(2),
                                     pipeline: +edge_pipeline_ema.toFixed(2),
                                 },
