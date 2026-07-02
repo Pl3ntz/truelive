@@ -56,3 +56,21 @@ campos alcançam apenas sinks inócuos (`textContent`, atributos ARIA, taxa de
 reprodução — que a página já controla nativamente). O MAIN world não tem acesso
 a `chrome.*` nem ao storage da extensão. O destinatário das doações (pix.js) é
 constante de módulo em contexto privilegiado — inalcançável pela página.
+
+## Auditoria pré-lançamento (2026-07-02)
+
+Revisão completa (extensão, landing em produção, VPS, supply chain) por
+revisor dedicado, read-only. Resultado: **apto** — nenhum vetor de roubo de
+PIX, XSS ou exfiltração. Ações derivadas, todas aplicadas:
+
+- Pacotes das lojas rebuildados para casar byte a byte com o fonte auditado.
+- CI com `permissions: contents: read` e actions pinadas por SHA.
+- Landing servida com o conjunto completo de headers (CSP estrito,
+  Permissions-Policy, COOP/CORP, frame-ancestors 'none', base-uri 'none').
+- QR PIX servido em produção decodificado por máquina e conferido contra a
+  chave esperada (payload EMV byte-idêntico ao fonte, CRC verificado).
+
+Superfície conhecida e aceita: eventos `_live_catch_up_*` no MAIN world são
+forjáveis por scripts co-residentes na página do YouTube; o impacto se limita
+à reprodução do próprio usuário (sem dados, sem privilégio, sem DOM injetável)
+— ver seção acima sobre a decisão de MAIN world.
