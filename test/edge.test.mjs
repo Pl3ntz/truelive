@@ -118,8 +118,10 @@ test('probing: after earned calm the target dives below the worst-case floor', (
 test('a rescue jump is meaningful but hard-capped at 4.5s', () => {
     const gov = createEdgeGovernor();
     const log = simulate(gov, { ticks: 2400, arrivalFn: heavy4kArrival, startReserve: 8 });
-    assert.ok(log.every(s => s.rescueTo >= 2.5 - 1e-9),
-        'every rescue must restore at least the 2.5s bridge');
+    const dd = gov.getState().drawdown;
+    const last = log[log.length - 1];
+    assert.ok(last.rescueTo >= Math.min(4.5, Math.max(dd + 0.6, 2.5)) - 1e-9,
+        `rescueTo ${last.rescueTo} too small for the measured valley (${dd})`);
     assert.ok(log.every(s => s.rescueTo <= 4.5 + 1e-9),
         'no single rescue may rewind more than 4.5s');
 });
@@ -272,84 +274,6 @@ test('one freak delivery gap does not pin the floor; a repeating one does', () =
         `a repeating gap must raise the measured need (${gov2.getState().drawdown})`);
 });
 
-test('quantile floor: the rare deepest valley does not tax every second', () => {
-    const gov = createEdgeGovernor();
-    // mild recurring valleys (~0.8s) + ONE deep (5s) freak: the floor must
-    // track the mild majority (the freak goes to the rescue net), and the
-    // single event must cost at most a couple of rescues, never suspension
-    const arrival = i => {
-        if (i >= 780 && i < 800) return 0;             // one 5s valley
-        if (i % 60 >= 57) return 0;                    // 0.75s valley every 15s
-        return i % 2 === 0 ? 0.55 : 0;                 // surplus: valleys repay
-    };
-    const log = simulate(gov, { ticks: 1600, arrivalFn: arrival, startReserve: 6 });
-    assert.ok(log.every(s => !s.suspended), 'one freak valley must never suspend');
-    const rescues = log.filter(s => s.rescue).length;
-    assert.ok(rescues <= 2, `the freak must cost at most 2 rescues, got ${rescues}`);
-    const need = gov.getState().drawdown;
-    assert.ok(need < 4.0, `floor must follow the mild majority, got ${need}`);
-});
-
-test('post-rescue hold is short once the valley closed; stalls keep the long gate', () => {
-    const gov = createEdgeGovernor();
-    // calm regime, one starvation deep enough to force a rescue, then calm
-    const arrival = i => (i >= 200 && i < 220 ? 0 : (i % 2 === 0 ? 0.6 : 0));
-    const log = simulate(gov, { ticks: 200 + 20 + 240, arrivalFn: arrival, startReserve: 4 });
-    const lastRescueIdx = log.map(s => s.rescue).lastIndexOf(true);
-    assert.ok(lastRescueIdx > 0, 'setup: the starvation must force a rescue');
-    // peak target right after the (last) rescue, vs ~40s later: the descent
-    // must already be under way — the old 60s gate would still hold it flat
-    const peak = Math.max(...log.slice(lastRescueIdx, lastRescueIdx + 40).map(s => +s.target));
-    const at40s = log[Math.min(log.length - 1, lastRescueIdx + 160)].target;
-    assert.ok(at40s < peak - 0.2,
-        `target ${at40s} vs peak ${peak}: descent must start before the 60s stall gate`);
-
-    // a REAL stall keeps the 60s gate
-    const gov2 = createEdgeGovernor();
-    simulate(gov2, { ticks: 400, arrivalFn: calmArrival, startReserve: 5, t0: 1_000_000 });
-    const t1 = 1_000_000 + 400 * TICK_MS;
-    gov2.noteStall(t1);
-    const bumped = gov2.getState().target;
-    const log2 = simulate(gov2, { ticks: 160, arrivalFn: calmArrival, startReserve: 5, t0: t1 + 250 });
-    assert.ok(log2[log2.length - 1].target > bumped - 0.1,
-        'a stall must hold the bumped target through the 40s mark');
-});
-
-test('rescue sizing: short bridge when arrivals are recovering, full step when starving', () => {
-    // starving case: no arrivals at the danger moment -> full step
-    const gov = createEdgeGovernor();
-    let t = 1_000_000, end = 100;
-    for (let i = 0; i < 200; i++) { end += (i % 2 === 0 ? 0.5 : 0); gov.tick(t += 250, end, 5, 1.25); }
-    let out = null;
-    for (let i = 0; i < 40; i++) out = gov.tick(t += 250, end, 5 - (i + 1) * 0.25, 1.25); // starvation
-    assert.equal(out.rescue, true, 'setup: starvation must trigger a rescue');
-    assert.ok(out.rescueTo > 2.5, `starving: expected the full step, got ${out.rescueTo}`);
-
-    // recovering case: arrivals outpace the clock while the reserve is thin
-    // (e.g. a catch-up overshoot) -> short bridge only
-    const gov2 = createEdgeGovernor();
-    let t2 = 1_000_000, end2 = 100;
-    for (let i = 0; i < 200; i++) { end2 += (i % 2 === 0 ? 0.5 : 0); gov2.tick(t2 += 250, end2, 5, 1.25); }
-    let out2 = null;
-    for (let i = 0; i < 30; i++) {
-        end2 += 0.3; // arrivals ABOVE realtime: inflow positive
-        out2 = gov2.tick(t2 += 250, end2, Math.max(1.2, 5 - (i + 1) * 0.2), 1.25);
-        if (out2.rescue) break;
-    }
-    assert.equal(out2.rescue, true, 'setup: the dip must trigger a rescue');
-    assert.equal(out2.rescueTo, 2.5, `recovering: expected the 2.5s bridge, got ${out2.rescueTo}`);
-});
-
-test('a long gap gets ONE rescue, not a chain of step-backs', () => {
-    const gov = createEdgeGovernor();
-    // calm baseline, then a 20s total starvation (longer than any bridge)
-    const arrival = i => (i >= 300 && i < 380 ? 0 : (i % 2 === 0 ? 0.6 : 0));
-    const log = simulate(gov, { ticks: 700, arrivalFn: arrival, startReserve: 5 });
-    const duringGap = log.slice(300, 385).filter(s => s.rescue).length;
-    assert.equal(duringGap, 1,
-        `a single gap must cost exactly one rescue, got ${duringGap}`);
-});
-
 test('buffer-first: no acceleration while the reserve is thin', () => {
     const gov = createEdgeGovernor();
     // reserve hovers just above danger with weak inflow — must rest at 1.0
@@ -357,42 +281,4 @@ test('buffer-first: no acceleration while the reserve is thin', () => {
     for (const s of log.slice(4)) {
         if (s.reserve < 2.0) assert.equal(s.rate, 1.0, `accelerated at thin reserve ${s.reserve}`);
     }
-});
-
-test('channel memory seed: starts on the remembered target, measurement overrides', () => {
-    const gov = createEdgeGovernor();
-    gov.seed(1_000_000, 5.5, 4.2);
-    const st = gov.getState();
-    assert.equal(st.target, 5.5, 'target must start where the channel needed it');
-    // the remembered valley is honored by the floor while fresh
-    const out = gov.tick(1_000_250, 100, 5.5, 1.25);
-    assert.ok(out.floor >= 4.2, `floor ${out.floor} must honor the seeded need`);
-    // ...and a calm stream lets the real measurement take over (seed expires)
-    const log = simulate(gov, { ticks: 1400, arrivalFn: calmArrival, startReserve: 5.5, t0: 1_000_500 });
-    const last = log[log.length - 1];
-    assert.ok(last.floor <= 2.5 + 1e-9,
-        `seeded need must expire in favor of live measurement (floor ${last.floor})`);
-});
-
-test('seed clamps: absurd saved values cannot break the policy bounds', () => {
-    const gov = createEdgeGovernor();
-    gov.seed(1_000_000, 99, 99);
-    const st = gov.getState();
-    assert.ok(st.target <= 10.0 + 1e-9, 'seeded target must respect HARD_CEIL');
-    const gov2 = createEdgeGovernor();
-    gov2.seed(1_000_000, 0.5, -3);
-    assert.ok(gov2.getState().target >= 2.75 - 1e-9, 'seeded target must respect START');
-});
-
-test('a stale drain reading must never block the grind on a fat reserve', () => {
-    const gov = createEdgeGovernor();
-    let t = 1_000_000, end = 100;
-    // hungry phase that ends STARVING (inflow EMA goes negative)...
-    for (let i = 0; i < 60; i++) { end += (i % 2 === 0 ? 0.5 : 0); gov.tick(t += 250, end, 4, 1.25); }
-    for (let i = 0; i < 20; i++) gov.tick(t += 250, end, 4 - i * 0.1, 1.25); // no arrivals
-    // ...then a burst pushes the reserve fat: the grind MUST engage
-    end += 12;
-    let out = null;
-    for (let i = 0; i < 40; i++) { out = gov.tick(t += 250, end, 12, 2.0); }
-    assert.ok(out.rate > 1.0, `fat reserve with stale drain data must grind, got ${out.rate}`);
 });

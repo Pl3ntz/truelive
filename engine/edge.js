@@ -39,9 +39,6 @@
         const RESCUE_COOLDOWN_MS = 10000;
         const INCIDENT_BUMP = 1.5;    // target raise per stall/rescue
         const CALM_MS = 60000;        // calm needed before tightening resumes
-        const RESCUE_CALM_MS = 25000; // shorter hold after a RESCUE whose valley
-                                      // already closed (deficit repaid) — the
-                                      // 60s gate stays for real stalls
         const CREEP = 0.0125;         // target decay toward floor, per tick
         // --- catch-up rate (hls.js sigmoid family) ---
         const SIG_K = 0.75;           // sigmoid steepness over Δ = reserve-target
@@ -54,13 +51,10 @@
         // the safe floor; a rescue is the congestion signal: back off above
         // the level that failed, remember it for a while, try again later.
         // Worst case (budget spent) degrades to exactly the safe floor.
-        // Owner (2026-07-02): optimistic by default — descend toward the
-        // minimum continuously (the "TV at 2x" instinct) and brake on
-        // EVIDENCE (a rescue / thin buffer), not on preemptive statistics.
-        const PROBE_CALM_MS = 45000;     // calm to earn probing below the floor
+        const PROBE_CALM_MS = 120000;    // calm to earn probing below the floor
         const PROBE_BACKOFF = 1.0;       // failed level + this = new lower bound
         const PROBE_FAIL_TTL_MS = 600000; // how long a failed level is remembered
-        const PROBE_MAX_RESCUES = 2;     // rescues within the window that...
+        const PROBE_MAX_RESCUES = 1;     // rescues within the window that...
         const PROBE_RESCUE_WINDOW_MS = 600000; // ...pause probing (hold safe floor)
         const DD_RECENT_WINDOW_MS = 30000; // short valley memory: the probe never
                                            // dives below what JUST happened
@@ -75,12 +69,6 @@
         const DD_WINDOW_MS = 120000;  // drawdown memory (BBR-style expiry)
         const GRACE_MS = 4000;        // after quality switch: no rescue, no measuring
         const MAX_TICK_GAP_S = 2.0;   // bigger gap = we were asleep: re-anchor
-        const HUNGRY_MAX = 6.0;       // measure arrivals ONLY under this reserve:
-                                      // above it the player fetches lazily in big
-                                      // batches and the "holes" are scheduling
-                                      // artifacts that inflate the floor (field
-                                      // discovery 2026-07-02: measured hole size
-                                      // tracked OUR cushion size — feedback loop)
 
         // BBR lib/win_minmax.c running-max: 3 time-stamped samples, O(1),
         // old maxima expire by age instead of decaying asymptotically.
@@ -119,9 +107,7 @@
         // episode always counts in full — it is happening right now.
         let episodes = [];            // completed valleys: {t, v}
         let ep_max = 0;               // depth of the ongoing valley
-        let ep_last_growth = 0;       // when the ongoing valley last MOVED
-        let ep_heal_low = Infinity;   // lowest drawdown since the peak (healing =
-                                      // NEW lows, not segment-cadence wobble)
+        let ep_last_growth = 0;       // when the ongoing valley last deepened
         let in_valley = false;
         let dd_now = 0;               // the resulting measured need (debug)
         let dd_recent_filter = winmax_create();
@@ -134,9 +120,6 @@
         let stall_times = [];
         let suspended_until = 0;
         let rescue_times = [];        // probing budget bookkeeping
-        let rescued_this_valley = false; // ONE rescue per valley: chaining
-                                      // step-backs during a long gap costs
-                                      // MORE delay than the gap itself
         let probe_fail = 0;           // reserve level a probe died at (+backoff)
         let probe_fail_t = 0;
 
@@ -148,9 +131,7 @@
             episodes = [];
             ep_max = 0;
             ep_last_growth = 0;
-            ep_heal_low = Infinity;
             in_valley = false;
-            rescued_this_valley = false;
             dd_now = 0;
             dd_recent_filter = winmax_create();
             dd_recent = 0;
@@ -158,31 +139,12 @@
             inflow_ema = 0;
         }
 
-        // The 30s valley memory, aged at READ time: while the reserve is fat
-        // we stop sampling (lazy-fetch artifacts), and a winmax only expires
-        // on new samples — without this, the last hungry-phase valley would
-        // stay "recent" forever and pin the floor.
-        function dd_recent_now(now) {
-            const s = dd_recent_filter.s;
-            if (!s.length || now - s[0].t > DD_RECENT_WINDOW_MS) return 0;
-            return s[0].v;
-        }
-
-        // Measured need from completed valley episodes (ongoing always counts).
-        // Tail-tolerant quantile (NetEQ spirit): skip the deepest quarter — the
-        // rare tail valley is absorbed by the budgeted rescue net (jumps capped
-        // at 4.5s) instead of taxing EVERY second with worst-case cushion.
-        // Graceful degradation: under rescue pressure (3+/10min) the tail is
-        // clearly not rare — fall back to the full max.
+        // Measured need: deepest of {2nd-deepest completed valley, ongoing valley}.
         function dd_need(now) {
             const vs = episodes.filter(e => now - e.t < DD_WINDOW_MS)
                 .map(e => e.v).sort((a, b) => b - a);
-            if (vs.length < 2) return Math.max(0, ep_max); // single freak: discounted
-            rescue_times = rescue_times.filter(t => now - t < PROBE_RESCUE_WINDOW_MS);
-            const idx = rescue_times.length >= 3
-                ? 0
-                : Math.min(vs.length - 1, Math.max(1, Math.floor(vs.length * 0.25)));
-            return Math.max(vs[idx], ep_max);
+            const completed = vs.length >= 2 ? vs[1] : 0;
+            return Math.max(completed, ep_max);
         }
 
         function abs_gate(now) {
@@ -190,23 +152,10 @@
             return now - last_trouble < DEEP_CALM_MS ? DEEP_CALM_FLOOR : FLOOR_ABS;
         }
 
-        // Safe floor: the measured valley need plus a margin. Two demands win:
-        // 1. Quantile of the window's episodes + pad. The pad is PRESSURE-
-        //    AWARE: lean (0.6s) while rescues are rare; when rescues repeat
-        //    (3+/10min) it grows to clear the danger zone entirely.
-        // 2. The valley of the LAST 30s with the same pad — the floor never
-        //    rests below what just happened. The pad is LEAN by default (the
-        //    morning-validated 0.6 — a fat preemptive pad taxed every stream
-        //    ~1.2s and regressed the healthy case, field 2026-07-02 night);
-        //    under real rescue pressure it fattens via the same escalation.
+        // Worst-case-safe floor: the deepest arrival valley in the window
+        // plus a margin. Holding this NEVER needs a rescue.
         function safe_floor(now) {
-            rescue_times = rescue_times.filter(t => now - t < PROBE_RESCUE_WINDOW_MS);
-            const pad = rescue_times.length >= 3 ? DANGER + 0.3 : MARGIN;
-            return Math.min(HARD_CEIL, Math.max(
-                abs_gate(now),
-                dd_need(now) + pad,
-                dd_recent_now(now) + pad,
-            ));
+            return Math.min(HARD_CEIL, Math.max(abs_gate(now), dd_now + MARGIN));
         }
 
         // Where the target is allowed to rest. Normally the safe floor; with
@@ -220,9 +169,8 @@
             if (rescue_times.length >= PROBE_MAX_RESCUES) return safe;
             const fail = now - probe_fail_t < PROBE_FAIL_TTL_MS ? probe_fail : 0;
             // never bet against known data: the probe bottoms at the deepest
-            // valley of the last 30s + margin (a stream that truly calmed
-            // lets it dive)
-            return Math.min(safe, Math.max(abs_gate(now), fail, dd_recent_now(now) + MARGIN));
+            // valley of the last 30s (a stream that truly calmed lets it dive)
+            return Math.min(safe, Math.max(abs_gate(now), fail, dd_recent + MARGIN));
         }
 
         function incident(now) {
@@ -265,23 +213,7 @@
 
             // --- measure arrival (NetEQ spirit: immune to playhead moves) ---
             const in_grace = nowMs < grace_until;
-            if (Number.isFinite(reserve)) {
-                reserve_ema = reserve_ema === null ? reserve : reserve_ema * 0.9 + reserve * 0.1;
-            }
-            const hungry = Number.isFinite(reserve) && reserve <= HUNGRY_MAX;
-            if (!hungry && in_valley) {
-                // leaving the hungry band mid-valley (a burst repaid us):
-                // close the episode with what the hungry phase saw, and
-                // RE-ANCHOR the deficit — it was booked; without this the
-                // next hungry phase reopens the same valley already deep
-                // and books it again (field bug: dd grew while fat)
-                episodes.push({ t: nowMs, v: ep_max });
-                if (episodes.length > 16) episodes.shift();
-                cum_max = cum;
-                in_valley = false;
-                ep_max = 0;
-            }
-            if (!in_grace && hungry && Number.isFinite(bufferedEnd)) {
+            if (!in_grace && Number.isFinite(bufferedEnd) && Number.isFinite(reserve)) {
                 if (last_now !== null && last_end !== null) {
                     const dt = (nowMs - last_now) / 1000;
                     const arrival = bufferedEnd - last_end;
@@ -291,19 +223,7 @@
                         cum_max = Math.max(cum_max, cum);
                         const drawdown = cum_max - cum;
                         if (drawdown > 0.3) {
-                            if (!in_valley) rescued_this_valley = false;
-                            // "alive" = deepening OR healing (making NEW
-                            // lows since the peak — cadence wobble of ±0.25
-                            // doesn't count); only a FLAT deficit for 10s is
-                            // a permanent offset (source-side halt). Closing
-                            // a slow repay mid-heal released an extra rescue.
-                            if (!in_valley || drawdown > ep_max + 0.05) {
-                                ep_last_growth = nowMs;
-                                ep_heal_low = drawdown;
-                            } else if (drawdown < ep_heal_low - 0.05) {
-                                ep_heal_low = drawdown;
-                                ep_last_growth = nowMs;
-                            }
+                            if (!in_valley || drawdown > ep_max + 0.05) ep_last_growth = nowMs;
                             in_valley = true;
                             ep_max = Math.max(ep_max, drawdown);
                             if (nowMs - ep_last_growth > 10000) {
@@ -330,57 +250,36 @@
                 }
                 last_now = nowMs;
                 last_end = bufferedEnd;
-            } else {
-                // fat reserve (lazy fetch) or grace: arrival data is not
-                // trustworthy — re-anchor and wait for the next hungry phase.
-                // Decay the inflow EMA instead of freezing it: a stale
-                // starving reading here blocked the catch-up FOREVER while
-                // the delay piled up (field bug: 25.9s, rate 1.0, target 2.5)
-                last_now = null;
+                reserve_ema = reserve_ema === null ? reserve : reserve_ema * 0.9 + reserve * 0.1;
+            } else if (in_grace) {
+                last_now = null; // re-anchor after the grace window
                 last_end = null;
-                inflow_ema *= 0.8;
             }
 
             // --- adapt the target (Shaka dynamicTargetLatency + AIMD probe) ---
             const floor = target_bound(nowMs);
-            // After a rescue whose valley already CLOSED, the stream repaid the
-            // deficit — holding the bumped target for the full 60s is wasted
-            // delay. Real stalls (and open valleys) keep the long gate.
-            const calm_needed = (last_trouble === last_rescue && !in_valley)
-                ? RESCUE_CALM_MS : CALM_MS;
             if (target < floor) {
                 target = floor;                       // bound rose: respect it now
-            } else if (nowMs - last_trouble > calm_needed && target > floor) {
+            } else if (nowMs - last_trouble > CALM_MS && target > floor) {
                 // Two-speed descent: ABOVE the safe floor the incident bump
                 // drains fast (the floor already covers the measured valleys —
                 // lingering above it is pure wasted delay); BELOW it, probing
-                // territory, twice the old crawl — optimistic by default,
-                // the brakes are evidence-driven (Owner rule).
-                const step = target > safe_floor(nowMs) + 1e-9 ? CREEP * 3 : CREEP * 2;
+                // territory, keep the cautious creep.
+                const step = target > safe_floor(nowMs) + 1e-9 ? CREEP * 3 : CREEP;
                 target = Math.max(floor, target - step);
             }
-            // Rescue sizing, recovery-aware: if arrivals already outpace the
-            // clock (the repay burst is under way, or a catch-up overshoot
-            // caused the dip), a short 2.5s bridge is enough — smaller jump,
-            // faster return to the regime. The full step (toward the safe
-            // floor, capped at 4.5s/jump) only while the starvation is still
-            // open; a deep need is met by chained small steps (10s cooldown
-            // apart), never one giant visible rewind.
-            const rescue_to = inflow_ema > 0
-                ? RESCUE_TO
-                : Math.min(RESCUE_STEP_MAX, Math.max(safe_floor(nowMs), RESCUE_TO));
+            // A rescue restores toward the safe floor but each JUMP is capped:
+            // a deep need is met by chained small steps (10s cooldown apart),
+            // never one giant visible rewind (field finding, 2026-07-02).
+            const rescue_to = Math.min(RESCUE_STEP_MAX, Math.max(safe_floor(nowMs), RESCUE_TO));
 
             if (suspended) {
                 return { rate: 1.0, rescue: false, rescueTo: rescue_to, target, floor, suspended: true };
             }
 
             // --- emergency rescue intent (seek stays ONLY here) ---
-            // One rescue per valley: if the gap outlasts the bridge, more
-            // step-backs only dig the delay hole deeper than the gap itself —
-            // playing out the rest (worst case a short freeze) costs less.
             const rescue = !in_grace && reserve < DANGER
-                && nowMs - last_rescue >= RESCUE_COOLDOWN_MS
-                && !(in_valley && rescued_this_valley);
+                && nowMs - last_rescue >= RESCUE_COOLDOWN_MS;
 
             // --- catch-up rate (gradual ONLY — Owner rule) ---
             let rate = 1.0;
@@ -388,12 +287,8 @@
             const delta = smoothed - target;
             const deadband = Math.max(DEADBAND, 0.02 * target);
             const buffer_first = reserve < Math.max(DANGER + 0.5, target * 0.5);
-            // The drain brake only means something with FRESH hungry-phase
-            // data; with a fat reserve there is nothing to protect — always
-            // allow the grind (a stale brake let the delay pile unbounded).
-            const braked = hungry && inflow_ema <= DRAIN_BRAKE;
             if (!in_grace && !rescue && !buffer_first
-                && delta > deadband && !braked) {
+                && delta > deadband && inflow_ema > DRAIN_BRAKE) {
                 rate = sigmoid_rate(delta, maxRate);
             }
             return {
@@ -409,7 +304,6 @@
         function noteRescue(nowMs, restoredReserve) {
             last_rescue = nowMs;
             rescue_times.push(nowMs);
-            if (in_valley) rescued_this_valley = true;
             // a probe died here: remember the level that failed so the next
             // probing round bottoms out just above it (AIMD back-off)
             if (target < safe_floor(nowMs) - 0.01) {
@@ -428,13 +322,10 @@
                 // target to START for the re-arm — don't bump it back up
                 if (nowMs < suspended_until) return;
             }
-            // A rescue does NOT take the full stall bump: the restored reserve
-            // plus a small pad IS the caution (the probe back-off and the
-            // rescue budget cover repetition). Field finding: the flat +1.5
-            // on top of the restore cost ~1min of extra delay per tail event.
-            last_trouble = nowMs;
-            const restored = Number.isFinite(restoredReserve) ? restoredReserve : RESCUE_TO;
-            target = Math.min(HARD_CEIL, Math.max(target, restored + 0.5));
+            incident(nowMs);
+            if (Number.isFinite(restoredReserve)) {
+                target = Math.min(HARD_CEIL, Math.max(target, restoredReserve));
+            }
         }
 
         /** Danger with nothing buffered behind to step back to. */
@@ -468,27 +359,6 @@
             last_trouble = nowMs;       // no tightening during the refill
         }
 
-        /**
-         * Seed from a remembered channel profile (learned in a past session):
-         * the target starts where this channel usually needs it (no blind
-         * 2.75s start, no attach rescue), and the remembered valley enters
-         * the episode stats as two synthetic entries — honored by the
-         * quantile until real measurement replaces them (they expire with
-         * the window). Live measurement always overrides the memory.
-         */
-        function seed(nowMs, savedTarget, savedNeed) {
-            if (Number.isFinite(savedTarget) && savedTarget > 0) {
-                target = Math.min(HARD_CEIL, Math.max(START, savedTarget));
-            }
-            if (Number.isFinite(savedNeed) && savedNeed > 0) {
-                const v = Math.min(HARD_CEIL, savedNeed);
-                episodes.push({ t: nowMs, v }, { t: nowMs, v });
-                // the memory says this channel needs a cushion — probing below
-                // it must be re-EARNED by live calm, not assumed at attach
-                last_trouble = nowMs;
-            }
-        }
-
         /** New stream/page: forget everything. */
         function reset() {
             measurement_reset();
@@ -513,7 +383,7 @@
             };
         }
 
-        return { tick, noteRescue, noteTrouble, noteStall, qualityChange, reset, seed, getState,
+        return { tick, noteRescue, noteTrouble, noteStall, qualityChange, reset, getState,
                  DANGER, HARD_CEIL, START };
     }
 

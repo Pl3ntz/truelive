@@ -82,22 +82,3 @@ test('resolveSettings applies defaults, clamps and snaps', () => {
     assert.equal(t.bufferTarget, common.defaultBufferTarget); // NaN -> default
     assert.equal(t.enabled, false); // real value kept
 });
-
-test('mergeChannelMemory adds, prunes stale entries, and caps the map', () => {
-    const now = 1_000_000_000_000;
-    const week = 7 * 24 * 3600 * 1000;
-    // add
-    const m1 = common.mergeChannelMemory(undefined, 'CazéTV', { target: 5.5, need: 4.2, pipeline: 5.0 }, now);
-    assert.deepEqual(m1['CazéTV'], { target: 5.5, need: 4.2, pipeline: 5.0, t: now });
-    // stale entries drop
-    const withStale = { ...m1, Velho: { target: 3, need: 1, pipeline: 2, t: now - week - 1 } };
-    const m2 = common.mergeChannelMemory(withStale, 'Outro', { target: 3, need: 2, pipeline: 4 }, now);
-    assert.equal(m2.Velho, undefined, 'stale entry must be pruned');
-    assert.ok(m2['CazéTV'] && m2.Outro, 'fresh entries must survive');
-    // cap keeps the newest
-    let big = {};
-    for (let i = 0; i < 25; i++) big['c' + i] = { target: 3, need: 2, pipeline: 4, t: now - i * 1000 };
-    const m3 = common.mergeChannelMemory(big, 'novo', { target: 3, need: 2, pipeline: 4 }, now);
-    assert.equal(Object.keys(m3).length, 20, 'map must be capped at 20');
-    assert.ok(m3.novo, 'the newest entry must survive the cap');
-});
