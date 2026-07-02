@@ -184,13 +184,6 @@
         }
     }
 
-    /** Jump to the live edge on demand (keyboard shortcut / popup chip). No latency threshold — the viewer asked for it. */
-    function seek_to_live() {
-        if (!player || !caps?.seekLive) return;
-        player.seekToLiveHead();
-        if (caps.playVideo) player.playVideo();
-    }
-
     // --- Edge-riding ("Super Ao Vivo") ---------------------------------------
     // v2 (2026-07-02): the brain lives in engine/edge.js (unit-tested, loaded
     // before this file). Delay now shrinks ONLY via playback rate — gradual,
@@ -676,7 +669,6 @@
         }
     });
 
-    document.addEventListener('_live_catch_up_go_live', seek_to_live);
 
     // --- Player detection + (re)attach (R2) ---------------------------------
     // Runs on first load AND on every SPA navigation (YouTube reuses the tab and
