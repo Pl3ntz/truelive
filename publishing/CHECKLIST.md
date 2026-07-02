@@ -22,5 +22,5 @@
 - [ ] LICENSE + THIRD-PARTY-NOTICES no zip (já embarcados)
 
 ## Divulgação
-- [ ] Post de lançamento (ângulo: "o gol no nível da TV aberta, medido")
+- [ ] Post de lançamento (ângulo: "chega junto do território da TV aberta — 3,2s medidos, ~16s à frente da CazéTV padrão")
 - [ ] Comunidades: r/futebol, r/CazeTV, X/Twitter tech-BR

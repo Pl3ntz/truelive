@@ -4,8 +4,8 @@
 TrueLive — menor atraso em lives
 
 ## Resumo curto (132 chars max)
-Assista lives do YouTube com o menor atraso que a sua internet permite — no
-nível da TV aberta. Adapta-se sozinho. Sem coleta.
+Assista lives do YouTube com o menor atraso que a transmissão e a sua
+internet permitem. Adapta-se sozinho. Sem coleta.
 
 ## Descrição longa
 
@@ -24,8 +24,8 @@ O TrueLive te deixa colado no ponto mais recente disponível:
   do vivo você está — medido de verdade, não estimado.
 
 Quanto você ganha depende da transmissão (quem escolhe a classe de latência é
-o canal): em streams de baixa latência (CazéTV, esports), medimos ~3-4s do
-lance — território de TV aberta, contra ~7s do player padrão. Em canais que
+o canal): em streams de baixa latência (CazéTV, esports), medimos ~3-4s da
+transmissão à tela — território de TV aberta, contra ~7s do player padrão. Em canais que
 transmitem em latência normal, o piso físico é maior (~10s+) e NENHUMA
 extensão fura esse limite — o TrueLive te garante o mínimo possível dali.
 Números medidos e verificados, com metodologia pública no repositório.

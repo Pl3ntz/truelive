@@ -18,9 +18,15 @@ Quem define a classe de latência é o **canal**, na hora de transmitir:
 
 | Classe da stream (escolha do canal) | Piso físico | Com TrueLive você fica em |
 |---|---|---|
-| Ultra-baixa latência | ~2-5s | **~3-4s** — nível TV aberta |
-| Baixa latência (CazéTV, esports) | ~5-10s | **~3-4s** — nível TV aberta |
+| Ultra-baixa latência | ~2-5s | **~3-4s** — território da TV aberta |
+| Baixa latência (CazéTV, esports) | ~5-10s | **~3-4s** — território da TV aberta |
 | Latência normal (padrão do YouTube) | ~10-30s | **o piso da stream** (~10s+) |
+
+> **Régua honesta:** nossos números são medidos da **ingestão** (encoder do
+> YouTube) até a tela; o ~3-5s da TV aberta é medido **do estádio**. São réguas
+> diferentes — contando do estádio, o caminho do streaming ainda soma o trecho
+> até o YouTube, então a TV aberta **empata ou ganha**. O TrueLive te coloca no
+> território dela, nunca "à frente da TV".
 
 Em latência normal, o vídeo mais novo **nem chega** ao seu computador antes
 disso — nenhuma extensão fura esse piso, e quem prometer o contrário está
@@ -35,8 +41,8 @@ relógio de ingestão do próprio player, mesma máquina e mesma stream:
 
 | Como você assiste | Delay | Comprovação |
 |---|---|---|
-| **YouTube + TrueLive (Super Ao Vivo)** | **3,2s medido** (~3,5s na calibração atual, mais conservadora) | benchmark próprio A/B/C |
-| TV aberta (antena digital, vs estádio) | ~3-5s | convergência imprensa/indústria |
+| TV aberta (antena digital — régua própria: medida do estádio) | ~3-5s | convergência imprensa/indústria |
+| **YouTube + TrueLive (Super Ao Vivo)** | **3,2s medido** da ingestão (~3,5s na calibração atual) | benchmark próprio A/B/C |
 | Catch-up 1.25x (a técnica dos concorrentes) | 4,5-7s, serrilhado | medido + derivado do código deles |
 | YouTube padrão (live low-latency, sem extensão) | 7,0-7,3s | medido |
 | CazéTV na Copa 2026 | +15-20s atrás da Globo | medição independente (Canaltech) |
