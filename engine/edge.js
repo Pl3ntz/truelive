@@ -168,15 +168,23 @@
             return now - last_trouble < DEEP_CALM_MS ? DEEP_CALM_FLOOR : FLOOR_ABS;
         }
 
-        // Safe floor: the measured valley need plus a margin. The margin is
-        // PRESSURE-AWARE: lean (0.6s, minimum delay) while rescues are rare;
-        // when rescues repeat (3+/10min) the lean bet is clearly losing, so
-        // the pad grows to clear the danger zone entirely (valley + DANGER +
-        // headroom) — recurring valleys then pass without any rescue.
+        // Safe floor: the measured valley need plus a margin. Two demands win:
+        // 1. Quantile of the window's episodes + pad. The pad is PRESSURE-
+        //    AWARE: lean (0.6s) while rescues are rare; when rescues repeat
+        //    (3+/10min) it grows to clear the danger zone entirely.
+        // 2. STABILITY RULE (Owner, 2026-07-02): whatever happened in the
+        //    LAST 30s must pass without a rescue — descend only when the
+        //    recent delivery proves it's safe. Kills the dive-crash cycle:
+        //    on a rough night the target parks above the active valleys; on
+        //    a healthy feed dd_recent is small and the floor drops with it.
         function safe_floor(now) {
             rescue_times = rescue_times.filter(t => now - t < PROBE_RESCUE_WINDOW_MS);
             const pad = rescue_times.length >= 3 ? DANGER + 0.3 : MARGIN;
-            return Math.min(HARD_CEIL, Math.max(abs_gate(now), dd_need(now) + pad));
+            return Math.min(HARD_CEIL, Math.max(
+                abs_gate(now),
+                dd_need(now) + pad,
+                dd_recent + DANGER + 0.3,
+            ));
         }
 
         // Where the target is allowed to rest. Normally the safe floor; with
@@ -189,9 +197,10 @@
             rescue_times = rescue_times.filter(t => now - t < PROBE_RESCUE_WINDOW_MS);
             if (rescue_times.length >= PROBE_MAX_RESCUES) return safe;
             const fail = now - probe_fail_t < PROBE_FAIL_TTL_MS ? probe_fail : 0;
-            // never bet against known data: the probe bottoms at the deepest
-            // valley of the last 30s (a stream that truly calmed lets it dive)
-            return Math.min(safe, Math.max(abs_gate(now), fail, dd_recent + MARGIN));
+            // never bet against known data: the probe bottoms where the last
+            // 30s could still pass WITHOUT a rescue (danger zone cleared) —
+            // a stream that truly calmed lets it dive
+            return Math.min(safe, Math.max(abs_gate(now), fail, dd_recent + DANGER + 0.3));
         }
 
         function incident(now) {
