@@ -115,13 +115,28 @@ test('probing: after earned calm the target dives below the worst-case floor', (
         `target never probed (min ${probedMin} vs worst-case ${worstCase})`);
 });
 
-test('a rescue restores enough to survive the valley that caused it', () => {
+test('a rescue jump is meaningful but hard-capped at 4.5s', () => {
     const gov = createEdgeGovernor();
     const log = simulate(gov, { ticks: 2400, arrivalFn: heavy4kArrival, startReserve: 8 });
     const dd = gov.getState().drawdown;
     const last = log[log.length - 1];
-    assert.ok(last.rescueTo >= Math.min(10, Math.max(dd + 0.6, 2.5)) - 1e-9,
-        `rescueTo ${last.rescueTo} must clear the measured valley (${dd})`);
+    assert.ok(last.rescueTo >= Math.min(4.5, Math.max(dd + 0.6, 2.5)) - 1e-9,
+        `rescueTo ${last.rescueTo} too small for the measured valley (${dd})`);
+    assert.ok(log.every(s => s.rescueTo <= 4.5 + 1e-9),
+        'no single rescue may rewind more than 4.5s');
+});
+
+test('probe never dives below the deepest valley of the last 30s', () => {
+    const gov = createEdgeGovernor();
+    // recurring 3s-deep valleys every 20s: dd_recent stays ~3 permanently
+    const arrival = i => (i % 80 >= 68 ? 0 : (i % 2 === 0 ? 0.55 : 0));
+    const log = simulate(gov, { ticks: 3200, arrivalFn: arrival, startReserve: 6 });
+    const adapted = log.slice(1200);
+    const boundMin = Math.min(...adapted.map(s => +s.floor));
+    assert.ok(boundMin >= 2.0, `bound ${boundMin} broke the absolute floor`);
+    // with valleys ~3s recurring inside every 30s window, the probe's bound
+    // must not rest materially below valley + margin
+    assert.ok(boundMin >= 2.5, `probe bound ${boundMin} bet against known valleys`);
 });
 
 test('danger dip: rescue fires once, respects cooldown, target rises', () => {

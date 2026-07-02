@@ -52,10 +52,15 @@
         // the level that failed, remember it for a while, try again later.
         // Worst case (budget spent) degrades to exactly the safe floor.
         const PROBE_CALM_MS = 120000;    // calm to earn probing below the floor
-        const PROBE_BACKOFF = 0.5;       // failed level + this = new lower bound
+        const PROBE_BACKOFF = 1.0;       // failed level + this = new lower bound
         const PROBE_FAIL_TTL_MS = 600000; // how long a failed level is remembered
-        const PROBE_MAX_RESCUES = 2;     // rescues within the window that...
+        const PROBE_MAX_RESCUES = 1;     // rescues within the window that...
         const PROBE_RESCUE_WINDOW_MS = 600000; // ...pause probing (hold safe floor)
+        const DD_RECENT_WINDOW_MS = 30000; // short valley memory: the probe never
+                                           // dives below what JUST happened
+        const RESCUE_STEP_MAX = 4.5;     // hard cap per rescue jump — a deep need
+                                         // is met by chained small steps, never
+                                         // one giant visible rewind
         // --- suspension (last resort — REAL stalls only) ---
         const SUSPEND_STALLS = 2;
         const SUSPEND_WINDOW_MS = 300000;
@@ -96,6 +101,8 @@
         let cum_max = 0;              // running peak of cum
         let dd_filter = winmax_create();
         let dd_now = 0;               // windowed max drawdown (the measured need)
+        let dd_recent_filter = winmax_create();
+        let dd_recent = 0;            // same statistic over 30s — the probe's floor
         let reserve_ema = null;
         let inflow_ema = 0;           // smoothed net inflow per tick (s)
         let last_trouble = 0;         // stall, rescue, or failed rescue
@@ -114,6 +121,8 @@
             cum_max = 0;
             dd_filter = winmax_create();
             dd_now = 0;
+            dd_recent_filter = winmax_create();
+            dd_recent = 0;
             reserve_ema = null;
             inflow_ema = 0;
         }
@@ -139,7 +148,9 @@
             rescue_times = rescue_times.filter(t => now - t < PROBE_RESCUE_WINDOW_MS);
             if (rescue_times.length >= PROBE_MAX_RESCUES) return safe;
             const fail = now - probe_fail_t < PROBE_FAIL_TTL_MS ? probe_fail : 0;
-            return Math.min(safe, Math.max(abs_gate(now), fail));
+            // never bet against known data: the probe bottoms at the deepest
+            // valley of the last 30s (a stream that truly calmed lets it dive)
+            return Math.min(safe, Math.max(abs_gate(now), fail, dd_recent + MARGIN));
         }
 
         function incident(now) {
@@ -190,7 +201,9 @@
                         // negative arrival = rendition wipe/DVR seek → skip, re-anchor
                         cum += arrival - dt;
                         cum_max = Math.max(cum_max, cum);
-                        dd_now = winmax_update(dd_filter, DD_WINDOW_MS, nowMs, cum_max - cum);
+                        const drawdown = cum_max - cum;
+                        dd_now = winmax_update(dd_filter, DD_WINDOW_MS, nowMs, drawdown);
+                        dd_recent = winmax_update(dd_recent_filter, DD_RECENT_WINDOW_MS, nowMs, drawdown);
                         inflow_ema = inflow_ema * 0.8 + (arrival - dt) * 0.2;
                     }
                 }
@@ -209,9 +222,10 @@
             } else if (nowMs - last_trouble > CALM_MS && target > floor) {
                 target = Math.max(floor, target - CREEP); // calm: creep back down
             }
-            // A rescue must restore enough to SURVIVE the valley that caused
-            // it — the safe floor, not the (possibly probing) target.
-            const rescue_to = Math.min(HARD_CEIL, Math.max(safe_floor(nowMs), RESCUE_TO));
+            // A rescue restores toward the safe floor but each JUMP is capped:
+            // a deep need is met by chained small steps (10s cooldown apart),
+            // never one giant visible rewind (field finding, 2026-07-02).
+            const rescue_to = Math.min(RESCUE_STEP_MAX, Math.max(safe_floor(nowMs), RESCUE_TO));
 
             if (suspended) {
                 return { rate: 1.0, rescue: false, rescueTo: rescue_to, target, floor, suspended: true };
