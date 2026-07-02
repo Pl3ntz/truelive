@@ -72,6 +72,12 @@
         const DD_WINDOW_MS = 120000;  // drawdown memory (BBR-style expiry)
         const GRACE_MS = 4000;        // after quality switch: no rescue, no measuring
         const MAX_TICK_GAP_S = 2.0;   // bigger gap = we were asleep: re-anchor
+        const HUNGRY_MAX = 6.0;       // measure arrivals ONLY under this reserve:
+                                      // above it the player fetches lazily in big
+                                      // batches and the "holes" are scheduling
+                                      // artifacts that inflate the floor (field
+                                      // discovery 2026-07-02: measured hole size
+                                      // tracked OUR cushion size — feedback loop)
 
         // BBR lib/win_minmax.c running-max: 3 time-stamped samples, O(1),
         // old maxima expire by age instead of decaying asymptotically.
@@ -146,6 +152,16 @@
             inflow_ema = 0;
         }
 
+        // The 30s valley memory, aged at READ time: while the reserve is fat
+        // we stop sampling (lazy-fetch artifacts), and a winmax only expires
+        // on new samples — without this, the last hungry-phase valley would
+        // stay "recent" forever and pin the floor.
+        function dd_recent_now(now) {
+            const s = dd_recent_filter.s;
+            if (!s.length || now - s[0].t > DD_RECENT_WINDOW_MS) return 0;
+            return s[0].v;
+        }
+
         // Measured need from completed valley episodes (ongoing always counts).
         // Tail-tolerant quantile (NetEQ spirit): skip the deepest quarter — the
         // rare tail valley is absorbed by the budgeted rescue net (jumps capped
@@ -183,7 +199,7 @@
             return Math.min(HARD_CEIL, Math.max(
                 abs_gate(now),
                 dd_need(now) + pad,
-                dd_recent + DANGER + 0.3,
+                dd_recent_now(now) + DANGER + 0.3,
             ));
         }
 
@@ -200,7 +216,7 @@
             // never bet against known data: the probe bottoms where the last
             // 30s could still pass WITHOUT a rescue (danger zone cleared) —
             // a stream that truly calmed lets it dive
-            return Math.min(safe, Math.max(abs_gate(now), fail, dd_recent + DANGER + 0.3));
+            return Math.min(safe, Math.max(abs_gate(now), fail, dd_recent_now(now) + DANGER + 0.3));
         }
 
         function incident(now) {
@@ -243,7 +259,19 @@
 
             // --- measure arrival (NetEQ spirit: immune to playhead moves) ---
             const in_grace = nowMs < grace_until;
-            if (!in_grace && Number.isFinite(bufferedEnd) && Number.isFinite(reserve)) {
+            if (Number.isFinite(reserve)) {
+                reserve_ema = reserve_ema === null ? reserve : reserve_ema * 0.9 + reserve * 0.1;
+            }
+            const hungry = Number.isFinite(reserve) && reserve <= HUNGRY_MAX;
+            if (!hungry && in_valley) {
+                // leaving the hungry band mid-valley (a burst repaid us):
+                // close the episode with what the hungry phase saw
+                episodes.push({ t: nowMs, v: ep_max });
+                if (episodes.length > 16) episodes.shift();
+                in_valley = false;
+                ep_max = 0;
+            }
+            if (!in_grace && hungry && Number.isFinite(bufferedEnd)) {
                 if (last_now !== null && last_end !== null) {
                     const dt = (nowMs - last_now) / 1000;
                     const arrival = bufferedEnd - last_end;
@@ -281,9 +309,10 @@
                 }
                 last_now = nowMs;
                 last_end = bufferedEnd;
-                reserve_ema = reserve_ema === null ? reserve : reserve_ema * 0.9 + reserve * 0.1;
-            } else if (in_grace) {
-                last_now = null; // re-anchor after the grace window
+            } else {
+                // fat reserve (lazy fetch) or grace: arrival data is not
+                // trustworthy — re-anchor and wait for the next hungry phase
+                last_now = null;
                 last_end = null;
             }
 
