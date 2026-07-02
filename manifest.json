@@ -1,0 +1,70 @@
+{
+   "action": {
+      "default_popup": "popup.html"
+   },
+   "author": {
+      "email": "vitorribasplentz@gmail.com"
+   },
+   "background": {
+      "service_worker": "background.js",
+      "type": "module"
+   },
+   "commands": {
+      "toggle-enabled": {
+         "suggested_key": {
+            "default": "Alt+Shift+Y",
+            "mac": "Command+Shift+Y"
+         },
+         "description": "__MSG_commandToggleDesc__"
+      },
+      "go-live": {
+         "suggested_key": {
+            "default": "Alt+Shift+L",
+            "mac": "Command+Shift+L"
+         },
+         "description": "__MSG_commandGoLiveDesc__"
+      }
+   },
+   "content_scripts": [
+      {
+         "all_frames": true,
+         "js": [
+            "content.js"
+         ],
+         "matches": [
+            "https://www.youtube.com/*"
+         ],
+         "run_at": "document_start"
+      }
+   ],
+   "default_locale": "en",
+   "description": "__MSG_appDesc__",
+   "icons": {
+      "128": "icons/128.png",
+      "16": "icons/16.png",
+      "48": "icons/48.png"
+   },
+   "manifest_version": 3,
+   "name": "TrueLive",
+   "options_ui": {
+      "open_in_tab": true,
+      "page": "popup.html"
+   },
+   "permissions": [
+      "storage"
+   ],
+   "version": "1.0.0",
+   "web_accessible_resources": [
+      {
+         "matches": [
+            "https://www.youtube.com/*"
+         ],
+         "resources": [
+            "common.js",
+            "inject.js",
+            "engine/controller.js"
+         ]
+      }
+   ],
+   "homepage_url": "https://github.com/Pl3ntz/truelive"
+}

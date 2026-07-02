@@ -1,0 +1,16 @@
+# Build output — the publishable .zip is generated from source, not committed.
+build/
+dist/
+web-ext-artifacts/
+
+# Node tooling (dev-only; installed for lint/CI and the web-ext Firefox build)
+node_modules/
+
+# Marketing/store assets — não versionados (gerados a partir dos HTML localmente).
+publishing/assets/
+
+# OS / editor / cloud cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log

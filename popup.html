@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!-- lang is set to the real UI language by popup.js at startup -->
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="popup.css" />
+    <script src="vendor/qrcode.js"></script>
+    <script src="popup.js" type="module"></script>
+    <title>TrueLive</title>
+</head>
+
+<body>
+    <main id="app" class="app">
+        <header class="app-header">
+            <div class="brand">
+                <span class="brand-dot" aria-hidden="true"></span>
+                <div class="brand-text">
+                    <h1 id="brand-name" class="brand-name"></h1>
+                    <p id="brand-tagline" class="brand-tagline"></p>
+                </div>
+            </div>
+            
+        </header>
+
+        <section class="quick-actions">
+            <button id="go-live-action" class="go-live-action" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span id="go-live-label" class="go-live-label"></span>
+            </button>
+        </section>
+
+        <section class="modes" aria-labelledby="modes-title">
+            <h2 id="modes-title" class="section-title"></h2>
+            <div id="mode-cards" class="mode-cards" role="radiogroup"></div>
+            <p id="modes-note" class="modes-note"></p>
+        </section>
+
+        <section class="advanced">
+            <button id="advanced-toggle" class="advanced-toggle" type="button" aria-expanded="false">
+                <span id="advanced-label" class="advanced-label"></span>
+                <svg class="chevron" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+            <div id="advanced-panel" class="advanced-panel" hidden>
+                <div class="group">
+                    <div id="indicator-rows" class="rows"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="support-area">
+            <button id="support-toggle" class="support-toggle" type="button" aria-expanded="false" aria-controls="support-panel">
+                <span>☕</span><span id="support-toggle-label"></span>
+            </button>
+            <section id="support-panel" class="support" aria-labelledby="support-title" hidden>
+                <h2 id="support-title" class="support-title"></h2>
+                <div id="support-amounts" class="support-amounts" role="radiogroup"></div>
+                <div class="support-pix">
+                    <div id="support-qr" class="support-qr" aria-hidden="true"></div>
+                    <p id="support-scan" class="support-scan"></p>
+                    <button id="support-copy" class="support-copy" type="button"></button>
+                </div>
+            </section>
+        </section>
+
+        <footer class="app-footer">
+            <button id="reset" class="reset" type="button">
+                <span id="reset-label" class="reset-label"></span>
+                <span class="reset-fill" aria-hidden="true"></span>
+            </button>
+        </footer>
+    </main>
+</body>
+
+</html>
