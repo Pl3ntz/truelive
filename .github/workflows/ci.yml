@@ -6,12 +6,17 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Least privilege: o job só lê o repo (review de segurança 2026-07-02).
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # Actions pinadas por SHA (tags são mutáveis; SHA não) — supply chain.
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
       - run: npm ci --no-audit --no-fund
@@ -19,8 +24,8 @@ jobs:
       - run: npm run check:locales
       - run: npm test
       - run: npm run build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: zerodelay-package
+          name: truelive-package
           path: build/*.zip
           if-no-files-found: error
