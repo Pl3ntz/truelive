@@ -192,159 +192,51 @@
     }
 
     // --- Edge-riding ("Super Ao Vivo") ---------------------------------------
-    // The player keeps several seconds of ALREADY-DOWNLOADED video ahead of the
-    // playhead even "at live head". This mode nudges the playhead to that edge,
-    // holding only EDGE_TARGET seconds of reserve. Validated live (2026-07-02,
-    // EDGE-RIDING-FINDINGS.md): ~3.1-3.6s true latency sustained vs 7.3s default;
-    // below ~1.5s of reserve a stall becomes a PERMANENT latency penalty, hence
-    // the guards: never after a recent stall (let the reserve rebuild), never in
-    // DVR (respect a viewer who rewound on purpose), rate-limited, and the nudge
-    // itself must not trip the stall watchdog.
-    // The reserve target ADAPTS to what this stream/connection can sustain.
-    // Fixed 2.0s was validated on steady feeds (lofi/esports) but stalls on
-    // high-motion sports (CazéTV): action moments spike the bitrate, segments
-    // arrive in heavier bursts, and a thin reserve drains exactly when the
-    // viewer can least afford a freeze. So: start safe, tighten only while the
-    // stream proves calm, back off hard on any evidence of trouble.
-    const EDGE_ABS_FLOOR = 2.0;        // conservative floor (Owner, 2026-07-02: the user must
-                                       // never suffer): below ~1.5s a stall becomes a
-                                       // PERMANENT latency penalty (measured live, 2026-07-02)
-    const EDGE_CEIL = 4.5;             // never hold more than this (stable-mode territory)
-    const EDGE_START = 2.75;           // first target after attach — safe until proven calm
-    const EDGE_JITTER_MARGIN = 0.6;    // cushion above the measured segment-arrival jitter
-    const EDGE_DEEP_CALM_MS = 180000;  // calm this long unlocks probing below 2.0s
-    const EDGE_DANGER = 1.5;           // reserve below this = stall territory (measured ~1.2,
-                                       // raised for margin — rescue fires earlier)
-    const EDGE_RESCUE_TO = 2.5;        // a rescue step-back restores at least this much reserve
-    const EDGE_RESCUE_COOLDOWN = 10000; // ms between rescues (target rises after each one)
-    const EDGE_NUDGE_BAND = 0.75;      // nudge once reserve outgrows target by this
-    const EDGE_NUDGE_COOLDOWN = 5000;  // ms between nudges
-    const EDGE_STALL_HOLDOFF = 45000;  // ms to pause nudging after a real stall
-    const EDGE_CALM_MS = 60000;        // calm this long before tightening again
-    const EDGE_SUSPEND_STALLS = 2;     // this many real stalls within the window...
-    const EDGE_SUSPEND_WINDOW = 300000; // ...suspends edge-riding (5 min)
-    const EDGE_SUSPEND_MS = 600000;     // suspension length (10 min) — then re-arm safely
-    let edge_target = EDGE_START;
-    let edge_last_nudge = 0;
-    let edge_self_seek_until = 0;
-    let edge_last_reserve = null;
-    let edge_last_trouble = 0;         // last stall OR burst-drain sighting
-    // Reserve breathing envelope: tracks how much the reserve naturally
-    // oscillates as segments arrive (decaying min/max). The DYNAMIC floor is
-    // that jitter + a margin — the lowest reserve THIS stream on THIS internet
-    // can hold without gambling. A calm fiber connection converges near the
-    // absolute floor; a bursty one keeps a bigger cushion, automatically.
-    let edge_env_max = null;
-    let edge_env_min = null;
-    let edge_last_rescue = 0;
+    // v2 (2026-07-02): the brain lives in engine/edge.js (unit-tested, loaded
+    // before this file). Delay now shrinks ONLY via playback rate — gradual,
+    // hls.js-style sigmoid, never below 1.0x (Owner rule) — and a seek
+    // survives solely as the emergency rescue. The reserve floor is measured
+    // from segment ARRIVAL (NetEQ spirit), so our own seeks and the catch-up
+    // drain can't pollute it, and it expires by time (BBR win_minmax) instead
+    // of haunting a calmer rendition. Technique study: docs/RESEARCH.md.
+    const edgeGovernorFactory = (typeof window !== 'undefined' && window.TrueLive && typeof window.TrueLive.createEdgeGovernor === 'function')
+        ? window.TrueLive.createEdgeGovernor
+        : null;
+    let edge_governor = edgeGovernorFactory ? edgeGovernorFactory() : null;
+    let edge_self_seek_until = 0;  // our rescue seek fires 'waiting' — not a real stall
+    let edge_quality_h = 0;        // last seen videoHeight (rendition watch)
 
-    // Owner's rule (2026-07-02): playback NEVER drops below 1.0x on a live —
-    // a sub-real-time rate makes no sense. So a danger dip is rescued by an
-    // instant step-back instead of a slow-down: one small playhead jump
-    // (~1-2s of replayed content) restores the reserve immediately while the
-    // rate stays untouched. The target rises to the restored level so the
-    // rider doesn't nudge right back into danger, and repeated rescues count
-    // toward graceful suspension (this internet can't hold the edge now).
-    function edge_rescue(v, reserve, now) {
-        if (reserve >= EDGE_DANGER) return;
-        if (now - edge_last_rescue < EDGE_RESCUE_COOLDOWN) return;
-        if (!v || v.paused || !v.buffered.length) return;
+    // Rendition switched: old measurements describe the old rendition, and the
+    // buffer wipe of the switch must not read as danger. Re-learn from zero.
+    // Runs even while suspended, so a quality DROP re-arms the motor at once
+    // (a lower rendition usually sustains a much lower delay).
+    function edge_watch_quality(v, now) {
+        if (!v || !v.videoHeight || !edge_governor) return;
+        if (edge_quality_h !== 0 && v.videoHeight !== edge_quality_h) {
+            edge_governor.qualityChange(now);
+            edge_self_seek_until = now + 4000; // refill 'waiting' isn't a stall
+        }
+        edge_quality_h = v.videoHeight;
+    }
+
+    // Emergency rescue: ONE instant step-back (~1-2s of replayed content)
+    // restores the reserve while the rate never leaves >=1.0x (Owner rule).
+    function edge_execute_rescue(v, rescueTo, now) {
+        if (!v || v.paused || !v.buffered.length || !edge_governor) return;
         const range = v.buffered.length - 1;
         const end = v.buffered.end(range);
-        const restore = Math.min(EDGE_CEIL, Math.max(edge_target, EDGE_RESCUE_TO));
         // never step back past what's actually buffered behind the playhead
-        const back = Math.max(v.buffered.start(range) + 0.1, end - restore);
+        const back = Math.max(v.buffered.start(range) + 0.1, end - rescueTo);
         if (back >= v.currentTime) {
-            // Danger with no material to step back to (e.g. right after attach,
-            // before back-buffer accumulates). Still trouble: keep the floor up
-            // and block tightening — but leave suspension to the real-stall
-            // watchdog, so a normal stream start can't trip a 10-min handover.
-            edge_last_trouble = now;
+            // Danger with no material to step back to (e.g. right after
+            // attach, before back-buffer accumulates). Still trouble: block
+            // tightening — but a normal stream start can't trip a handover.
+            edge_governor.noteTrouble(now);
             return;
         }
         edge_self_seek_until = now + 1500; // the seek fires 'waiting'; not a real stall
         v.currentTime = back;
-        edge_last_rescue = now;
-        edge_last_trouble = now;                                        // no tightening soon
-        edge_target = Math.min(EDGE_CEIL, Math.max(edge_target, end - back)); // hold the new cushion
-        edge_note_stall(now);              // repeated rescues -> hand over to Automático
-    }
-
-    function edge_dynamic_floor(now) {
-        const jitter = (edge_env_max !== null && edge_env_min !== null)
-            ? Math.max(0, edge_env_max - edge_env_min) : 1.0;
-        let floor = Math.max(EDGE_ABS_FLOOR, jitter + EDGE_JITTER_MARGIN);
-        // going below 2.5 is EARNED: only after deep calm (3+ min without trouble)
-        if (now - edge_last_trouble < EDGE_DEEP_CALM_MS) floor = Math.max(floor, 2.5);
-        return Math.min(floor, EDGE_CEIL);
-    }
-    let edge_stall_times = [];         // real stalls seen while edge mode is on
-    let edge_suspended_until = 0;      // while in the future: behave as Automático
-
-    // Weak-connection tier: if the stream stalls repeatedly even with the
-    // adaptive reserve, edge-riding is the wrong tool for THIS internet right
-    // now. Suspend it and hand control to the Automático controller (which
-    // grows the buffer to whatever the connection sustains). Re-arm later,
-    // starting safe. The viewer never has to touch anything.
-    function edge_note_stall(now) {
-        edge_stall_times = edge_stall_times.filter(t => now - t < EDGE_SUSPEND_WINDOW);
-        edge_stall_times.push(now);
-        if (edge_stall_times.length >= EDGE_SUSPEND_STALLS) {
-            edge_suspended_until = now + EDGE_SUSPEND_MS;
-            edge_stall_times = [];
-            edge_target = EDGE_START; // when it re-arms, start from the safe target
-        }
-    }
-
-    function edge_is_suspended(now) {
-        return now < edge_suspended_until;
-    }
-
-    function ride_edge(progress_state) {
-        const v = video_instance();
-        if (!v || v.paused || !v.buffered.length) return;
-        if (progress_state && progress_state.isAtLiveHead === false) return; // viewer is in DVR on purpose
-        const now = Date.now();
-        const edge = v.buffered.end(v.buffered.length - 1);
-        const reserve = edge - v.currentTime;
-
-        // --- adapt the target ---
-        if (now - last_stall < 8000 && last_stall > edge_last_trouble) {
-            // a real stall just happened: this stream needs more cushion
-            edge_target = Math.min(EDGE_CEIL, edge_target + 1.5);
-            edge_last_trouble = last_stall;
-            edge_note_stall(now);
-        } else if (edge_last_reserve !== null && edge_last_reserve - reserve > 1.2) {
-            // burst drain (bitrate spike swallowed >1.2s in one tick-gap):
-            // pre-emptive raise BEFORE it becomes a stall
-            edge_target = Math.min(EDGE_CEIL, Math.max(edge_target, reserve + 1.5));
-            edge_last_trouble = now;
-        }
-        // breathing envelope (decays ~0.008s/s so old spikes stop counting)
-        edge_env_max = edge_env_max === null ? reserve : Math.max(reserve, edge_env_max - 0.002);
-        edge_env_min = edge_env_min === null ? reserve : Math.min(reserve, edge_env_min + 0.002);
-        const floor = edge_dynamic_floor(now);
-        if (now - edge_last_trouble > EDGE_CALM_MS && edge_target > floor) {
-            // stream is calm: creep down toward the measured floor (~0.05s/s)
-            edge_target = Math.max(floor, edge_target - 0.0125);
-        } else if (edge_target < floor) {
-            edge_target = floor; // floor rose (jitter grew) — respect it immediately
-        }
-        edge_last_reserve = reserve;
-        // observability (page-world): lets diagnostics read the adaptive state
-        window.__truelive_debug = { target: +edge_target.toFixed(2), reserve: +reserve.toFixed(2),
-                                    lastTrouble: edge_last_trouble, lastStall: last_stall,
-                                    suspendedUntil: edge_suspended_until, stallCount: edge_stall_times.length, lastRescue: edge_last_rescue,
-                                    floor: +edge_dynamic_floor(now).toFixed(2),
-                                    jitter: (edge_env_max !== null && edge_env_min !== null) ? +(edge_env_max - edge_env_min).toFixed(2) : null };
-
-        // --- nudge (with all guards) ---
-        if (now - last_stall < EDGE_STALL_HOLDOFF) return;      // let the reserve rebuild
-        if (now - edge_last_nudge < EDGE_NUDGE_COOLDOWN) return;
-        if (reserve <= edge_target + EDGE_NUDGE_BAND) return;   // already riding the edge
-        edge_self_seek_until = now + 1500;                      // the seek fires 'waiting'; don't count it as a stall
-        v.currentTime = edge - edge_target;
-        edge_last_nudge = now;
+        edge_governor.noteRescue(now, end - v.currentTime);
     }
 
     function video_instance() {
@@ -552,11 +444,12 @@
     function on_video_waiting() {
         if (!current_settings?.enabled) return;
         const now = Date.now();
-        if (now < edge_self_seek_until) return; // our own edge nudge, not a real stall
+        if (now < edge_self_seek_until) return; // our own rescue seek, not a real stall
         if (now < stall_cooldown_until || now - last_stall < 5000) return;
         last_stall = now;
-        // (stall-offer card removed: the graceful-suspension tier handles a
-        // struggling connection automatically — no user action required)
+        // A REAL stall (frozen screen) is what counts toward the graceful
+        // handover — an invisible rescue step-back no longer does (v2).
+        if (current_settings?.edge && edge_governor) edge_governor.noteStall(now);
     }
 
     // --- Resilience helpers (R1/R3) -----------------------------------------
@@ -637,35 +530,45 @@
             document.dispatchEvent(new CustomEvent('_live_catch_up_active'));
         }
 
-        const edge_suspended = settings.edge && edge_is_suspended(Date.now());
+        let edge_suspended = false;
         if (caps.setRate && caps.getRate) {
             if (!settings.enabled) {
                 reset_playbackRate();
-            } else if (settings.edge && !edge_suspended) {
-                // ONE buffer metric governs edge mode: the same video.buffered
-                // reserve ride_edge nudges on. Feeding the controller the
-                // stats-for-nerds health here could accelerate while a nudge
-                // thins the reserve in the same tick (review finding).
+            } else if (settings.edge && edge_governor) {
+                // ONE buffer metric governs edge mode: the video.buffered
+                // reserve — the same one the governor measures arrivals on.
                 const ev = video_instance();
-                const read_reserve = () => (ev && ev.buffered.length)
-                    ? ev.buffered.end(ev.buffered.length - 1) - ev.currentTime
-                    : health;
-                // Rate control stays >= 1.0x always (Owner rule); danger dips
-                // are handled by an instant step-back, not a slow-down.
-                edge_rescue(ev, read_reserve(), Date.now());
-                // Re-read AFTER the possible rescue seek — the controller must
-                // see the restored reserve, not the pre-seek danger value
-                // (review finding: don't lean on EDGE_DANGER == BUFFER_FLOOR).
-                set_playbackRate(settings.playbackRate, latency, read_reserve(), edge_target, false);
+                const now = Date.now();
+                edge_watch_quality(ev, now);
+                if (ev && !ev.paused && ev.buffered.length) {
+                    const b_end = ev.buffered.end(ev.buffered.length - 1);
+                    const g = edge_governor.tick(now, b_end, b_end - ev.currentTime, settings.playbackRate);
+                    edge_suspended = g.suspended;
+                    if (g.suspended) {
+                        // weak-connection handover: behave as Automático
+                        set_playbackRate(settings.playbackRate, latency, health, settings.bufferTarget, true);
+                    } else if (progress_state && progress_state.isAtLiveHead === false) {
+                        apply_playback_rate(1.0); // viewer rewound on purpose — don't fight
+                    } else {
+                        // Rate stays >= 1.0x always (Owner rule); a danger dip
+                        // is handled by an instant step-back, not a slow-down.
+                        if (g.rescue) edge_execute_rescue(ev, g.rescueTo, now);
+                        apply_playback_rate(g.rate);
+                    }
+                    // observability (page-world): diagnostics read the live state
+                    window.__truelive_debug = {
+                        v: 2, rate: g.rate, target: +g.target.toFixed(2),
+                        floor: +g.floor.toFixed(2), reserve: +(b_end - ev.currentTime).toFixed(2),
+                        suspended: g.suspended, ...edge_governor.getState(),
+                    };
+                }
             } else if (settings.edge) {
+                // governor unavailable (engine/edge.js failed to load) — the
+                // stable, buffered profile is the safe fallback
                 set_playbackRate(settings.playbackRate, latency, health, settings.bufferTarget, true);
             } else {
                 set_playbackRate(settings.playbackRate, latency, health, settings.bufferTarget, settings.auto);
             }
-        }
-
-        if (settings.enabled && settings.edge && !edge_suspended) {
-            ride_edge(progress_state);
         }
 
         if (settings.skip) {
@@ -775,16 +678,10 @@
         // handles whatever rate the new player starts at.)
         if (controllerFactory) controller = controllerFactory();
         seekableEnds = [];
-        edge_last_nudge = 0;      // fresh stream: edge-riding state must not carry over
+        // fresh stream: edge-riding state must not carry over
+        if (edgeGovernorFactory) edge_governor = edgeGovernorFactory();
         edge_self_seek_until = 0;
-        edge_target = EDGE_START;
-        edge_last_reserve = null;
-        edge_last_trouble = 0;
-        edge_stall_times = [];
-        edge_suspended_until = 0;
-        edge_env_max = null;
-        edge_env_min = null;
-        edge_last_rescue = 0;
+        edge_quality_h = 0;
 
         if (bound_video !== v) {
             // Detach the previous <video>'s listener before binding the new one,

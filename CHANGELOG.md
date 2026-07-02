@@ -1,5 +1,33 @@
 # Changelog — TrueLive
 
+## 1.1.0 — 2026-07-02
+
+Motor do Super Ao Vivo reescrito (v2) após diagnóstico ao vivo em stream
+4K60: o modo travava em transmissões pesadas. Estudo técnico completo em
+docs/RESEARCH.md (hls.js, dash.js LoL+, WebRTC NetEQ, TCP BBR, Shaka).
+
+### Mudado
+- **Redução de delay sempre gradual**: o Super Ao Vivo agora encosta na
+  borda só por velocidade (curva sigmoide suave, 1,0x-teto do usuário, em
+  passos de 0,05) — o reposicionamento do playhead sobrou apenas como
+  resgate de emergência. Nada de pulos perceptíveis.
+- **Piso medido por chegada de segmentos** (não mais pelo nível do buffer):
+  imune à interferência do próprio motor, com memória que expira — o vale
+  de uma rendition 4K não contamina o 720p.
+- **Colchão que a transmissão exigir**: o teto do alvo subiu de 4,5s para
+  até 10s quando a entrega medida pede — 4K pesado roda estável em vez de
+  alternar travada/suspensão.
+- **Trocar de resolução re-mede na hora**: baixar a qualidade agora mergulha
+  o delay para o piso da nova rendition em ~1 min (antes, a troca punia o
+  motor com uma suspensão de 10 min).
+- **Suspensão graciosa só por travada real**: um resgate invisível não conta
+  mais como stall.
+
+### Novo
+- `engine/edge.js` — o cérebro do Super Ao Vivo extraído e coberto por
+  testes (`test/edge.test.mjs`, 10 cenários, incluindo o ciclo de entrega
+  4K medido em campo). Suíte: 40 testes.
+
 ## 1.0.0 — 2026-07-02
 
 Primeira versão do TrueLive (fork GPL-3.0 do ZeroDelay).

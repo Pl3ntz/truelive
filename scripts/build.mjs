@@ -19,6 +19,7 @@ const SHIP_FILES = [
     'content.js',
     'inject.js',
     'engine/controller.js',
+    'engine/edge.js',
     'popup.js',
     'pix.js',
     'popup.css',
