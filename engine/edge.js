@@ -265,9 +265,13 @@
             const hungry = Number.isFinite(reserve) && reserve <= HUNGRY_MAX;
             if (!hungry && in_valley) {
                 // leaving the hungry band mid-valley (a burst repaid us):
-                // close the episode with what the hungry phase saw
+                // close the episode with what the hungry phase saw, and
+                // RE-ANCHOR the deficit — it was booked; without this the
+                // next hungry phase reopens the same valley already deep
+                // and books it again (field bug: dd grew while fat)
                 episodes.push({ t: nowMs, v: ep_max });
                 if (episodes.length > 16) episodes.shift();
+                cum_max = cum;
                 in_valley = false;
                 ep_max = 0;
             }
