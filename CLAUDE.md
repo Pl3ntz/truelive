@@ -26,9 +26,14 @@ THIRD-PARTY-NOTICES.md. Contexto completo da construção: `docs/SESSION-LOG.md`
 
 ## Arquitetura
 
-- `engine/controller.js` — matemática de catch-up (unit-tested)
-- `inject.js` — motor no MAIN world: edge-riding, piso dinâmico medido,
-  resgate instantâneo, suspensão graciosa, badge de delay real
+- `engine/controller.js` — matemática de catch-up Automático (unit-tested)
+- `engine/edge.js` — governador v2 do Super Ao Vivo (unit-tested): piso por
+  drawdown de CHEGADA de segmentos (NetEQ), janela que expira (BBR
+  win_minmax), rate sigmoide ≥1,0x quantizada 0,05 (hls.js), dead-band +
+  buffer-first (LoL+), alvo dinâmico (Shaka), soft-reset em troca de
+  qualidade. Estudo com fontes: docs/RESEARCH.md ("Motor v2")
+- `inject.js` — wiring no MAIN world: liga o governador ao player, resgate
+  de emergência, suspensão→Automático, badge de delay real
   (`getProgressState().ingestionTime`, não documentado, validado empiricamente)
 - `content.js` — ponte storage→página (CustomEvents `_live_catch_up_*`)
 - `popup.js/html/css` — UI (segmented off/auto/edge, doações PIX)
@@ -42,7 +47,7 @@ THIRD-PARTY-NOTICES.md. Contexto completo da construção: `docs/SESSION-LOG.md`
 ## Comandos
 
 ```bash
-npm test              # 30 testes (motor, PIX, presets)
+npm test              # 40 testes (motores, PIX, presets)
 npm run validate      # manifests + arquivos embarcados
 npm run check:locales # 4 locales íntegros
 npm run build         # build/truelive-<versão>.zip (Chrome)
@@ -65,6 +70,11 @@ node scripts/deploy-site.mjs  # site: hashes + gate + imprime os scp
 
 - CWS: `description` do manifest ≤ **132 chars POR locale** (rejeita com 133).
 - CWS: PNG de screenshot/ícone tem que ser **sem canal alfa** (RGB).
+- Arquivo novo embarcado na extensão entra em **4 lugares**: manifest.json,
+  manifest.firefox.json, content.js (se injetado) E as listas hardcoded de
+  `scripts/build.mjs` + `scripts/build-firefox.cjs` — o `npm run validate`
+  confere manifests×disco, mas NÃO confere as listas de build (quase shipou
+  zip sem engine/edge.js na v1.1.0).
 - AMO: `author` no manifest tem que ser **string** (objeto = erro no linter).
 - YouTube quantiza playbackRate custom (0,92→0,90) — por isso o read-back em
   `apply_playback_rate` é obrigatório.
@@ -85,8 +95,11 @@ node scripts/deploy-site.mjs  # site: hashes + gate + imprime os scp
    login funciona, diferente de WebView) carregando /tv; distribuição sideload
    (Play Store deve recusar por ToS do YouTube). Próximo passo: spike 2 numa
    live logada (validar `ingestionTime` no /tv) antes de criar `truelive-tv`.
-2. Re-medição ao vivo com o piso novo (2,0s) — o 3,16s do benchmark foi com o
-   piso antigo; docs/DELAY-BENCHMARK.md declara a lacuna.
-3. Extrair o motor edge de inject.js pra `engine/` com testes formais (hoje:
-   réplica determinística validada, mas fora da suíte).
+2. Re-medição ao vivo do benchmark competitivo com o motor v2 — o 3,16s do
+   benchmark foi com o motor v1; docs/DELAY-BENCHMARK.md declara a lacuna.
+3. ~~Extrair o motor edge pra `engine/` com testes formais~~ — FEITO na
+   v1.1.0 (`engine/edge.js` + `test/edge.test.mjs`).
 4. Twitch/Kick; doação internacional (Ko-fi) se surgir demanda gringa.
+5. Opcional (decisão de produto pendente): toggle "priorizar velocidade"
+   que limita a qualidade via `setPlaybackQualityRange` pra quem aceita
+   1080p em troca do menor delay possível.

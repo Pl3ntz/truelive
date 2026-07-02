@@ -86,3 +86,44 @@ Mínima em conexão instável. Candidato a contribuição upstream no ZeroDelay.
 Nenhum concorrente pesquisado (ZeroDelay, Live Stream Latency Mitigator,
 userscripts Greasyfork) usa reposicionamento direto do playhead — todos apenas
 aceleram a reprodução.
+
+## Motor v2 (2026-07-02) — redução gradual, medição por chegada
+
+Reescrita do Super Ao Vivo após diagnóstico em campo (Copa, 4K60 51Mbps):
+o v1 travava porque (a) o nudge por seek era perceptível e disparava o
+próprio detector de burst-drain, zerando o relógio de calmaria; (b) o
+envelope min/máx media o nível da reserva — poluído pelos nossos seeks,
+pelo dreno do catch-up e pelo wipe de troca de qualidade; (c) o teto fixo
+de 4,5s era menor que o déficit real de entrega do 4K (~5-7s por ciclo
+goteja-rajada), gerando thrash stall→resgate→suspensão.
+
+O v2 vive em `engine/edge.js` (unit-tested, `test/edge.test.mjs`, com o
+ciclo 4K medido como caso de teste). Técnicas adotadas do estudo
+comparativo (2 deep-researchers, fontes primárias com código lido):
+
+1. **Rate sigmoide (hls.js `latency-controller.ts`)** — delay reduz SÓ por
+   velocidade: `rate = 2/(1+e^(-0,75·Δ))`, clampeada ≥1,0x, quantizada em
+   passos de 0,05 (a mesma grade que o YouTube impõe). Seek sobrou apenas
+   no resgate de emergência — consenso hls.js/dash.js/Shaka.
+2. **Dead-band + buffer-first (dash.js LoL+ `CatchupController.js`)** —
+   perto do alvo (±máx(0,15s, 2%)) a rate crava 1,0; reserva fina ignora
+   latência e protege o buffer.
+3. **Medição por CHEGADA (WebRTC NetEQ `delay_manager`)** — o piso vem do
+   drawdown máximo do fluxo líquido de chegada de segmentos
+   (Σ(chegada−relógio)), imune a playhead/rate/seeks por construção.
+4. **Janela que expira (BBR `lib/win_minmax.c`)** — filtro de máximo com 3
+   amostras/2min: o vale de uma rendition 4K não assombra o 720p.
+5. **Alvo dinâmico (Shaka `dynamicTargetLatency`)** — incidente afrouxa o
+   alvo em +1,5s; 60s de calmaria reaperta rumo ao piso. Suspensão binária
+   (10min) virou último recurso: só 2 stalls REAIS/5min (resgate não conta;
+   resgate com alvo já no teto de 10s conta — rede não segura a borda).
+6. **Soft-reset na troca de qualidade** (achado nosso — players não
+   precisam porque controlam o próprio ABR): `videoHeight` mudou →
+   re-mede do zero, limpa suspensão, 4s de graça pro wipe da rendition.
+
+Validação ao vivo (2026-07-02, mesma live 4K/720p): 90s+90s sem stall,
+sem resgate, sem suspensão; catch-up só em 1,15-1,25x; 4K estável ~10s
+(piso medido 5,7-5,8s + pipeline ~5,4s); troca pra 720p re-mediu e
+mergulhou 17,7→10,7s em 90s. Lição honesta: o piso é da TRANSMISSÃO na
+conexão do usuário (esta live entrega 720p com déficits de ~5,5s também)
+— o motor obedece a medição, não a expectativa por classe.

@@ -88,9 +88,9 @@ function main(common) {
         }, 500);
     });
 
-    // Inject the controller first, then the engine. `async = false` preserves
-    // execution order for dynamically-inserted scripts, so window.TrueLive is
-    // ready by the time inject.js runs.
+    // Inject the engine modules first, then the wiring. `async = false`
+    // preserves execution order for dynamically-inserted scripts, so
+    // window.TrueLive is fully populated by the time inject.js runs.
     const injectScript = file => {
         const s = document.createElement('script');
         s.src = chrome.runtime.getURL(file);
@@ -100,5 +100,6 @@ function main(common) {
         return s;
     };
     injectScript('engine/controller.js');
+    injectScript('engine/edge.js');
     injectScript('inject.js').id = '_live_catch_up';
 }
