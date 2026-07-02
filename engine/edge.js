@@ -107,6 +107,7 @@
         // episode always counts in full — it is happening right now.
         let episodes = [];            // completed valleys: {t, v}
         let ep_max = 0;               // depth of the ongoing valley
+        let ep_last_growth = 0;       // when the ongoing valley last deepened
         let in_valley = false;
         let dd_now = 0;               // the resulting measured need (debug)
         let dd_recent_filter = winmax_create();
@@ -129,6 +130,7 @@
             cum_max = 0;
             episodes = [];
             ep_max = 0;
+            ep_last_growth = 0;
             in_valley = false;
             dd_now = 0;
             dd_recent_filter = winmax_create();
@@ -221,8 +223,20 @@
                         cum_max = Math.max(cum_max, cum);
                         const drawdown = cum_max - cum;
                         if (drawdown > 0.3) {
+                            if (!in_valley || drawdown > ep_max + 0.05) ep_last_growth = nowMs;
                             in_valley = true;
                             ep_max = Math.max(ep_max, drawdown);
+                            if (nowMs - ep_last_growth > 10000) {
+                                // the deficit stopped deepening: content that was
+                                // never delivered (source-side halt) is not a
+                                // valley — it's the new baseline. Close and
+                                // re-anchor so it can't pin the floor forever.
+                                episodes.push({ t: nowMs, v: ep_max });
+                                if (episodes.length > 16) episodes.shift();
+                                cum_max = cum;
+                                in_valley = false;
+                                ep_max = 0;
+                            }
                         } else if (in_valley && drawdown < 0.1) {
                             episodes.push({ t: nowMs, v: ep_max });
                             if (episodes.length > 16) episodes.shift();
