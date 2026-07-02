@@ -290,10 +290,16 @@
                 const step = target > safe_floor(nowMs) + 1e-9 ? CREEP * 3 : CREEP;
                 target = Math.max(floor, target - step);
             }
-            // A rescue restores toward the safe floor but each JUMP is capped:
-            // a deep need is met by chained small steps (10s cooldown apart),
-            // never one giant visible rewind (field finding, 2026-07-02).
-            const rescue_to = Math.min(RESCUE_STEP_MAX, Math.max(safe_floor(nowMs), RESCUE_TO));
+            // Rescue sizing, recovery-aware: if arrivals already outpace the
+            // clock (the repay burst is under way, or a catch-up overshoot
+            // caused the dip), a short 2.5s bridge is enough — smaller jump,
+            // faster return to the regime. The full step (toward the safe
+            // floor, capped at 4.5s/jump) only while the starvation is still
+            // open; a deep need is met by chained small steps (10s cooldown
+            // apart), never one giant visible rewind.
+            const rescue_to = inflow_ema > 0
+                ? RESCUE_TO
+                : Math.min(RESCUE_STEP_MAX, Math.max(safe_floor(nowMs), RESCUE_TO));
 
             if (suspended) {
                 return { rate: 1.0, rescue: false, rescueTo: rescue_to, target, floor, suspended: true };

@@ -118,10 +118,8 @@ test('probing: after earned calm the target dives below the worst-case floor', (
 test('a rescue jump is meaningful but hard-capped at 4.5s', () => {
     const gov = createEdgeGovernor();
     const log = simulate(gov, { ticks: 2400, arrivalFn: heavy4kArrival, startReserve: 8 });
-    const dd = gov.getState().drawdown;
-    const last = log[log.length - 1];
-    assert.ok(last.rescueTo >= Math.min(4.5, Math.max(dd + 0.6, 2.5)) - 1e-9,
-        `rescueTo ${last.rescueTo} too small for the measured valley (${dd})`);
+    assert.ok(log.every(s => s.rescueTo >= 2.5 - 1e-9),
+        'every rescue must restore at least the 2.5s bridge');
     assert.ok(log.every(s => s.rescueTo <= 4.5 + 1e-9),
         'no single rescue may rewind more than 4.5s');
 });
@@ -312,6 +310,31 @@ test('post-rescue hold is short once the valley closed; stalls keep the long gat
     const log2 = simulate(gov2, { ticks: 160, arrivalFn: calmArrival, startReserve: 5, t0: t1 + 250 });
     assert.ok(log2[log2.length - 1].target > bumped - 0.1,
         'a stall must hold the bumped target through the 40s mark');
+});
+
+test('rescue sizing: short bridge when arrivals are recovering, full step when starving', () => {
+    // starving case: no arrivals at the danger moment -> full step
+    const gov = createEdgeGovernor();
+    let t = 1_000_000, end = 100;
+    for (let i = 0; i < 200; i++) { end += (i % 2 === 0 ? 0.5 : 0); gov.tick(t += 250, end, 5, 1.25); }
+    let out = null;
+    for (let i = 0; i < 40; i++) out = gov.tick(t += 250, end, 5 - (i + 1) * 0.25, 1.25); // starvation
+    assert.equal(out.rescue, true, 'setup: starvation must trigger a rescue');
+    assert.ok(out.rescueTo > 2.5, `starving: expected the full step, got ${out.rescueTo}`);
+
+    // recovering case: arrivals outpace the clock while the reserve is thin
+    // (e.g. a catch-up overshoot) -> short bridge only
+    const gov2 = createEdgeGovernor();
+    let t2 = 1_000_000, end2 = 100;
+    for (let i = 0; i < 200; i++) { end2 += (i % 2 === 0 ? 0.5 : 0); gov2.tick(t2 += 250, end2, 5, 1.25); }
+    let out2 = null;
+    for (let i = 0; i < 30; i++) {
+        end2 += 0.3; // arrivals ABOVE realtime: inflow positive
+        out2 = gov2.tick(t2 += 250, end2, Math.max(1.2, 5 - (i + 1) * 0.2), 1.25);
+        if (out2.rescue) break;
+    }
+    assert.equal(out2.rescue, true, 'setup: the dip must trigger a rescue');
+    assert.equal(out2.rescueTo, 2.5, `recovering: expected the 2.5s bridge, got ${out2.rescueTo}`);
 });
 
 test('buffer-first: no acceleration while the reserve is thin', () => {
