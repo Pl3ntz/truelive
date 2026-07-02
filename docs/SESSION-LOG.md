@@ -73,3 +73,47 @@ Detalhes no CLAUDE.md (Roadmap).
 - Benchmark: docs/DELAY-BENCHMARK.md · Pesquisa: docs/RESEARCH.md
 - Publicação: publishing/ (listing, privacy, checklist, screenshots)
 - Contrato operacional (leis do produto, gotchas, comandos): CLAUDE.md na raiz
+
+---
+
+## Sessão 2 — 2026-07-02 (tarde/noite): motor v2 do Super Ao Vivo
+
+Gatilho: "o modo super ao vivo está travando demais, não dá pra ver em 4K".
+
+### Diagnóstico ao vivo (Chrome do Owner, Copa 4K60 51Mbps)
+- Stream entrega em ciclos goteja-rajada; vales de reserva ~5-7s; teto fixo
+  de 4,5s do v1 era menor que a necessidade → stall→resgate→suspensão em loop.
+- 4 bugs do v1: nudge por seek perceptível; envelope min/máx poluído pelos
+  próprios seeks; burst-drain detectando o próprio nudge (zerava a calmaria);
+  troca de qualidade punia com suspensão em vez de re-medir.
+
+### Estudo (2 deep-researchers, fontes primárias com código lido)
+hls.js (sigmoide quantizada 0,05, clamp ≥1) · dash.js LoL+ (dead-band 2%,
+buffer-first) · WebRTC NetEQ (medir CHEGADA, não nível; quantil) · TCP BBR
+(win_minmax; percentil > máximo) · Shaka (alvo dinâmico). Registrado em
+docs/RESEARCH.md ("Motor v2").
+
+### Motor v2 (engine/edge.js, unit-tested)
+Redução de delay SÓ por velocidade (lei do Owner: gradual sempre, nunca
+<1,0x; teto 2x). Piso por drawdown de chegada com estatística de episódios
+(2º vale mais fundo; déficit permanente re-ancora). Sonda AIMD abaixo do
+piso com backoff e orçamento. Resgate capado em 4,5s/pulo. Suspensão só por
+stall real. Soft-reset em troca de qualidade (re-arma só em queda). Régua
+honesta no badge: "Piso desta live ~X,Xs".
+
+### Calibração em campo (5 rodadas medidas no jogo)
+Cada rodada validada ao vivo via __truelive_debug: teto dinâmico → sonda →
+sonda informada + pulo capado → 2 velocidades + teto 2x → episódios +
+re-ancoragem + badge. Descoberta: o broadcast tinha engasgos reais de ~13s
+de entrega — motor foi ao teto sem congelar (a TV congela).
+
+### Resultado final (baseline v1.1.0)
+"Delay 9,3s · Buffer 4,1s · Piso desta live ~8,9s" em 4K estável — Owner:
+"chega a ECOAR com a TV" (CazéTV pós-truque do 2x), sem congelamentos.
+Quality gate: security-reviewer zero achados; code-reviewer 3 achados (1
+HIGH: poluição em DVR) — todos corrigidos. 47 testes.
+
+### Próxima fase (decisão do Owner)
+Este é o ponto de partida ideal congelado (tag v1.1.0). Objetivo seguinte:
+reduzir o delay ainda mais (roadmap item 0 no CLAUDE.md). Lojas: CWS/AMO
+com a 1.0.0 pendente — decisão de resubmissão em aberto.

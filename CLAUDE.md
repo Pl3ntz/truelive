@@ -28,10 +28,15 @@ THIRD-PARTY-NOTICES.md. Contexto completo da construção: `docs/SESSION-LOG.md`
 
 - `engine/controller.js` — matemática de catch-up Automático (unit-tested)
 - `engine/edge.js` — governador v2 do Super Ao Vivo (unit-tested): piso por
-  drawdown de CHEGADA de segmentos (NetEQ), janela que expira (BBR
-  win_minmax), rate sigmoide ≥1,0x quantizada 0,05 (hls.js), dead-band +
-  buffer-first (LoL+), alvo dinâmico (Shaka), soft-reset em troca de
-  qualidade. Estudo com fontes: docs/RESEARCH.md ("Motor v2")
+  drawdown de CHEGADA de segmentos (NetEQ) com estatística de EPISÓDIOS
+  (2º vale mais fundo — outlier único não pina; déficit permanente
+  re-ancora), janela que expira (BBR win_minmax), rate sigmoide ≥1,0x
+  quantizada 0,05 com teto 2x (hls.js), dead-band + buffer-first (LoL+),
+  alvo dinâmico com descida em 2 velocidades (Shaka), sonda AIMD abaixo do
+  piso (backoff 1,0s, orçamento 1/10min, limitada pelo vale dos últimos
+  30s), resgate capado em 4,5s/pulo, soft-reset em troca de qualidade
+  (re-arma só em QUEDA), suspensão apenas por stall real. Estudo com
+  fontes + validação de campo: docs/RESEARCH.md ("Motor v2")
 - `inject.js` — wiring no MAIN world: liga o governador ao player, resgate
   de emergência, suspensão→Automático, badge de delay real
   (`getProgressState().ingestionTime`, não documentado, validado empiricamente)
@@ -47,7 +52,7 @@ THIRD-PARTY-NOTICES.md. Contexto completo da construção: `docs/SESSION-LOG.md`
 ## Comandos
 
 ```bash
-npm test              # 40 testes (motores, PIX, presets)
+npm test              # 47 testes (motores, PIX, presets)
 npm run validate      # manifests + arquivos embarcados
 npm run check:locales # 4 locales íntegros
 npm run build         # build/truelive-<versão>.zip (Chrome)
@@ -88,6 +93,11 @@ node scripts/deploy-site.mjs  # site: hashes + gate + imprime os scp
 
 ## Roadmap
 
+0. **Menos delay ainda (fase atual — baseline v1.1.0 congelado):** o Owner
+   quer reduzir abaixo da paridade com a TV. Alavancas mapeadas: re-tuning
+   da sonda com mais dados de campo, margem/gates adaptativos, toggle
+   "priorizar velocidade" (cap de qualidade via setPlaybackQualityRange),
+   e re-benchmark competitivo com o motor v2.
 1. **TV (spike validado 2026-07-02):** `youtube.com/tv` com UA de Smart TV
    expõe TODAS as APIs do motor (`setPlaybackRate`, `getProgressState`,
    `getStatsForNerds`, `seekTo`) e o content script já casa com o host.
