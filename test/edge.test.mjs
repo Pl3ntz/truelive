@@ -383,3 +383,16 @@ test('seed clamps: absurd saved values cannot break the policy bounds', () => {
     gov2.seed(1_000_000, 0.5, -3);
     assert.ok(gov2.getState().target >= 2.75 - 1e-9, 'seeded target must respect START');
 });
+
+test('a stale drain reading must never block the grind on a fat reserve', () => {
+    const gov = createEdgeGovernor();
+    let t = 1_000_000, end = 100;
+    // hungry phase that ends STARVING (inflow EMA goes negative)...
+    for (let i = 0; i < 60; i++) { end += (i % 2 === 0 ? 0.5 : 0); gov.tick(t += 250, end, 4, 1.25); }
+    for (let i = 0; i < 20; i++) gov.tick(t += 250, end, 4 - i * 0.1, 1.25); // no arrivals
+    // ...then a burst pushes the reserve fat: the grind MUST engage
+    end += 12;
+    let out = null;
+    for (let i = 0; i < 40; i++) { out = gov.tick(t += 250, end, 12, 2.0); }
+    assert.ok(out.rate > 1.0, `fat reserve with stale drain data must grind, got ${out.rate}`);
+});
