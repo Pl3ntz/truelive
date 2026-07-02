@@ -289,6 +289,31 @@ test('quantile floor: the rare deepest valley does not tax every second', () => 
     assert.ok(need >= 1.5, `floor must still honor the recurring valleys, got ${need}`);
 });
 
+test('post-rescue hold is short once the valley closed; stalls keep the long gate', () => {
+    const gov = createEdgeGovernor();
+    // calm regime, one starvation deep enough to force a rescue, then calm
+    const arrival = i => (i >= 200 && i < 220 ? 0 : (i % 2 === 0 ? 0.6 : 0));
+    const log = simulate(gov, { ticks: 200 + 20 + 240, arrivalFn: arrival, startReserve: 4 });
+    const lastRescueIdx = log.map(s => s.rescue).lastIndexOf(true);
+    assert.ok(lastRescueIdx > 0, 'setup: the starvation must force a rescue');
+    // peak target right after the (last) rescue, vs ~40s later: the descent
+    // must already be under way — the old 60s gate would still hold it flat
+    const peak = Math.max(...log.slice(lastRescueIdx, lastRescueIdx + 40).map(s => +s.target));
+    const at40s = log[Math.min(log.length - 1, lastRescueIdx + 160)].target;
+    assert.ok(at40s < peak - 0.2,
+        `target ${at40s} vs peak ${peak}: descent must start before the 60s stall gate`);
+
+    // a REAL stall keeps the 60s gate
+    const gov2 = createEdgeGovernor();
+    simulate(gov2, { ticks: 400, arrivalFn: calmArrival, startReserve: 5, t0: 1_000_000 });
+    const t1 = 1_000_000 + 400 * TICK_MS;
+    gov2.noteStall(t1);
+    const bumped = gov2.getState().target;
+    const log2 = simulate(gov2, { ticks: 160, arrivalFn: calmArrival, startReserve: 5, t0: t1 + 250 });
+    assert.ok(log2[log2.length - 1].target > bumped - 0.1,
+        'a stall must hold the bumped target through the 40s mark');
+});
+
 test('buffer-first: no acceleration while the reserve is thin', () => {
     const gov = createEdgeGovernor();
     // reserve hovers just above danger with weak inflow — must rest at 1.0

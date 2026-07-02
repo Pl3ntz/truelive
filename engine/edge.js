@@ -39,6 +39,9 @@
         const RESCUE_COOLDOWN_MS = 10000;
         const INCIDENT_BUMP = 1.5;    // target raise per stall/rescue
         const CALM_MS = 60000;        // calm needed before tightening resumes
+        const RESCUE_CALM_MS = 25000; // shorter hold after a RESCUE whose valley
+                                      // already closed (deficit repaid) — the
+                                      // 60s gate stays for real stalls
         const CREEP = 0.0125;         // target decay toward floor, per tick
         // --- catch-up rate (hls.js sigmoid family) ---
         const SIG_K = 0.75;           // sigmoid steepness over Δ = reserve-target
@@ -161,10 +164,15 @@
             return now - last_trouble < DEEP_CALM_MS ? DEEP_CALM_FLOOR : FLOOR_ABS;
         }
 
-        // Worst-case-safe floor: the deepest arrival valley in the window
-        // plus a margin. Holding this NEVER needs a rescue.
+        // Safe floor: the measured valley need plus a margin. The margin is
+        // PRESSURE-AWARE: lean (0.6s, minimum delay) while rescues are rare;
+        // when rescues repeat (3+/10min) the lean bet is clearly losing, so
+        // the pad grows to clear the danger zone entirely (valley + DANGER +
+        // headroom) — recurring valleys then pass without any rescue.
         function safe_floor(now) {
-            return Math.min(HARD_CEIL, Math.max(abs_gate(now), dd_now + MARGIN));
+            rescue_times = rescue_times.filter(t => now - t < PROBE_RESCUE_WINDOW_MS);
+            const pad = rescue_times.length >= 3 ? DANGER + 0.3 : MARGIN;
+            return Math.min(HARD_CEIL, Math.max(abs_gate(now), dd_need(now) + pad));
         }
 
         // Where the target is allowed to rest. Normally the safe floor; with
@@ -267,9 +275,14 @@
 
             // --- adapt the target (Shaka dynamicTargetLatency + AIMD probe) ---
             const floor = target_bound(nowMs);
+            // After a rescue whose valley already CLOSED, the stream repaid the
+            // deficit — holding the bumped target for the full 60s is wasted
+            // delay. Real stalls (and open valleys) keep the long gate.
+            const calm_needed = (last_trouble === last_rescue && !in_valley)
+                ? RESCUE_CALM_MS : CALM_MS;
             if (target < floor) {
                 target = floor;                       // bound rose: respect it now
-            } else if (nowMs - last_trouble > CALM_MS && target > floor) {
+            } else if (nowMs - last_trouble > calm_needed && target > floor) {
                 // Two-speed descent: ABOVE the safe floor the incident bump
                 // drains fast (the floor already covers the measured valleys —
                 // lingering above it is pure wasted delay); BELOW it, probing
@@ -331,10 +344,13 @@
                 // target to START for the re-arm — don't bump it back up
                 if (nowMs < suspended_until) return;
             }
-            incident(nowMs);
-            if (Number.isFinite(restoredReserve)) {
-                target = Math.min(HARD_CEIL, Math.max(target, restoredReserve));
-            }
+            // A rescue does NOT take the full stall bump: the restored reserve
+            // plus a small pad IS the caution (the probe back-off and the
+            // rescue budget cover repetition). Field finding: the flat +1.5
+            // on top of the restore cost ~1min of extra delay per tail event.
+            last_trouble = nowMs;
+            const restored = Number.isFinite(restoredReserve) ? restoredReserve : RESCUE_TO;
+            target = Math.min(HARD_CEIL, Math.max(target, restored + 0.5));
         }
 
         /** Danger with nothing buffered behind to step back to. */
