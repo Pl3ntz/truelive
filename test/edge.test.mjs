@@ -355,3 +355,28 @@ test('buffer-first: no acceleration while the reserve is thin', () => {
         if (s.reserve < 2.0) assert.equal(s.rate, 1.0, `accelerated at thin reserve ${s.reserve}`);
     }
 });
+
+test('channel memory seed: starts on the remembered target, measurement overrides', () => {
+    const gov = createEdgeGovernor();
+    gov.seed(1_000_000, 5.5, 4.2);
+    const st = gov.getState();
+    assert.equal(st.target, 5.5, 'target must start where the channel needed it');
+    // the remembered valley is honored by the floor while fresh
+    const out = gov.tick(1_000_250, 100, 5.5, 1.25);
+    assert.ok(out.floor >= 4.2, `floor ${out.floor} must honor the seeded need`);
+    // ...and a calm stream lets the real measurement take over (seed expires)
+    const log = simulate(gov, { ticks: 1400, arrivalFn: calmArrival, startReserve: 5.5, t0: 1_000_500 });
+    const last = log[log.length - 1];
+    assert.ok(last.floor <= 2.5 + 1e-9,
+        `seeded need must expire in favor of live measurement (floor ${last.floor})`);
+});
+
+test('seed clamps: absurd saved values cannot break the policy bounds', () => {
+    const gov = createEdgeGovernor();
+    gov.seed(1_000_000, 99, 99);
+    const st = gov.getState();
+    assert.ok(st.target <= 10.0 + 1e-9, 'seeded target must respect HARD_CEIL');
+    const gov2 = createEdgeGovernor();
+    gov2.seed(1_000_000, 0.5, -3);
+    assert.ok(gov2.getState().target >= 2.75 - 1e-9, 'seeded target must respect START');
+});

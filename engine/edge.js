@@ -400,6 +400,27 @@
             last_trouble = nowMs;       // no tightening during the refill
         }
 
+        /**
+         * Seed from a remembered channel profile (learned in a past session):
+         * the target starts where this channel usually needs it (no blind
+         * 2.75s start, no attach rescue), and the remembered valley enters
+         * the episode stats as two synthetic entries — honored by the
+         * quantile until real measurement replaces them (they expire with
+         * the window). Live measurement always overrides the memory.
+         */
+        function seed(nowMs, savedTarget, savedNeed) {
+            if (Number.isFinite(savedTarget) && savedTarget > 0) {
+                target = Math.min(HARD_CEIL, Math.max(START, savedTarget));
+            }
+            if (Number.isFinite(savedNeed) && savedNeed > 0) {
+                const v = Math.min(HARD_CEIL, savedNeed);
+                episodes.push({ t: nowMs, v }, { t: nowMs, v });
+                // the memory says this channel needs a cushion — probing below
+                // it must be re-EARNED by live calm, not assumed at attach
+                last_trouble = nowMs;
+            }
+        }
+
         /** New stream/page: forget everything. */
         function reset() {
             measurement_reset();
@@ -424,7 +445,7 @@
             };
         }
 
-        return { tick, noteRescue, noteTrouble, noteStall, qualityChange, reset, getState,
+        return { tick, noteRescue, noteTrouble, noteStall, qualityChange, reset, seed, getState,
                  DANGER, HARD_CEIL, START };
     }
 
