@@ -170,178 +170,47 @@ body {
     color: var(--text-faint);
 }
 
-/* ---------------------------------------------------------------- Mode cards */
-.mode-cards {
+/* ------------------------------------------------------------- Segmented modes */
+.segmented {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.mode-card {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    width: 100%;
-    text-align: left;
-    padding: 13px 14px;
+    gap: 4px;
+    padding: 4px;
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 999px;
     background: var(--surface);
-    color: inherit;
-    cursor: pointer;
-    font-family: inherit;
-    transition: border-color 160ms var(--ease), background 160ms var(--ease), transform 120ms var(--ease);
 }
 
-.mode-card:hover {
-    border-color: var(--text-faint);
-    background: var(--surface-2);
-}
-
-.mode-card:active {
-    transform: scale(0.99);
-}
-
-.mode-card[aria-checked="true"] {
-    border-color: var(--accent);
-    background: linear-gradient(180deg, var(--accent-soft), transparent 140%);
-    box-shadow: 0 0 0 1px var(--accent), 0 8px 24px -12px var(--accent-glow);
-}
-
-.mode-icon {
-    flex: none;
-    width: 38px;
-    height: 38px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background: var(--surface-3);
+.seg-btn {
+    flex: 1;
+    padding: 9px 8px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
     color: var(--text-dim);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
     transition: background 160ms var(--ease), color 160ms var(--ease);
 }
 
-.mode-card[aria-checked="true"] .mode-icon {
+.seg-btn:hover {
+    color: var(--text);
+    background: var(--surface-2);
+}
+
+.seg-btn[aria-checked="true"] {
     background: var(--accent);
     color: #fff;
 }
 
-.mode-icon svg {
-    width: 20px;
-    height: 20px;
-}
-
-.mode-body {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.mode-name {
-    font-size: 14px;
-    font-weight: 600;
-}
-
 .mode-desc {
-    margin-top: 2px;
+    margin: 10px 4px 0;
+    min-height: 2.6em;   /* reserva 2 linhas: trocar de modo não pula o layout */
     font-size: 12px;
+    line-height: 1.45;
     color: var(--text-dim);
-    white-space: normal;
-}
-
-.mode-conn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 6px;
-    font-size: 11.5px;
-    font-weight: 500;
-    color: var(--text-faint);
-    white-space: normal;
-}
-
-.mode-card[aria-checked="true"] .mode-conn {
-    color: var(--accent-strong);
-}
-
-.conn-icon {
-    flex: none;
-    display: inline-flex;
-    width: 14px;
-    height: 14px;
-}
-
-.conn-icon svg {
-    width: 14px;
-    height: 14px;
-}
-
-.mode-gain {
-    display: inline-flex;
-    align-items: center;
-    align-self: flex-start;
-    gap: 5px;
-    margin-top: 8px;
-    padding: 3px 10px 3px 7px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 700;
-    background: var(--accent-soft);
-    color: var(--accent-strong);
-    font-variant-numeric: tabular-nums;
-}
-
-.mode-gain.is-none {
-    background: var(--surface-3);
-    color: var(--text-faint);
-}
-
-.gain-icon {
-    flex: none;
-    display: inline-flex;
-    width: 13px;
-    height: 13px;
-}
-
-.gain-icon svg {
-    width: 13px;
-    height: 13px;
-}
-
-.mode-check {
-    flex: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    display: grid;
-    place-items: center;
-    transition: border-color 160ms var(--ease), background 160ms var(--ease);
-}
-
-.mode-check svg {
-    width: 12px;
-    height: 12px;
-    opacity: 0;
-    transform: scale(0.4);
-    transition: opacity 160ms var(--ease), transform 160ms var(--ease);
-}
-
-.mode-card[aria-checked="true"] .mode-check {
-    border-color: var(--accent);
-    background: var(--accent);
-}
-
-.mode-card[aria-checked="true"] .mode-check svg {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.modes-note {
-    margin: 8px 2px 0;
-    font-size: 11px;
-    color: var(--text-faint);
 }
 
 /* ---------------------------------------------------------------- Advanced */
@@ -662,6 +531,27 @@ body {
     border-color: var(--ok);
     background: rgba(43, 166, 64, 0.15);
     color: var(--ok);
+}
+
+/* International (USD) donation link — quiet secondary action under the PIX block */
+.support-intl {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 150ms var(--ease), color 150ms var(--ease);
+}
+
+.support-intl:hover {
+    border-color: var(--accent);
+    color: var(--accent-strong);
 }
 
 /* ---------------------------------------------------------------- Quick Actions */

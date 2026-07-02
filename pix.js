@@ -15,9 +15,17 @@ export const PIX_KEY = '22890078-d19c-4a4f-92f1-d9fc9233c2f0';  // chave aleató
 export const MERCHANT_NAME = 'VITOR PLENTZ';
 export const MERCHANT_CITY = 'JOACABA';
 
-// Suggested tip amounts, in BRL. The first one is the default selection.
-export const PIX_AMOUNTS = [1, 3, 5, 10];
-export const PIX_DEFAULT_AMOUNT = 1;
+// Suggested tip amounts, in BRL, priced as round dollar equivalents
+// (~US$ 1/3/5/10) so tiers feel natural to an international audience.
+// The first one is the default selection. The UI also offers an OPEN amount
+// chip (buildPixCode(0)): the payer types whatever they want in the bank app.
+export const PIX_AMOUNTS = [5, 15, 25, 50];
+export const PIX_DEFAULT_AMOUNT = 5;
+
+// International (non-PIX) donation page in USD, for users without a Brazilian
+// bank. A static link the user CLICKS is not a network request by the
+// extension (zero-request policy holds). Empty string = button hidden.
+export const INTL_DONATE_URL = '';
 
 // One EMV field: ID + 2-digit length + value.
 function field(id, value) {

@@ -1,188 +1,97 @@
 {
-   "appDesc": {
-      "message": "Synchronise les directs YouTube en temps réel en accélérant la lecture quand vous prenez du retard dû à la réception des données."
-   },
-   "appName": {
-      "message": "TrueLive"
-   },
-   "tagline": {
-      "message": "Gardez les directs YouTube en temps réel"
-   },
-   "sectionMode": {
-      "message": "Mode"
-   },
-   "modesNote": {
-      "message": "Accélère juste ce qu'il faut pour réduire la latence, puis revient à 1.0x (ce qui la maintient). Moins de tampon = plus proche du direct, mais demande une meilleure connexion."
-   },
-   "modeOff": {
-      "message": "Désactivé"
-   },
-   "modeOffDesc": {
-      "message": "Lecture normale, sans ajustements."
-   },
-   "modeOffConn": {
-      "message": "Toute connexion"
-   },
-   "modeOffGain": {
-      "message": "—"
-   },
-   "modeAuto": {
-      "message": "Automatique"
-   },
-   "modeAutoDesc": {
-      "message": "Analyse votre connexion et s'ajuste seul : plus proche du direct quand elle tient, plus de tampon quand elle fluctue."
-   },
-   "modeAutoConn": {
-      "message": "Toute connexion (s'adapte)"
-   },
-   "modeAutoGain": {
-      "message": "adaptatif"
-   },
-   "modeSuave": {
-      "message": "Doux"
-   },
-   "modeSuaveDesc": {
-      "message": "Garde beaucoup de tampon et réduit la latence avec de la marge. Idéal pour une connexion lente ou instable."
-   },
-   "modeSuaveConn": {
-      "message": "Connexion lente ou instable (~3+ Mbps)"
-   },
-   "modeSuaveGain": {
-      "message": "tampon ~8s"
-   },
-   "modeBalanced": {
-      "message": "Équilibré"
-   },
-   "modeBalancedDesc": {
-      "message": "Réduit bien la latence tout en gardant ~6s de tampon. Un bon compromis."
-   },
-   "modeBalancedConn": {
-      "message": "Connexion moyenne (~5–10 Mbps)"
-   },
-   "modeBalancedGain": {
-      "message": "tampon ~6s"
-   },
-   "modeAggressive": {
-      "message": "Proche"
-   },
-   "modeAggressiveDesc": {
-      "message": "Se rapproche du direct en gardant ~4,5s de tampon. Nécessite une connexion stable."
-   },
-   "modeAggressiveConn": {
-      "message": "Connexion stable (~15+ Mbps)"
-   },
-   "modeAggressiveGain": {
-      "message": "tampon ~4,5s"
-   },
-   "modeMin": {
-      "message": "Latence minimale"
-   },
-   "modeMinDesc": {
-      "message": "Au plus près du direct, avec seulement ~3,5s de tampon. Nécessite une connexion rapide et stable."
-   },
-   "modeMinConn": {
-      "message": "Connexion rapide et stable (~25+ Mbps)"
-   },
-   "modeMinGain": {
-      "message": "tampon ~3,5s"
-   },
-   "sectionIndicators": {
-      "message": "Indicateurs du lecteur"
-   },
-   "showPlaybackRate": {
-      "message": "Afficher la vitesse de lecture actuelle"
-   },
-   "showLatency": {
-      "message": "Afficher la latence actuelle du direct"
-   },
-   "showHealth": {
-      "message": "Afficher l'état actuel du tampon"
-   },
-   "reset": {
-      "message": "Restaurer les valeurs par défaut"
-   },
-   "resetHint": {
-      "message": "Maintenez appuyé 1 seconde pour réinitialiser."
-   },
-   "supportTitle": {
-      "message": "Offrez-moi un café"
-   },
-   "supportNote": {
-      "message": "Vous aimez l'extension ? Soutenez son développement avec un petit don."
-   },
-   "supportCustom": {
-      "message": "Autre"
-   },
-   "supportCustomPlaceholder": {
-      "message": "Montant en R$"
-   },
-   "supportScan": {
-      "message": "Scannez avec l'appli de votre banque, ou copiez le code :"
-   },
-   "supportCopy": {
-      "message": "Copier le code PIX"
-   },
-   "supportCopied": {
-      "message": "Copié !"
-   },
-   "supportBmc": {
-      "message": "Offrez-moi un café"
-   },
-   "donateNudge": {
-      "message": "Vous aimez TrueLive ? S'il vous aide, pensez à le soutenir avec un café — entièrement facultatif. 🙂"
-   },
-   "donateLater": {
-      "message": "Me le rappeler plus tard"
-   },
-   "donateOptOut": {
-      "message": "Ne plus afficher"
-   },
-   "donateBannerText": {
-      "message": "Vous aimez TrueLive ? Soutenez-le avec un café."
-   },
-   "donateBannerCta": {
-      "message": "Soutenir"
-   },
-   "donateBannerClose": {
-      "message": "Fermer"
-   },
-   "stallTitle": {
-      "message": "Le direct se met sans cesse en mémoire tampon"
-   },
-   "stallDesc": {
-      "message": "Un mode plus doux garde plus de tampon et le stabilise."
-   },
-   "stallSwitch": {
-      "message": "Passer à"
-   },
-   "supportBtn": {
-      "message": "Soutenir"
-   },
-   "supportCtaText": {
-      "message": "Vous aimez ? Offrez-moi un café 🙏"
-   },
-   "supportCtaBtn": {
-      "message": "Soutenir"
-   },
-   "commandToggleDesc": {
-      "message": "Activer/désactiver TrueLive"
-   },
-   "commandGoLiveDesc": {
-      "message": "Aller au direct"
-   },
-   "a11yPlaybackRate": {
-      "message": "Vitesse de lecture"
-   },
-   "a11yLatency": {
-      "message": "Latence du direct"
-   },
-   "a11yHealth": {
-      "message": "État du tampon"
-   },
-   "a11yEstimation": {
-      "message": "Temps estimé pour rejoindre le direct"
-   },
-   "a11yCurrent": {
-      "message": "Heure actuelle (cliquez pour copier le lien)"
-   }
+    "appName": {
+        "message": "TrueLive"
+    },
+    "appDesc": {
+        "message": "Regardez les directs YouTube avec le plus faible délai que votre connexion permet — niveau TV hertzienne. Entièrement adaptatif, zéro collecte de données."
+    },
+    "tagline": {
+        "message": "Le vrai direct — le délai le plus faible possible"
+    },
+    "sectionMode": {
+        "message": "Mode"
+    },
+    "modeOff": {
+        "message": "Désactivé"
+    },
+    "modeOffDesc": {
+        "message": "Lecture normale, sans réglages."
+    },
+    "modeAuto": {
+        "message": "Automatique"
+    },
+    "modeAutoDesc": {
+        "message": "Équilibre délai et stabilité selon votre connexion, tout seul."
+    },
+    "modeEdge": {
+        "message": "Super Ao Vivo"
+    },
+    "modeEdgeDesc": {
+        "message": "Le délai le plus faible possible — recule tout seul si nécessaire."
+    },
+    "sectionIndicators": {
+        "message": "Indicateurs du lecteur"
+    },
+    "showPlaybackRate": {
+        "message": "Afficher la vitesse"
+    },
+    "showLatency": {
+        "message": "Afficher le délai réel"
+    },
+    "showHealth": {
+        "message": "Afficher le buffer"
+    },
+    "showPinned": {
+        "message": "Panneau de délai épinglé (toujours visible)"
+    },
+    "reset": {
+        "message": "Rétablir les réglages"
+    },
+    "resetHint": {
+        "message": "Maintenez 1 seconde pour rétablir."
+    },
+    "supportToggle": {
+        "message": "Soutenir le projet"
+    },
+    "supportTitle2": {
+        "message": "Offrez-moi un café via PIX"
+    },
+    "supportScan2": {
+        "message": "Scannez avec votre appli bancaire, ou copiez le code :"
+    },
+    "supportCopy2": {
+        "message": "Copier le code PIX"
+    },
+    "supportCopied": {
+        "message": "Copié !"
+    },
+    "commandToggleDesc": {
+        "message": "Activer/désactiver TrueLive"
+    },
+    "commandGoLiveDesc": {
+        "message": "Aller au direct"
+    },
+    "a11yPlaybackRate": {
+        "message": "Vitesse de lecture"
+    },
+    "a11yLatency": {
+        "message": "Délai du direct"
+    },
+    "a11yHealth": {
+        "message": "Buffer disponible"
+    },
+    "a11yEstimation": {
+        "message": "Heure estimée pour rejoindre le direct"
+    },
+    "a11yCurrent": {
+        "message": "Temps actuel (cliquer pour copier)"
+    },
+    "supportFree": {
+        "message": "Libre",
+        "description": "Open-amount chip: the payer types the value in the bank app"
+    },
+    "supportIntl": {
+        "message": "Faire un don en US$ (carte)",
+        "description": "International donation link (USD) for users without PIX"
+    }
 }

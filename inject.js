@@ -50,7 +50,7 @@
 
     function update_latency(latency, isAtLiveHead) {
         if (isAtLiveHead) {
-            setChip(button_latency, isFinite(latency) ? 'delay ' + latency.toFixed(1) + 's' : 'delay —');
+            setChip(button_latency, isFinite(latency) ? 'Delay ' + latency.toFixed(1) + 's' : 'Delay —');
         } else {
             setChip(button_latency, '(DVR)');
         }
@@ -63,7 +63,7 @@
     }
 
     function update_health(health) {
-        setChip(button_health, isFinite(health) ? 'buffer ' + health.toFixed(1) + 's' : 'buffer —');
+        setChip(button_health, isFinite(health) ? 'Buffer ' + health.toFixed(1) + 's' : 'Buffer —');
 
         // Warn (red) when the buffer is running low.
         if (health < BUFFER_WARN) {
@@ -206,15 +206,17 @@
     // arrive in heavier bursts, and a thin reserve drains exactly when the
     // viewer can least afford a freeze. So: start safe, tighten only while the
     // stream proves calm, back off hard on any evidence of trouble.
-    const EDGE_ABS_FLOOR = 1.5;        // physical floor: below this a stall becomes a
+    const EDGE_ABS_FLOOR = 2.0;        // conservative floor (Owner, 2026-07-02: the user must
+                                       // never suffer): below ~1.5s a stall becomes a
                                        // PERMANENT latency penalty (measured live, 2026-07-02)
     const EDGE_CEIL = 4.5;             // never hold more than this (stable-mode territory)
     const EDGE_START = 2.75;           // first target after attach — safe until proven calm
     const EDGE_JITTER_MARGIN = 0.6;    // cushion above the measured segment-arrival jitter
     const EDGE_DEEP_CALM_MS = 180000;  // calm this long unlocks probing below 2.0s
-    const EDGE_DANGER = 1.2;           // reserve below this = stall territory (measured)
-    const EDGE_BRAKE_RATE = 0.92;      // emergency soft-brake: imperceptible, refills +0.08s/s
-    const EDGE_BRAKE_RELEASE = 1.8;    // resume normal once the reserve recovers to this
+    const EDGE_DANGER = 1.5;           // reserve below this = stall territory (measured ~1.2,
+                                       // raised for margin — rescue fires earlier)
+    const EDGE_RESCUE_TO = 2.5;        // a rescue step-back restores at least this much reserve
+    const EDGE_RESCUE_COOLDOWN = 10000; // ms between rescues (target rises after each one)
     const EDGE_NUDGE_BAND = 0.75;      // nudge once reserve outgrows target by this
     const EDGE_NUDGE_COOLDOWN = 5000;  // ms between nudges
     const EDGE_STALL_HOLDOFF = 45000;  // ms to pause nudging after a real stall
@@ -234,29 +236,46 @@
     // absolute floor; a bursty one keeps a bigger cushion, automatically.
     let edge_env_max = null;
     let edge_env_min = null;
-    let edge_braking = false;
+    let edge_last_rescue = 0;
 
-    // Owner's insight: the player freezes when the reserve dips under ~1s. A
-    // preventive floor can't help once the dip is ALREADY happening — but a
-    // gentle slow-down can: at 0.92x the buffer refills ~0.08s/s without ever
-    // freezing the picture (pitch-preserved, imperceptible), the pro-player
-    // "catch-down" technique. Hysteresis so it doesn't flap.
-    function edge_brake_rate(reserve) {
-        if (edge_braking) {
-            if (reserve >= EDGE_BRAKE_RELEASE) edge_braking = false;
-        } else if (reserve < EDGE_DANGER) {
-            edge_braking = true;
-            edge_last_trouble = Date.now();   // a danger dip counts as trouble (no tightening soon)
+    // Owner's rule (2026-07-02): playback NEVER drops below 1.0x on a live —
+    // a sub-real-time rate makes no sense. So a danger dip is rescued by an
+    // instant step-back instead of a slow-down: one small playhead jump
+    // (~1-2s of replayed content) restores the reserve immediately while the
+    // rate stays untouched. The target rises to the restored level so the
+    // rider doesn't nudge right back into danger, and repeated rescues count
+    // toward graceful suspension (this internet can't hold the edge now).
+    function edge_rescue(v, reserve, now) {
+        if (reserve >= EDGE_DANGER) return;
+        if (now - edge_last_rescue < EDGE_RESCUE_COOLDOWN) return;
+        if (!v || v.paused || !v.buffered.length) return;
+        const range = v.buffered.length - 1;
+        const end = v.buffered.end(range);
+        const restore = Math.min(EDGE_CEIL, Math.max(edge_target, EDGE_RESCUE_TO));
+        // never step back past what's actually buffered behind the playhead
+        const back = Math.max(v.buffered.start(range) + 0.1, end - restore);
+        if (back >= v.currentTime) {
+            // Danger with no material to step back to (e.g. right after attach,
+            // before back-buffer accumulates). Still trouble: keep the floor up
+            // and block tightening — but leave suspension to the real-stall
+            // watchdog, so a normal stream start can't trip a 10-min handover.
+            edge_last_trouble = now;
+            return;
         }
-        return edge_braking ? EDGE_BRAKE_RATE : null;
+        edge_self_seek_until = now + 1500; // the seek fires 'waiting'; not a real stall
+        v.currentTime = back;
+        edge_last_rescue = now;
+        edge_last_trouble = now;                                        // no tightening soon
+        edge_target = Math.min(EDGE_CEIL, Math.max(edge_target, end - back)); // hold the new cushion
+        edge_note_stall(now);              // repeated rescues -> hand over to Automático
     }
 
     function edge_dynamic_floor(now) {
         const jitter = (edge_env_max !== null && edge_env_min !== null)
             ? Math.max(0, edge_env_max - edge_env_min) : 1.0;
         let floor = Math.max(EDGE_ABS_FLOOR, jitter + EDGE_JITTER_MARGIN);
-        // going below 2.0 is EARNED: only after deep calm (3+ min without trouble)
-        if (now - edge_last_trouble < EDGE_DEEP_CALM_MS) floor = Math.max(floor, 2.0);
+        // going below 2.5 is EARNED: only after deep calm (3+ min without trouble)
+        if (now - edge_last_trouble < EDGE_DEEP_CALM_MS) floor = Math.max(floor, 2.5);
         return Math.min(floor, EDGE_CEIL);
     }
     let edge_stall_times = [];         // real stalls seen while edge mode is on
@@ -315,7 +334,7 @@
         // observability (page-world): lets diagnostics read the adaptive state
         window.__truelive_debug = { target: +edge_target.toFixed(2), reserve: +reserve.toFixed(2),
                                     lastTrouble: edge_last_trouble, lastStall: last_stall,
-                                    suspendedUntil: edge_suspended_until, stallCount: edge_stall_times.length, braking: edge_braking,
+                                    suspendedUntil: edge_suspended_until, stallCount: edge_stall_times.length, lastRescue: edge_last_rescue,
                                     floor: +edge_dynamic_floor(now).toFixed(2),
                                     jitter: (edge_env_max !== null && edge_env_min !== null) ? +(edge_env_max - edge_env_min).toFixed(2) : null };
 
@@ -439,12 +458,12 @@
         // expands the full detail. pointer-events stays on (hover needs it) but
         // the hit area is tiny, so it never gets in the way of the video.
         '._live_catch_up_pinned{position:absolute;top:12px;left:12px;z-index:60;display:none;'
-        + 'align-items:center;gap:5px;padding:3px 8px;border-radius:2px;'
-        + 'background:rgba(0,0,0,.8);color:#f1f1f1;'
-        + 'font:500 11px/1.35 "Roboto Mono",Menlo,Consolas,monospace;'
-        + 'pointer-events:auto;cursor:default;opacity:.85;transition:opacity .25s ease,background .3s ease}'
-        + '._live_catch_up_pinned .tl-num{color:#9ec7ff}'
-        + '._live_catch_up_pinned .tl-dim{color:#b8b8b8;font-weight:400}'
+        + 'align-items:center;gap:5px;padding:4px 10px;border-radius:12px;'
+        + 'background:rgba(0,0,0,.5);color:#fff;'
+        + 'font:500 12px/1.35 "Roboto","Arial",sans-serif;'
+        + 'pointer-events:auto;cursor:default;opacity:1;transition:opacity .25s ease,background .3s ease}'
+        + '._live_catch_up_pinned .tl-num{color:#fff}'
+        + '._live_catch_up_pinned .tl-dim{color:#fff;font-weight:400}'
         // repouso mostra só o atraso; hover (ou alerta) expande o detalhe
         + '._live_catch_up_pinned .tl-full{display:none}'
         + '._live_catch_up_pinned:hover .tl-full,._live_catch_up_pinned.tl-warn .tl-full{display:inline}'
@@ -478,13 +497,13 @@
         const res = isFinite(health) ? health.toFixed(1).replace('.', ',') + 's' : '—';
         pinned_short.textContent = lat;
         pinned_full.textContent = '';
-        const dim1 = document.createElement('span'); dim1.className = 'tl-dim'; dim1.textContent = 'delay ';
+        const dim1 = document.createElement('span'); dim1.className = 'tl-dim'; dim1.textContent = 'Delay ';
         const n1 = document.createElement('span'); n1.className = 'tl-num'; n1.textContent = lat;
-        const dim2 = document.createElement('span'); dim2.className = 'tl-dim'; dim2.textContent = ' · buffer ';
+        const dim2 = document.createElement('span'); dim2.className = 'tl-dim'; dim2.textContent = ' · Buffer ';
         const n2 = document.createElement('span'); n2.className = 'tl-num'; n2.textContent = res;
         pinned_full.append(dim1, n1, dim2, n2);
         if (pinned_suspended) {
-            const tag = document.createElement('span'); tag.className = 'tl-dim'; tag.textContent = ' · estável';
+            const tag = document.createElement('span'); tag.className = 'tl-dim'; tag.textContent = ' · Estável';
             pinned_full.append(tag);
         }
         pinned_panel.classList.toggle('tl-warn', isFinite(health) && health < BUFFER_WARN);
@@ -619,12 +638,16 @@
                 // stats-for-nerds health here could accelerate while a nudge
                 // thins the reserve in the same tick (review finding).
                 const ev = video_instance();
-                const reserve = (ev && ev.buffered.length)
+                const read_reserve = () => (ev && ev.buffered.length)
                     ? ev.buffered.end(ev.buffered.length - 1) - ev.currentTime
                     : health;
-                const brake = edge_brake_rate(reserve);
-                if (brake !== null) apply_playback_rate(brake);
-                else set_playbackRate(settings.playbackRate, latency, reserve, edge_target, false);
+                // Rate control stays >= 1.0x always (Owner rule); danger dips
+                // are handled by an instant step-back, not a slow-down.
+                edge_rescue(ev, read_reserve(), Date.now());
+                // Re-read AFTER the possible rescue seek — the controller must
+                // see the restored reserve, not the pre-seek danger value
+                // (review finding: don't lean on EDGE_DANGER == BUFFER_FLOOR).
+                set_playbackRate(settings.playbackRate, latency, read_reserve(), edge_target, false);
             } else if (settings.edge) {
                 set_playbackRate(settings.playbackRate, latency, health, settings.bufferTarget, true);
             } else {
@@ -752,6 +775,7 @@
         edge_suspended_until = 0;
         edge_env_max = null;
         edge_env_min = null;
+        edge_last_rescue = 0;
 
         if (bound_video !== v) {
             // Detach the previous <video>'s listener before binding the new one,

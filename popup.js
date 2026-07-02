@@ -24,11 +24,11 @@ function el(tag, props = {}, ...children) {
     return node;
 }
 
-// Parse trusted static SVG markup (our own ICONS / generated QR) into a DOM node,
-// avoiding innerHTML (and the addons-linter UNSAFE_VAR_ASSIGNMENT warning). Parse
-// as text/html (not image/svg+xml): the HTML parser puts <svg> in the SVG
-// namespace even without an xmlns attribute, so our inline ICONS actually render;
-// image/svg+xml would drop them into the null namespace and they'd stay invisible.
+// Parse trusted static SVG markup (the generated QR) into a DOM node, avoiding
+// innerHTML (and the addons-linter UNSAFE_VAR_ASSIGNMENT warning). Parse as
+// text/html (not image/svg+xml): the HTML parser puts <svg> in the SVG
+// namespace even without an xmlns attribute, so the inline SVG actually
+// renders; image/svg+xml would drop it into the null namespace, invisible.
 function parseSvg(markup) {
     return new DOMParser().parseFromString(markup, 'text/html').body.firstElementChild;
 }
@@ -67,16 +67,6 @@ function wireRadiogroup(container, items, activate) {
     return roving;
 }
 
-// --------------------------------------------------------------- Icons
-const ICONS = {
-    off: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v9"/><path d="M6.6 6.6a8 8 0 1 0 10.8 0"/></svg>',
-    auto: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.9z"/><path d="M5.5 15l1 2.4 2.4 1-2.4 1-1 2.4-1-2.4-2.4-1 2.4-1z"/></svg>',
-    edge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 3 6.5 13h4l-1 8 6-10h-4z" fill="currentColor" stroke="none"/><path d="M19 5a12 12 0 0 1 0 8"/><path d="M21.8 3a16 16 0 0 1 0 12" opacity=".5"/></svg>',
-    check: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17l9-10"/></svg>',
-    wifi: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.5c5.8-5 14.2-5 20 0"/><path d="M5 12c3.8-3.3 10.2-3.3 14 0"/><path d="M8.5 15.5c2-1.7 5-1.7 7 0"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg>',
-    gain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>',
-};
-
 // --------------------------------------------------------------- State
 let state = {};
 const updaters = [];          // fn() -> sync a control's display
@@ -101,7 +91,6 @@ function renderStatic() {
     $('#brand-name').textContent = L.appName;
     $('#brand-tagline').textContent = L.tagline;
     $('#modes-title').textContent = L.sectionMode;
-    $('#modes-note').textContent = L.modesNote;
     $('#advanced-label').textContent = L.sectionIndicators;
     $('#reset-label').textContent = L.reset;
     $('#reset').title = L.resetHint;
@@ -109,39 +98,40 @@ function renderStatic() {
 }
 
 function renderModes() {
-    const container = $('#mode-cards');
+    const seg = $('#mode-seg');
     for (const name of common.modeOrder) {
         const meta = common.modeMeta[name];
-        const card = el('button', {
-            class: 'mode-card', type: 'button', role: 'radio', 'aria-checked': 'false',
-            onclick: () => applyPreset(name),
-        },
-            el('span', { class: 'mode-icon', html: ICONS[name] }),
-            el('span', { class: 'mode-body' },
-                el('span', { class: 'mode-name', text: meta.title }),
-                el('span', { class: 'mode-desc', text: meta.desc }),
-                el('span', { class: 'mode-conn' }, el('span', { class: 'conn-icon', html: ICONS.wifi }), el('span', { text: meta.conn })),
-                el('span', { class: 'mode-gain' + (name === 'off' ? ' is-none' : '') }, el('span', { class: 'gain-icon', html: ICONS.gain }), el('span', { text: meta.gain })),
-            ),
-            el('span', { class: 'mode-check', html: ICONS.check }),
-        );
-        modeCards[name] = card;
-        container.append(card);
+        const btn = el('button', {
+            class: 'seg-btn', type: 'button', role: 'radio', 'aria-checked': 'false',
+        }, name === 'edge' ? `⚡ ${meta.title}` : meta.title);
+        btn.addEventListener('click', () => applyPreset(name));
+        modeCards[name] = btn;
+        seg.append(btn);
     }
-    const modeItems = common.modeOrder.map(n => modeCards[n]);
-    rovingModes = wireRadiogroup(container, modeItems, idx => applyPreset(common.modeOrder[idx]));
+    const items = common.modeOrder.map(n => modeCards[n]);
+    rovingModes = wireRadiogroup(seg, items, idx => applyPreset(common.modeOrder[idx]));
 }
 
+// A labelled row: text on the left, control on the right.
 function buildRow({ label, control }) {
-    const main = el('div', { class: 'row-main' }, el('div', { class: 'row-label', text: label }));
-    return el('div', { class: 'row' }, main, el('div', { class: 'row-control' }, control));
+    return el('div', { class: 'row' },
+        el('div', { class: 'row-main' }, el('span', { class: 'row-label', text: label })),
+        el('div', { class: 'row-control' }, control),
+    );
 }
 
+// A toggle switch bound to a boolean storage key. Registers an updater so the
+// checkbox reflects `state[key]` on every refresh().
 function buildToggle(key) {
-    const input = el('input', { type: 'checkbox', onchange: () => setOne(key, input.checked) });
-    const sw = el('label', { class: 'switch' }, input, el('span', { class: 'track' }), el('span', { class: 'thumb' }));
+    const input = el('input', { type: 'checkbox' });
+    input.checked = !!state[key];
+    input.addEventListener('change', () => setOne(key, input.checked));
     updaters.push(() => { input.checked = !!state[key]; });
-    return sw;
+    return el('label', { class: 'switch' },
+        input,
+        el('span', { class: 'track', 'aria-hidden': 'true' }),
+        el('span', { class: 'thumb', 'aria-hidden': 'true' }),
+    );
 }
 
 function renderIndicators() {
@@ -252,8 +242,11 @@ function renderSupport() {
 
     const chipsBox = $('#support-amounts');
     const chips = [];
-    for (const value of pix.PIX_AMOUNTS) {
-        const chip = el('button', { class: 'support-chip', type: 'button', role: 'radio', 'aria-checked': String(value === amount) }, `R$ ${value}`);
+    // Fixed tiers + a trailing OPEN chip (value 0): the QR carries no amount
+    // and the payer types whatever they want in the bank app.
+    for (const value of [...pix.PIX_AMOUNTS, 0]) {
+        const text = value === 0 ? L.supportFree : `R$ ${value}`;
+        const chip = el('button', { class: 'support-chip', type: 'button', role: 'radio', 'aria-checked': String(value === amount) }, text);
         chip.addEventListener('click', () => {
             amount = value;
             for (const c of chips) c.setAttribute('aria-checked', String(c === chip));
@@ -263,6 +256,14 @@ function renderSupport() {
         chipsBox.append(chip);
     }
     wireRadiogroup(chipsBox, chips, i => chips[i].click());
+
+    // International donations (USD) — non-Brazilians can't pay PIX. A plain
+    // link the user clicks; hidden until the page URL is configured.
+    if (pix.INTL_DONATE_URL) {
+        const intl = el('button', { class: 'support-intl', type: 'button' }, L.supportIntl);
+        intl.addEventListener('click', () => chrome.tabs.create({ url: pix.INTL_DONATE_URL }));
+        panel.append(intl);
+    }
 
     copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(copyBtn.dataset.code || pix.buildPixCode(amount));
@@ -291,6 +292,8 @@ function refresh() {
     });
     // Keep the group's single tab-stop on the selected mode (first card if none).
     if (rovingModes) rovingModes(activeIndex >= 0 ? activeIndex : 0);
+    // Progressive disclosure: only the SELECTED mode's one-line description shows.
+    $('#mode-desc').textContent = common.modeMeta[mode] ? common.modeMeta[mode].desc : '';
     for (const u of updaters) u();
 }
 

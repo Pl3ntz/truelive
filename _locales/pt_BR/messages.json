@@ -1,188 +1,97 @@
 {
-   "appDesc": {
-      "message": "Sincroniza lives do YouTube em tempo real, acelerando a reprodução para reduzir o atraso e manter você perto do ao vivo."
-   },
-   "appName": {
-      "message": "TrueLive"
-   },
-   "tagline": {
-      "message": "Mantenha as lives do YouTube em tempo real"
-   },
-   "sectionMode": {
-      "message": "Modo"
-   },
-   "modesNote": {
-      "message": "Acelera só o necessário para reduzir a latência e descansa em 1.0x (que segura a latência). Menos buffer = mais perto do ao vivo, mas pede internet melhor."
-   },
-   "modeOff": {
-      "message": "Desligado"
-   },
-   "modeOffDesc": {
-      "message": "Reprodução normal, sem ajustes."
-   },
-   "modeOffConn": {
-      "message": "Qualquer conexão"
-   },
-   "modeOffGain": {
-      "message": "—"
-   },
-   "modeAuto": {
-      "message": "Automático"
-   },
-   "modeAutoDesc": {
-      "message": "Analisa sua conexão e ajusta sozinho: mais perto do ao vivo quando a internet aguenta, mais buffer quando ela oscila."
-   },
-   "modeAutoConn": {
-      "message": "Qualquer conexão (adapta-se)"
-   },
-   "modeAutoGain": {
-      "message": "adaptável"
-   },
-   "modeSuave": {
-      "message": "Suave"
-   },
-   "modeSuaveDesc": {
-      "message": "Mantém bastante buffer e reduz a latência com folga. Ideal para internet fraca ou instável."
-   },
-   "modeSuaveConn": {
-      "message": "Internet lenta ou instável (~3+ Mbps)"
-   },
-   "modeSuaveGain": {
-      "message": "buffer ~8s"
-   },
-   "modeBalanced": {
-      "message": "Equilibrado"
-   },
-   "modeBalancedDesc": {
-      "message": "Reduz bem a latência mantendo ~6s de buffer. Bom meio-termo."
-   },
-   "modeBalancedConn": {
-      "message": "Internet comum (~5–10 Mbps)"
-   },
-   "modeBalancedGain": {
-      "message": "buffer ~6s"
-   },
-   "modeAggressive": {
-      "message": "Próximo"
-   },
-   "modeAggressiveDesc": {
-      "message": "Chega mais perto do ao vivo, mantendo ~4,5s de buffer. Precisa de internet estável."
-   },
-   "modeAggressiveConn": {
-      "message": "Internet estável (~15+ Mbps)"
-   },
-   "modeAggressiveGain": {
-      "message": "buffer ~4,5s"
-   },
-   "modeMin": {
-      "message": "Latência Mínima"
-   },
-   "modeMinDesc": {
-      "message": "O mais perto possível do ao vivo, com só ~3,5s de buffer. Precisa de internet rápida e estável."
-   },
-   "modeMinConn": {
-      "message": "Internet rápida e estável (~25+ Mbps)"
-   },
-   "modeMinGain": {
-      "message": "buffer ~3,5s"
-   },
-   "sectionIndicators": {
-      "message": "Indicadores no player"
-   },
-   "showPlaybackRate": {
-      "message": "Exibir velocidade de reprodução atual"
-   },
-   "showLatency": {
-      "message": "Exibir latência atual da transmissão ao vivo"
-   },
-   "showHealth": {
-      "message": "Exibir saúde atual do buffer"
-   },
-   "reset": {
-      "message": "Restaurar padrões"
-   },
-   "resetHint": {
-      "message": "Segure por 1 segundo para restaurar."
-   },
-   "supportTitle": {
-      "message": "Me pague um café"
-   },
-   "supportNote": {
-      "message": "Curtiu a extensão? Me ajude com um cafezinho via PIX."
-   },
-   "supportCustom": {
-      "message": "Outro"
-   },
-   "supportCustomPlaceholder": {
-      "message": "Valor em R$"
-   },
-   "supportScan": {
-      "message": "Aponte a câmera do app do seu banco, ou copie o código:"
-   },
-   "supportCopy": {
-      "message": "Copiar código PIX"
-   },
-   "supportCopied": {
-      "message": "Copiado!"
-   },
-   "supportBmc": {
-      "message": "Buy me a coffee"
-   },
-   "donateNudge": {
-      "message": "Curtindo o TrueLive? Se ele te ajuda, considere apoiar com um café — é totalmente opcional. 🙂"
-   },
-   "donateLater": {
-      "message": "Lembrar depois"
-   },
-   "donateOptOut": {
-      "message": "Não mostrar novamente"
-   },
-   "donateBannerText": {
-      "message": "Curtindo o TrueLive? Apoie com um café."
-   },
-   "donateBannerCta": {
-      "message": "Apoiar"
-   },
-   "donateBannerClose": {
-      "message": "Fechar"
-   },
-   "stallTitle": {
-      "message": "A transmissão está travando"
-   },
-   "stallDesc": {
-      "message": "Um modo mais leve mantém mais buffer e estabiliza."
-   },
-   "stallSwitch": {
-      "message": "Trocar para"
-   },
-   "supportBtn": {
-      "message": "Apoiar"
-   },
-   "supportCtaText": {
-      "message": "Curtindo? Me ajuda com um cafezinho 🙏"
-   },
-   "supportCtaBtn": {
-      "message": "Apoiar via PIX"
-   },
-   "commandToggleDesc": {
-      "message": "Ativar/desativar o TrueLive"
-   },
-   "commandGoLiveDesc": {
-      "message": "Pular para o ao vivo"
-   },
-   "a11yPlaybackRate": {
-      "message": "Velocidade de reprodução"
-   },
-   "a11yLatency": {
-      "message": "Latência ao vivo"
-   },
-   "a11yHealth": {
-      "message": "Saúde do buffer"
-   },
-   "a11yEstimation": {
-      "message": "Horário estimado para alcançar o ao vivo"
-   },
-   "a11yCurrent": {
-      "message": "Tempo atual (clique para copiar o link)"
-   }
+    "appName": {
+        "message": "TrueLive"
+    },
+    "appDesc": {
+        "message": "Assista lives do YouTube com o menor delay que a sua internet permite — nível TV aberta. Totalmente adaptativo, zero coleta de dados."
+    },
+    "tagline": {
+        "message": "O ao vivo de verdade — menor delay possível"
+    },
+    "sectionMode": {
+        "message": "Modo"
+    },
+    "modeOff": {
+        "message": "Desligado"
+    },
+    "modeOffDesc": {
+        "message": "Reprodução normal, sem ajustes."
+    },
+    "modeAuto": {
+        "message": "Automático"
+    },
+    "modeAutoDesc": {
+        "message": "Equilibra delay e estabilidade pela sua internet, sozinho."
+    },
+    "modeEdge": {
+        "message": "Super Ao Vivo"
+    },
+    "modeEdgeDesc": {
+        "message": "O menor delay que sua internet permite — recua sozinho se precisar."
+    },
+    "sectionIndicators": {
+        "message": "Indicadores no player"
+    },
+    "showPlaybackRate": {
+        "message": "Exibir velocidade de reprodução"
+    },
+    "showLatency": {
+        "message": "Exibir delay real"
+    },
+    "showHealth": {
+        "message": "Exibir buffer"
+    },
+    "showPinned": {
+        "message": "Painel fixo de delay (sempre visível)"
+    },
+    "reset": {
+        "message": "Restaurar padrões"
+    },
+    "resetHint": {
+        "message": "Segure por 1 segundo para restaurar."
+    },
+    "supportToggle": {
+        "message": "Apoiar o projeto"
+    },
+    "supportTitle2": {
+        "message": "Me pague um café via PIX"
+    },
+    "supportScan2": {
+        "message": "Aponte a câmera do app do banco, ou copie o código:"
+    },
+    "supportCopy2": {
+        "message": "Copiar código PIX"
+    },
+    "supportCopied": {
+        "message": "Copiado!"
+    },
+    "commandToggleDesc": {
+        "message": "Ligar/desligar o TrueLive"
+    },
+    "commandGoLiveDesc": {
+        "message": "Pular para o ao vivo"
+    },
+    "a11yPlaybackRate": {
+        "message": "Velocidade de reprodução"
+    },
+    "a11yLatency": {
+        "message": "Delay do ao vivo"
+    },
+    "a11yHealth": {
+        "message": "Buffer disponível"
+    },
+    "a11yEstimation": {
+        "message": "Horário estimado para alcançar o ao vivo"
+    },
+    "a11yCurrent": {
+        "message": "Tempo atual (clique para copiar o link)"
+    },
+    "supportFree": {
+        "message": "Livre",
+        "description": "Open-amount chip: the payer types the value in the bank app"
+    },
+    "supportIntl": {
+        "message": "Doar em US$ (cartão)",
+        "description": "International donation link (USD) for users without PIX"
+    }
 }

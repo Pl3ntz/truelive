@@ -11,14 +11,25 @@ Copa 2026, isso significou ver o gol ~20 segundos depois da TV aberta.
 O TrueLive elimina esse excesso e te deixa colado no ponto mais recente
 disponível, com proteção automática contra travamentos.
 
-## Números (medidos ao vivo, não prometidos)
+## Números (medidos e verificados, não prometidos)
 
-| Como você assiste | Atraso típico do lance real |
-|---|---|
-| TV aberta (antena digital) | ~3-5s |
-| **YouTube + TrueLive (Super Ao Vivo)** | **~3-4s** — no nível da TV aberta |
-| YouTube padrão (live low-latency) | ~7s |
-| CazéTV padrão na Copa (medido pela imprensa) | ~20-45s |
+Delays fim-a-fim (ingestão → sua tela) em stream low-latency, medidos com o
+relógio de ingestão do próprio player, mesma máquina e mesma stream:
+
+| Como você assiste | Delay | Comprovação |
+|---|---|---|
+| **YouTube + TrueLive (Super Ao Vivo)** | **3,2s medido** (~3,5s na calibração atual, mais conservadora) | benchmark próprio A/B/C |
+| TV aberta (antena digital, vs estádio) | ~3-5s | convergência imprensa/indústria |
+| Catch-up 1.25x (a técnica dos concorrentes) | 4,5-7s, serrilhado | medido + derivado do código deles |
+| YouTube padrão (live low-latency, sem extensão) | 7,0-7,3s | medido |
+| CazéTV na Copa 2026 | +15-20s atrás da Globo | medição independente (Canaltech) |
+
+Redução real medida: **~55%** do delay (7,0s → 3,2s) — e não os "80%" que
+concorrentes prometem sem medição. Nenhuma outra extensão pesquisada usa
+edge-riding (reposicionamento do playhead); todas só aceleram o vídeo.
+
+Análise completa — 16 fontes, metodologia e lacunas conhecidas:
+[docs/DELAY-BENCHMARK.md](docs/DELAY-BENCHMARK.md).
 
 ## Modos
 
@@ -30,12 +41,13 @@ nada:
 - **Super Ao Vivo** ⚡ — força o menor atraso fisicamente possível, com quatro
   camadas de proteção para a experiência nunca degradar:
   1. **Piso dinâmico medido** — o motor mede a "respiração" da sua conexão e
-     descobre o quão perto do vivo dá pra chegar (mínimo físico: 1,5s).
-     Descer abaixo de 2s é conquistado com 3+ minutos de estabilidade provada.
+     descobre o quão perto do vivo dá pra chegar (base conservadora: 2,0s).
+     Descer abaixo de 2,5s é conquistado com 3+ minutos de estabilidade provada.
   2. **Reação preventiva** — picos de bitrate (lances!) aumentam a reserva
      *antes* de virarem travada.
-  3. **Freio suave de emergência** — se a reserva despencar, o vídeo desacelera
-     imperceptivelmente (0,92x) até se blindar de novo, em vez de congelar.
+  3. **Resgate instantâneo** — se a reserva despencar, um único recuo de ~1-2s
+     restaura a proteção na hora. A velocidade **nunca** cai abaixo de 1,0x —
+     você está ao vivo, não faz sentido desacelerar.
   4. **Suspensão graciosa** — internet fraca de verdade? O modo se suspende por
      10 minutos e entrega ao Automático. Re-arma sozinho, começando seguro.
 

@@ -24,26 +24,15 @@ export const label = {
 
     // Modes / presets
     sectionMode: msg('sectionMode', 'Modo'),
-    modesNote: msg('modesNote', 'Os dois modos se adaptam à sua internet sozinhos. Automático prioriza estabilidade; Super Ao Vivo prioriza o menor delay — e recua se precisar.'),
 
     modeOff: msg('modeOff', 'Desligado'),
     modeOffDesc: msg('modeOffDesc', 'Reprodução normal, sem ajustes.'),
-    modeOffConn: msg('modeOffConn', 'Qualquer conexão'),
-    modeOffGain: msg('modeOffGain', '—'),
 
     modeAuto: msg('modeAuto', 'Automático'),
-    modeAutoDesc: msg('modeAutoDesc', 'Equilíbrio sem pensar: analisa sua internet e ajusta sozinho — menos delay quando dá, mais buffer quando ela oscila.'),
-    modeAutoConn: msg('modeAutoConn', 'Qualquer conexão (adapta-se)'),
-    modeAutoGain: msg('modeAutoGain', 'adaptável'),
-
-
-
-
+    modeAutoDesc: msg('modeAutoDesc', 'Equilibra delay e estabilidade pela sua internet, sozinho.'),
 
     modeEdge: msg('modeEdge', 'Super Ao Vivo'),
-    modeEdgeDesc: msg('modeEdgeDesc', 'Força o menor delay que existe: cola no trecho mais recente disponível. Se a internet não aguentar, ele mesmo recua, estabiliza e tenta de novo.'),
-    modeEdgeConn: msg('modeEdgeConn', 'Qualquer conexão — recua sozinho se precisar'),
-    modeEdgeGain: msg('modeEdgeGain', 'menor delay'),
+    modeEdgeDesc: msg('modeEdgeDesc', 'O menor delay que sua internet permite — recua sozinho se precisar.'),
 
     // Player indicators
     sectionIndicators: msg('sectionIndicators', 'Indicadores no player'),
@@ -61,6 +50,8 @@ export const label = {
     supportTitle2: msg('supportTitle2', 'Me pague um café via PIX'),
     supportScan2: msg('supportScan2', 'Aponte a câmera do app do banco, ou copie o código:'),
     supportCopy2: msg('supportCopy2', 'Copiar código PIX'),
+    supportFree: msg('supportFree', 'Livre'),
+    supportIntl: msg('supportIntl', 'Doar em US$ (cartão)'),
 
 
 
@@ -205,9 +196,9 @@ export const presets = {
 export const modeOrder = ['off', 'auto', 'edge'];
 
 export const modeMeta = {
-    off: { title: label.modeOff, desc: label.modeOffDesc, conn: label.modeOffConn, gain: label.modeOffGain },
-    auto: { title: label.modeAuto, desc: label.modeAutoDesc, conn: label.modeAutoConn, gain: label.modeAutoGain },
-    edge: { title: label.modeEdge, desc: label.modeEdgeDesc, conn: label.modeEdgeConn, gain: label.modeEdgeGain },
+    off: { title: label.modeOff, desc: label.modeOffDesc },
+    auto: { title: label.modeAuto, desc: label.modeAutoDesc },
+    edge: { title: label.modeEdge, desc: label.modeEdgeDesc },
 };
 
 /**

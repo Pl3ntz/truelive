@@ -62,12 +62,15 @@ Mínima em conexão instável. Candidato a contribuição upstream no ZeroDelay.
 ## Evolução pós-medição (implementada)
 
 1. **Piso dinâmico medido** — o alvo não é fixo: envelope de respiração da
-   reserva (min/máx decadente) define o piso = jitter + 0,6s (mín. 1,5s).
-   Descer <2s exige 3min de calmaria provada.
-2. **Freio suave 0,92x** — na zona de perigo (<1,2s, observação do autor em
-   produção), desacelerar imperceptivelmente re-enche o buffer ~0,08s/s e evita
-   a cascata de travadas (validado em simulação: pós-engasgo de 1,6s, reserva
-   final 1,81s com freio vs 0,25s sem).
+   reserva (min/máx decadente) define o piso = jitter + 0,6s (base conservadora
+   2,0s, subida em 2026-07-02 por decisão de produto). Descer <2,5s exige 3min
+   de calmaria provada.
+2. **Resgate instantâneo** (substituiu o freio 0,92x em 2026-07-02) — na zona
+   de perigo (<1,5s), um único recuo do playhead restaura a reserva para
+   ≥2,5s imediatamente. Regra de produto do autor: **a velocidade nunca cai
+   abaixo de 1,0x ao vivo** — o freio 0,92x foi removido porque (a) sub-tempo-
+   real não faz sentido assistindo ao vivo e (b) o YouTube quantizava 0,92→0,90x.
+   Resgates repetidos contam para a suspensão graciosa.
 3. **Suspensão graciosa** — 2 stalls/5min suspendem o edge por 10min
    (Automático governa); re-arme seguro. Máquina validada por réplica
    determinística.

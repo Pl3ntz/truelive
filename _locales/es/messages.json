@@ -1,188 +1,97 @@
 {
-   "appDesc": {
-      "message": "Sincroniza en tiempo real las transmisiones en vivo de YouTube acelerando la reproducción cuando te atrasas por demoras de red."
-   },
-   "appName": {
-      "message": "TrueLive"
-   },
-   "tagline": {
-      "message": "Mantén las transmisiones en vivo de YouTube en tiempo real"
-   },
-   "sectionMode": {
-      "message": "Modo"
-   },
-   "modesNote": {
-      "message": "Acelera solo lo necesario para reducir la latencia y luego descansa en 1.0x (que la mantiene). Menos búfer = más cerca del vivo, pero exige mejor conexión."
-   },
-   "modeOff": {
-      "message": "Desactivado"
-   },
-   "modeOffDesc": {
-      "message": "Reproducción normal, sin ajustes."
-   },
-   "modeOffConn": {
-      "message": "Cualquier conexión"
-   },
-   "modeOffGain": {
-      "message": "—"
-   },
-   "modeAuto": {
-      "message": "Automático"
-   },
-   "modeAutoDesc": {
-      "message": "Analiza tu conexión y se ajusta solo: más cerca del vivo cuando tu internet aguanta, más búfer cuando oscila."
-   },
-   "modeAutoConn": {
-      "message": "Cualquier conexión (se adapta)"
-   },
-   "modeAutoGain": {
-      "message": "adaptable"
-   },
-   "modeSuave": {
-      "message": "Suave"
-   },
-   "modeSuaveDesc": {
-      "message": "Mantiene bastante búfer y reduce la latencia con margen. Ideal para internet lenta o inestable."
-   },
-   "modeSuaveConn": {
-      "message": "Internet lenta o inestable (~3+ Mbps)"
-   },
-   "modeSuaveGain": {
-      "message": "búfer ~8s"
-   },
-   "modeBalanced": {
-      "message": "Equilibrado"
-   },
-   "modeBalancedDesc": {
-      "message": "Reduce bien la latencia manteniendo ~6s de búfer. Un buen término medio."
-   },
-   "modeBalancedConn": {
-      "message": "Internet promedio (~5–10 Mbps)"
-   },
-   "modeBalancedGain": {
-      "message": "búfer ~6s"
-   },
-   "modeAggressive": {
-      "message": "Cercano"
-   },
-   "modeAggressiveDesc": {
-      "message": "Se acerca más al vivo, manteniendo ~4.5s de búfer. Necesita internet estable."
-   },
-   "modeAggressiveConn": {
-      "message": "Internet estable (~15+ Mbps)"
-   },
-   "modeAggressiveGain": {
-      "message": "búfer ~4.5s"
-   },
-   "modeMin": {
-      "message": "Latencia mínima"
-   },
-   "modeMinDesc": {
-      "message": "Lo más cerca posible del vivo, con solo ~3.5s de búfer. Necesita internet rápida y estable."
-   },
-   "modeMinConn": {
-      "message": "Internet rápida y estable (~25+ Mbps)"
-   },
-   "modeMinGain": {
-      "message": "búfer ~3.5s"
-   },
-   "sectionIndicators": {
-      "message": "Indicadores del reproductor"
-   },
-   "showPlaybackRate": {
-      "message": "Mostrar la velocidad de reproducción actual"
-   },
-   "showLatency": {
-      "message": "Mostrar la latencia actual de la transmisión en vivo"
-   },
-   "showHealth": {
-      "message": "Mostrar el estado actual del búfer"
-   },
-   "reset": {
-      "message": "Restaurar valores predeterminados"
-   },
-   "resetHint": {
-      "message": "Mantén presionado 1 segundo para restablecer."
-   },
-   "supportTitle": {
-      "message": "Invítame un café"
-   },
-   "supportNote": {
-      "message": "¿Te gusta la extensión? Apoya su desarrollo con una pequeña donación."
-   },
-   "supportCustom": {
-      "message": "Otro"
-   },
-   "supportCustomPlaceholder": {
-      "message": "Monto en R$"
-   },
-   "supportScan": {
-      "message": "Escanea con la app de tu banco o copia el código:"
-   },
-   "supportCopy": {
-      "message": "Copiar código PIX"
-   },
-   "supportCopied": {
-      "message": "¡Copiado!"
-   },
-   "supportBmc": {
-      "message": "Invítame un café"
-   },
-   "donateNudge": {
-      "message": "¿Te gusta TrueLive? Si te sirve, puedes apoyarlo con un café — totalmente opcional. 🙂"
-   },
-   "donateLater": {
-      "message": "Recordar más tarde"
-   },
-   "donateOptOut": {
-      "message": "No mostrar de nuevo"
-   },
-   "donateBannerText": {
-      "message": "¿Te gusta TrueLive? Apóyalo con un café."
-   },
-   "donateBannerCta": {
-      "message": "Apoyar"
-   },
-   "donateBannerClose": {
-      "message": "Cerrar"
-   },
-   "stallTitle": {
-      "message": "La transmisión no deja de almacenar en búfer"
-   },
-   "stallDesc": {
-      "message": "Un modo más suave mantiene más búfer y lo estabiliza."
-   },
-   "stallSwitch": {
-      "message": "Cambiar a"
-   },
-   "supportBtn": {
-      "message": "Apoyar"
-   },
-   "supportCtaText": {
-      "message": "¿Te gusta? Invítame un café 🙏"
-   },
-   "supportCtaBtn": {
-      "message": "Apoyar"
-   },
-   "commandToggleDesc": {
-      "message": "Activar/desactivar TrueLive"
-   },
-   "commandGoLiveDesc": {
-      "message": "Saltar al vivo"
-   },
-   "a11yPlaybackRate": {
-      "message": "Velocidad de reproducción"
-   },
-   "a11yLatency": {
-      "message": "Latencia en vivo"
-   },
-   "a11yHealth": {
-      "message": "Estado del búfer"
-   },
-   "a11yEstimation": {
-      "message": "Tiempo estimado para alcanzar el vivo"
-   },
-   "a11yCurrent": {
-      "message": "Tiempo actual (haz clic para copiar el enlace)"
-   }
+    "appName": {
+        "message": "TrueLive"
+    },
+    "appDesc": {
+        "message": "Mira directos de YouTube con el menor retraso que tu internet permita — nivel TV abierta. Totalmente adaptativo, cero recopilación de datos."
+    },
+    "tagline": {
+        "message": "El directo de verdad — el menor delay posible"
+    },
+    "sectionMode": {
+        "message": "Modo"
+    },
+    "modeOff": {
+        "message": "Apagado"
+    },
+    "modeOffDesc": {
+        "message": "Reproducción normal, sin ajustes."
+    },
+    "modeAuto": {
+        "message": "Automático"
+    },
+    "modeAutoDesc": {
+        "message": "Equilibra delay y estabilidad según tu conexión, solo."
+    },
+    "modeEdge": {
+        "message": "Super Ao Vivo"
+    },
+    "modeEdgeDesc": {
+        "message": "El menor delay que tu internet permite — retrocede solo si hace falta."
+    },
+    "sectionIndicators": {
+        "message": "Indicadores en el player"
+    },
+    "showPlaybackRate": {
+        "message": "Mostrar velocidad"
+    },
+    "showLatency": {
+        "message": "Mostrar delay real"
+    },
+    "showHealth": {
+        "message": "Mostrar buffer"
+    },
+    "showPinned": {
+        "message": "Panel fijo de delay (siempre visible)"
+    },
+    "reset": {
+        "message": "Restaurar valores"
+    },
+    "resetHint": {
+        "message": "Mantén pulsado 1 segundo."
+    },
+    "supportToggle": {
+        "message": "Apoyar el proyecto"
+    },
+    "supportTitle2": {
+        "message": "Invítame un café vía PIX"
+    },
+    "supportScan2": {
+        "message": "Escanéalo con la app de tu banco, o copia el código:"
+    },
+    "supportCopy2": {
+        "message": "Copiar código PIX"
+    },
+    "supportCopied": {
+        "message": "¡Copiado!"
+    },
+    "commandToggleDesc": {
+        "message": "Activar/desactivar TrueLive"
+    },
+    "commandGoLiveDesc": {
+        "message": "Ir al directo"
+    },
+    "a11yPlaybackRate": {
+        "message": "Velocidad de reproducción"
+    },
+    "a11yLatency": {
+        "message": "Delay del directo"
+    },
+    "a11yHealth": {
+        "message": "Buffer disponible"
+    },
+    "a11yEstimation": {
+        "message": "Hora estimada para alcanzar el directo"
+    },
+    "a11yCurrent": {
+        "message": "Tiempo actual (clic para copiar)"
+    },
+    "supportFree": {
+        "message": "Libre",
+        "description": "Open-amount chip: the payer types the value in the bank app"
+    },
+    "supportIntl": {
+        "message": "Donar en US$ (tarjeta)",
+        "description": "International donation link (USD) for users without PIX"
+    }
 }
