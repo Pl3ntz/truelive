@@ -45,6 +45,17 @@
         const RATE_QUANT = 20;        // quantize rate to 1/20 = 0.05 steps
         const DEADBAND = 0.15;        // Δ under max(this, 2% of target) rests at 1.0
         const DRAIN_BRAKE = -0.02;    // net-inflow EMA under this: rest (LoL+ buffer-first)
+        // --- probing below the safe floor (AIMD spirit, TCP-style) ---
+        // The measured drawdown is a WORST-CASE estimate; the true sustainable
+        // reserve is usually lower. After earned calm the target probes below
+        // the safe floor; a rescue is the congestion signal: back off above
+        // the level that failed, remember it for a while, try again later.
+        // Worst case (budget spent) degrades to exactly the safe floor.
+        const PROBE_CALM_MS = 120000;    // calm to earn probing below the floor
+        const PROBE_BACKOFF = 0.5;       // failed level + this = new lower bound
+        const PROBE_FAIL_TTL_MS = 600000; // how long a failed level is remembered
+        const PROBE_MAX_RESCUES = 2;     // rescues within the window that...
+        const PROBE_RESCUE_WINDOW_MS = 600000; // ...pause probing (hold safe floor)
         // --- suspension (last resort — REAL stalls only) ---
         const SUSPEND_STALLS = 2;
         const SUSPEND_WINDOW_MS = 300000;
@@ -92,6 +103,9 @@
         let grace_until = 0;
         let stall_times = [];
         let suspended_until = 0;
+        let rescue_times = [];        // probing budget bookkeeping
+        let probe_fail = 0;           // reserve level a probe died at (+backoff)
+        let probe_fail_t = 0;
 
         function measurement_reset() {
             last_now = null;
@@ -104,10 +118,28 @@
             inflow_ema = 0;
         }
 
-        function dynamic_floor(now) {
-            let floor = Math.max(FLOOR_ABS, dd_now + MARGIN);
-            if (now - last_trouble < DEEP_CALM_MS) floor = Math.max(floor, DEEP_CALM_FLOOR);
-            return Math.min(floor, HARD_CEIL);
+        function abs_gate(now) {
+            // going under 2.5 is EARNED by deep calm (3+ min without trouble)
+            return now - last_trouble < DEEP_CALM_MS ? DEEP_CALM_FLOOR : FLOOR_ABS;
+        }
+
+        // Worst-case-safe floor: the deepest arrival valley in the window
+        // plus a margin. Holding this NEVER needs a rescue.
+        function safe_floor(now) {
+            return Math.min(HARD_CEIL, Math.max(abs_gate(now), dd_now + MARGIN));
+        }
+
+        // Where the target is allowed to rest. Normally the safe floor; with
+        // earned calm and rescue budget it drops toward the absolute gate so
+        // the target can PROBE the true minimum, bounded by any remembered
+        // failed level.
+        function target_bound(now) {
+            const safe = safe_floor(now);
+            if (now - last_trouble < PROBE_CALM_MS) return safe;
+            rescue_times = rescue_times.filter(t => now - t < PROBE_RESCUE_WINDOW_MS);
+            if (rescue_times.length >= PROBE_MAX_RESCUES) return safe;
+            const fail = now - probe_fail_t < PROBE_FAIL_TTL_MS ? probe_fail : 0;
+            return Math.min(safe, Math.max(abs_gate(now), fail));
         }
 
         function incident(now) {
@@ -170,16 +202,19 @@
                 last_end = null;
             }
 
-            // --- adapt the target (Shaka dynamicTargetLatency spirit) ---
-            const floor = dynamic_floor(nowMs);
+            // --- adapt the target (Shaka dynamicTargetLatency + AIMD probe) ---
+            const floor = target_bound(nowMs);
             if (target < floor) {
-                target = floor;                       // floor rose: respect it now
+                target = floor;                       // bound rose: respect it now
             } else if (nowMs - last_trouble > CALM_MS && target > floor) {
                 target = Math.max(floor, target - CREEP); // calm: creep back down
             }
+            // A rescue must restore enough to SURVIVE the valley that caused
+            // it — the safe floor, not the (possibly probing) target.
+            const rescue_to = Math.min(HARD_CEIL, Math.max(safe_floor(nowMs), RESCUE_TO));
 
             if (suspended) {
-                return { rate: 1.0, rescue: false, rescueTo: RESCUE_TO, target, floor, suspended: true };
+                return { rate: 1.0, rescue: false, rescueTo: rescue_to, target, floor, suspended: true };
             }
 
             // --- emergency rescue intent (seek stays ONLY here) ---
@@ -199,7 +234,7 @@
             return {
                 rate,
                 rescue,
-                rescueTo: Math.min(HARD_CEIL, Math.max(target, RESCUE_TO)),
+                rescueTo: rescue_to,
                 target, floor,
                 suspended: false,
             };
@@ -208,17 +243,29 @@
         /** A rescue seek was performed (inject.js moved the playhead back). */
         function noteRescue(nowMs, restoredReserve) {
             last_rescue = nowMs;
-            // needing a rescue while ALREADY fully relaxed = this internet
-            // can't hold the edge at all right now — a real handover case
-            // (rescues are cooldown-limited, so this can't spam suspension)
-            if (target >= HARD_CEIL - 0.01) note_stall(nowMs);
-            incident(nowMs);
-            if (Number.isFinite(restoredReserve)) {
-                target = Math.min(HARD_CEIL, Math.max(target, restoredReserve));
+            rescue_times.push(nowMs);
+            // a probe died here: remember the level that failed so the next
+            // probing round bottoms out just above it (AIMD back-off)
+            if (target < safe_floor(nowMs) - 0.01) {
+                probe_fail = Math.min(HARD_CEIL, target + PROBE_BACKOFF);
+                probe_fail_t = nowMs;
             }
             // the seek moved the playhead, not the arrivals — measurement
             // stays valid; only the reserve EMA must re-learn
             reserve_ema = null;
+            // needing a rescue while ALREADY fully relaxed = this internet
+            // can't hold the edge at all right now — a real handover case
+            // (rescues are cooldown-limited, so this can't spam suspension)
+            if (target >= HARD_CEIL - 0.01) {
+                note_stall(nowMs);
+                // if that triggered the handover, note_stall already reset the
+                // target to START for the re-arm — don't bump it back up
+                if (nowMs < suspended_until) return;
+            }
+            incident(nowMs);
+            if (Number.isFinite(restoredReserve)) {
+                target = Math.min(HARD_CEIL, Math.max(target, restoredReserve));
+            }
         }
 
         /** Danger with nothing buffered behind to step back to. */
@@ -231,12 +278,23 @@
             note_stall(nowMs);
         }
 
-        /** Rendition switched: old measurements describe the old rendition. */
-        function qualityChange(nowMs) {
+        /**
+         * Rendition switched: old measurements describe the old rendition.
+         * @param {boolean} rearm - true when the quality went DOWN: a lighter
+         * rendition earns a fresh chance (suspension cleared). A quality RISE
+         * on a connection bad enough to be suspended keeps the suspension —
+         * more bitrate will not have fixed that internet.
+         */
+        function qualityChange(nowMs, rearm) {
             measurement_reset();
             target = START;
-            stall_times = [];
-            suspended_until = 0;        // a fresh rendition earns a fresh chance
+            rescue_times = [];
+            probe_fail = 0;
+            probe_fail_t = 0;
+            if (rearm) {
+                stall_times = [];
+                suspended_until = 0;
+            }
             grace_until = nowMs + GRACE_MS;
             last_trouble = nowMs;       // no tightening during the refill
         }
@@ -249,6 +307,9 @@
             last_rescue = 0;
             grace_until = 0;
             stall_times = [];
+            rescue_times = [];
+            probe_fail = 0;
+            probe_fail_t = 0;
             suspended_until = 0;
         }
 
@@ -258,6 +319,7 @@
                 target, drawdown: dd_now, inflow_ema, reserve_ema,
                 last_trouble, last_rescue, grace_until,
                 stall_count: stall_times.length, suspended_until,
+                probe_fail, rescue_count: rescue_times.length,
             };
         }
 

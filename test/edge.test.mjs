@@ -83,17 +83,45 @@ test('calm stream: floor relaxes to the deep-calm gate, then to ABS floor', () =
     assert.ok(last.target < 3.0, `target ${last.target} should creep toward the floor`);
 });
 
-test('heavy 4K cycle: floor rises above the old 4.5 ceiling instead of thrashing', () => {
+test('heavy 4K cycle: adapts above the old 4.5 ceiling instead of thrashing', () => {
     const gov = createEdgeGovernor();
     const log = simulate(gov, { ticks: 2400, arrivalFn: heavy4kArrival, startReserve: 8 });
     const tail = log.slice(-400);
-    const floor = tail[tail.length - 1].floor;
-    assert.ok(floor > 4.5, `floor ${floor} must exceed the old ceiling for this stream`);
-    assert.ok(floor <= 10.0, `floor ${floor} must respect HARD_CEIL`);
-    // stability: no suspension and (near) no rescues once adapted
+    // the measured need exceeds the old fixed ceiling — v1 could never hold it
+    const dd = gov.getState().drawdown;
+    assert.ok(dd + 0.6 > 4.5, `measured need ${dd + 0.6} must exceed the old ceiling`);
+    assert.ok(tail.every(s => s.floor <= 10.0), 'bound must respect HARD_CEIL');
+    // stability: the handover of last resort never fires on this cycle
     assert.ok(tail.every(s => !s.suspended), 'must not suspend on the measured 4K cycle');
-    const rescues = tail.filter(s => s.rescue).length;
-    assert.ok(rescues === 0, `expected no rescues after adapting, got ${rescues}`);
+    // probing may buy delay with OCCASIONAL rescues — but bounded by budget
+    const rescues = log.filter(s => s.rescue).length;
+    assert.ok(rescues <= 8, `rescues must stay budget-bounded over 10 min, got ${rescues}`);
+});
+
+test('probing: after earned calm the target dives below the worst-case floor', () => {
+    const gov = createEdgeGovernor();
+    // a 4s-deep valley every 60s keeps the worst case high in the window,
+    // while the stream is otherwise calm — the probe should undercut it
+    const arrival = i => {
+        if (i % 240 >= 224) return 0;            // 4s starvation every 60s
+        return i % 2 === 0 ? 0.55 : 0;           // slight surplus otherwise
+    };
+    const log = simulate(gov, { ticks: 4000, arrivalFn: arrival, startReserve: 6 });
+    assert.ok(log.every(s => !s.suspended), 'probing must never escalate to suspension');
+    const adapted = log.slice(800); // after the first rescues taught the governor
+    const worstCase = Math.max(...adapted.map(s => +s.target));
+    const probedMin = Math.min(...adapted.map(s => +s.target));
+    assert.ok(probedMin < worstCase - 0.5,
+        `target never probed (min ${probedMin} vs worst-case ${worstCase})`);
+});
+
+test('a rescue restores enough to survive the valley that caused it', () => {
+    const gov = createEdgeGovernor();
+    const log = simulate(gov, { ticks: 2400, arrivalFn: heavy4kArrival, startReserve: 8 });
+    const dd = gov.getState().drawdown;
+    const last = log[log.length - 1];
+    assert.ok(last.rescueTo >= Math.min(10, Math.max(dd + 0.6, 2.5)) - 1e-9,
+        `rescueTo ${last.rescueTo} must clear the measured valley (${dd})`);
 });
 
 test('danger dip: rescue fires once, respects cooldown, target rises', () => {
@@ -140,12 +168,34 @@ test('rescue at the hard ceiling counts as a handover case', () => {
     assert.equal(out.suspended, true, 'rescuing while fully relaxed must hand over');
 });
 
-test('quality change: fresh measurement, suspension cleared, grace respected', () => {
+test('quality RISE while suspended: re-measures but keeps the suspension', () => {
     const gov = createEdgeGovernor();
     const t0 = 1_000_000;
     gov.noteStall(t0);
     gov.noteStall(t0 + 10_000); // suspended now
-    gov.qualityChange(t0 + 20_000);
+    gov.qualityChange(t0 + 20_000, false); // 720p -> 1080p: more bitrate won't fix this internet
+    const out = gov.tick(t0 + 26_000, 50, 5, 1.25);
+    assert.equal(out.suspended, true, 'a quality rise must not clear the suspension');
+});
+
+test('handover via rescue-at-ceiling re-arms at the safe START target', () => {
+    const gov = createEdgeGovernor();
+    const t0 = 1_000_000;
+    for (let k = 0; k < 8; k++) gov.noteStall(t0 + k * 400_000); // spaced: reach the ceiling
+    gov.noteRescue(t0 + 4_000_000, 2.5);
+    gov.noteRescue(t0 + 4_020_000, 9.9); // triggers the handover
+    const st = gov.getState();
+    assert.ok(st.suspended_until > t0 + 4_020_000, 'setup: must be suspended');
+    assert.ok(st.target <= 2.75 + 1e-9,
+        `target ${st.target} must re-arm at START, not carry the incident bump`);
+});
+
+test('quality DROP: fresh measurement, suspension cleared, grace respected', () => {
+    const gov = createEdgeGovernor();
+    const t0 = 1_000_000;
+    gov.noteStall(t0);
+    gov.noteStall(t0 + 10_000); // suspended now
+    gov.qualityChange(t0 + 20_000, true);
     // rendition wipe: reserve crashes to 0.4 during grace — must NOT rescue
     const during = gov.tick(t0 + 21_000, 50, 0.4, 1.25);
     assert.equal(during.suspended, false, 'quality change must clear suspension');

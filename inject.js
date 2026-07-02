@@ -213,7 +213,9 @@
     function edge_watch_quality(v, now) {
         if (!v || !v.videoHeight || !edge_governor) return;
         if (edge_quality_h !== 0 && v.videoHeight !== edge_quality_h) {
-            edge_governor.qualityChange(now);
+            // rearm (clear a suspension) only on a DROP — a lighter rendition
+            // earns a fresh chance; a RISE on a suspended connection doesn't
+            edge_governor.qualityChange(now, v.videoHeight < edge_quality_h);
             edge_self_seek_until = now + 4000; // refill 'waiting' isn't a stall
         }
         edge_quality_h = v.videoHeight;
@@ -540,15 +542,20 @@
                 const ev = video_instance();
                 const now = Date.now();
                 edge_watch_quality(ev, now);
-                if (ev && !ev.paused && ev.buffered.length) {
+                if (ev && !ev.paused && ev.buffered.length
+                    && progress_state && progress_state.isAtLiveHead === false) {
+                    // Viewer rewound on purpose: don't fight, and don't feed
+                    // DVR "reserve" into the governor's measurement — it does
+                    // not describe the live-edge headroom (review finding).
+                    // The tick-gap guard re-anchors when we come back.
+                    apply_playback_rate(1.0);
+                } else if (ev && !ev.paused && ev.buffered.length) {
                     const b_end = ev.buffered.end(ev.buffered.length - 1);
                     const g = edge_governor.tick(now, b_end, b_end - ev.currentTime, settings.playbackRate);
                     edge_suspended = g.suspended;
                     if (g.suspended) {
                         // weak-connection handover: behave as Automático
                         set_playbackRate(settings.playbackRate, latency, health, settings.bufferTarget, true);
-                    } else if (progress_state && progress_state.isAtLiveHead === false) {
-                        apply_playback_rate(1.0); // viewer rewound on purpose — don't fight
                     } else {
                         // Rate stays >= 1.0x always (Owner rule); a danger dip
                         // is handled by an instant step-back, not a slow-down.
