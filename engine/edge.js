@@ -123,6 +123,9 @@
         let stall_times = [];
         let suspended_until = 0;
         let rescue_times = [];        // probing budget bookkeeping
+        let rescued_this_valley = false; // ONE rescue per valley: chaining
+                                      // step-backs during a long gap costs
+                                      // MORE delay than the gap itself
         let probe_fail = 0;           // reserve level a probe died at (+backoff)
         let probe_fail_t = 0;
 
@@ -135,6 +138,7 @@
             ep_max = 0;
             ep_last_growth = 0;
             in_valley = false;
+            rescued_this_valley = false;
             dd_now = 0;
             dd_recent_filter = winmax_create();
             dd_recent = 0;
@@ -240,6 +244,7 @@
                         cum_max = Math.max(cum_max, cum);
                         const drawdown = cum_max - cum;
                         if (drawdown > 0.3) {
+                            if (!in_valley) rescued_this_valley = false;
                             if (!in_valley || drawdown > ep_max + 0.05) ep_last_growth = nowMs;
                             in_valley = true;
                             ep_max = Math.max(ep_max, drawdown);
@@ -306,8 +311,12 @@
             }
 
             // --- emergency rescue intent (seek stays ONLY here) ---
+            // One rescue per valley: if the gap outlasts the bridge, more
+            // step-backs only dig the delay hole deeper than the gap itself —
+            // playing out the rest (worst case a short freeze) costs less.
             const rescue = !in_grace && reserve < DANGER
-                && nowMs - last_rescue >= RESCUE_COOLDOWN_MS;
+                && nowMs - last_rescue >= RESCUE_COOLDOWN_MS
+                && !(in_valley && rescued_this_valley);
 
             // --- catch-up rate (gradual ONLY — Owner rule) ---
             let rate = 1.0;
@@ -332,6 +341,7 @@
         function noteRescue(nowMs, restoredReserve) {
             last_rescue = nowMs;
             rescue_times.push(nowMs);
+            if (in_valley) rescued_this_valley = true;
             // a probe died here: remember the level that failed so the next
             // probing round bottoms out just above it (AIMD back-off)
             if (target < safe_floor(nowMs) - 0.01) {

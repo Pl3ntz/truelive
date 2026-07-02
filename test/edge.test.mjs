@@ -337,6 +337,16 @@ test('rescue sizing: short bridge when arrivals are recovering, full step when s
     assert.equal(out2.rescueTo, 2.5, `recovering: expected the 2.5s bridge, got ${out2.rescueTo}`);
 });
 
+test('a long gap gets ONE rescue, not a chain of step-backs', () => {
+    const gov = createEdgeGovernor();
+    // calm baseline, then a 20s total starvation (longer than any bridge)
+    const arrival = i => (i >= 300 && i < 380 ? 0 : (i % 2 === 0 ? 0.6 : 0));
+    const log = simulate(gov, { ticks: 700, arrivalFn: arrival, startReserve: 5 });
+    const duringGap = log.slice(300, 385).filter(s => s.rescue).length;
+    assert.equal(duringGap, 1,
+        `a single gap must cost exactly one rescue, got ${duringGap}`);
+});
+
 test('buffer-first: no acceleration while the reserve is thin', () => {
     const gov = createEdgeGovernor();
     // reserve hovers just above danger with weak inflow — must rest at 1.0
