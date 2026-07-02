@@ -9,9 +9,10 @@ internet permitem. Adapta-se sozinho. Sem coleta.
 
 ## Descrição longa
 
-⚡ O ao vivo do YouTube não é ao vivo: o player te segura vários segundos atrás
-de propósito — e boa parte desse vídeo já está baixada no seu computador. Num
-jogo, é a diferença entre ouvir o grito do vizinho e gritar junto.
+O ao vivo do YouTube não é ao vivo: o player te segura vários segundos atrás
+de propósito — e boa parte desse vídeo já está baixada no seu computador. Em
+qualquer live — o lance, o drop, o anúncio — é a diferença entre reagir junto
+e ficar sabendo pelo chat.
 
 O TrueLive te deixa colado no ponto mais recente disponível:
 
@@ -39,7 +40,7 @@ Atalhos: Alt+Shift+Y liga/desliga · Alt+Shift+L pula pro ao vivo.
 Ferramentas / Entretenimento
 
 ## Screenshots (1280x800)
-1. Player com badge "⚡ 2,9s" numa live de esporte (herói)
+1. Player com badge " 2,9s" numa live com movimento (herói)
 2. Popup com os 3 modos
 3. Badge expandido no hover (atraso · reserva)
 

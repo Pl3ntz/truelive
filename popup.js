@@ -103,7 +103,7 @@ function renderModes() {
         const meta = common.modeMeta[name];
         const btn = el('button', {
             class: 'seg-btn', type: 'button', role: 'radio', 'aria-checked': 'false',
-        }, name === 'edge' ? `⚡ ${meta.title}` : meta.title);
+        }, meta.title);
         btn.addEventListener('click', () => applyPreset(name));
         modeCards[name] = btn;
         seg.append(btn);

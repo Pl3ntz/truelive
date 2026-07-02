@@ -475,13 +475,22 @@
         + '._live_catch_up_pinned.tl-warn{background:rgba(150,100,0,.75);opacity:.95}'
         + '._live_catch_up_pinned.tl-warn .tl-num{color:#ffd77a}'
         + '@keyframes _tl_pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.82)}}'
-        + '._tl_bolt{color:#4a90ff;display:inline-block;animation:_tl_pulse 1.6s ease-in-out infinite;'
-        + 'filter:drop-shadow(0 0 3px rgba(41,121,255,.7));font-size:10px}'
+        + '._tl_bolt{color:#4a90ff;display:inline-flex;animation:_tl_pulse 1.6s ease-in-out infinite;'
+        + 'filter:drop-shadow(0 0 3px rgba(41,121,255,.7))}'
         + '@media (prefers-reduced-motion: reduce){._tl_bolt{animation:none !important}}';
 
-    const pinned_bolt = document.createElement('span');
-    pinned_bolt.className = '_tl_bolt';
-    pinned_bolt.textContent = '⚡';
+    // Bolt icon as inline SVG — no emoji anywhere in the product (Owner rule),
+    // and SVG renders identically across platforms while emoji glyphs don't.
+    const pinned_bolt = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    pinned_bolt.setAttribute('class', '_tl_bolt');
+    pinned_bolt.setAttribute('viewBox', '0 0 24 24');
+    pinned_bolt.setAttribute('width', '10');
+    pinned_bolt.setAttribute('height', '10');
+    pinned_bolt.setAttribute('aria-hidden', 'true');
+    const bolt_path = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    bolt_path.setAttribute('points', '13 2 3 14 11 14 10 22 21 9 13 9');
+    bolt_path.setAttribute('fill', 'currentColor');
+    pinned_bolt.append(bolt_path);
     const pinned_short = document.createElement('span');
     pinned_short.className = 'tl-short tl-num';
     const pinned_full = document.createElement('span');

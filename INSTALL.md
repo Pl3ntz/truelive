@@ -22,8 +22,8 @@ Enquanto isso, ou se você preferir instalar por fora da loja:
    desenvolvedor"**. *(É só um nome assustador — não muda nada no seu Chrome.)*
 5. Clique no botão **"Carregar sem compactação"** que apareceu e escolha a
    pasta `truelive` do passo 2.
-6. Pronto! Abra uma live no YouTube, clique no ícone de quebra-cabeça 🧩 no
-   topo do Chrome e fixe o ⚡ TrueLive. Clique nele e escolha **Super Ao
+6. Pronto! Abra uma live no YouTube, clique no ícone de quebra-cabeça (peça de encaixe) no
+   topo do Chrome e fixe o TrueLive. Clique nele e escolha **Super Ao
    Vivo** — o badge no player mostra seu delay caindo.
 
 ## Edge, Brave, Opera e Vivaldi

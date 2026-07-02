@@ -4,20 +4,36 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TrueLive — o ao vivo de verdade. Menor delay em lives do YouTube</title>
-    <meta name="description" content="Extensão gratuita e de código aberto que reduz o delay de lives do YouTube pro território da TV aberta — 3,2s medidos da transmissão à tela. Sem coleta de dados, adapta-se sozinha à sua internet." />
-    <meta property="og:title" content="TrueLive — o ao vivo de verdade" />
-    <meta property="og:description" content="O ao vivo de verdade: 3,2s medidos da transmissão à sua tela — não 20 segundos atrás. Extensão gratuita pro YouTube." />
-    <meta property="og:image" content="https://truelive.vitorplentz.com.br/assets/screenshot-1-hero.png?v=3" />
-    <meta property="og:type" content="website" />
-    <link rel="icon" href="assets/icon.png?v=2" />
-    <link rel="stylesheet" href="assets/style.css?v=2" />
+    <title>TrueLive — menor delay em lives do YouTube</title>
+    <meta name="description" content="Extensão gratuita e de código aberto que reduz o atraso (delay) de lives do YouTube. Zero coleta de dados; adapta-se à transmissão e à sua internet." />
+    <link rel="canonical" href="https://truelive.vitorplentz.com.br/" />
+    <link rel="alternate" hreflang="pt-BR" href="https://truelive.vitorplentz.com.br/" />
     <link rel="alternate" hreflang="en" href="https://truelive.vitorplentz.com.br/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://truelive.vitorplentz.com.br/" />
+    <meta property="og:title" content="TrueLive — o ao vivo de verdade" />
+    <meta property="og:description" content="O menor delay que a transmissão e a sua internet permitem — 3,2s medidos. Grátis e de código aberto." />
+    <meta property="og:image" content="https://truelive.vitorplentz.com.br/assets/og-image.png?v=a794f55f" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://truelive.vitorplentz.com.br/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="TrueLive" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TrueLive — o ao vivo de verdade" />
+    <meta name="twitter:description" content="O menor delay que a transmissão e a sua internet permitem — 3,2s medidos. Grátis e de código aberto." />
+    <meta name="twitter:image" content="https://truelive.vitorplentz.com.br/assets/og-image.png?v=a794f55f" />
+    <link rel="icon" href="assets/icon.png?v=a84b11e6" />
+    <link rel="stylesheet" href="assets/style.css?v=83bf8c3e" />
+    <link rel="alternate" hreflang="en" href="https://truelive.vitorplentz.com.br/en/" />
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"SoftwareApplication","name":"TrueLive","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome, Edge, Brave, Opera, Firefox","inLanguage":"pt-BR","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"description":"Extensão gratuita e de código aberto que reduz o atraso de lives do YouTube ao mínimo que a transmissão e a internet do usuário permitem.","url":"https://truelive.vitorplentz.com.br/","license":"https://www.gnu.org/licenses/gpl-3.0.html"}
+    </script>
 </head>
 
 <body>
     <header class="wrap top">
-        <a class="brand" href="/"><img src="assets/icon.png?v=2" alt="" /> TrueLive</a>
+        <a class="brand" href="/"><img src="assets/icon.png?v=a84b11e6" alt="" width="30" height="30" /> TrueLive</a>
         <nav class="top-nav">
             <a href="#instalar">Instalar</a>
             <a href="#faq">Dúvidas</a>
@@ -35,31 +51,31 @@
                     <strong>transmissão e a sua internet</strong> permitem — 3,2s medidos da
                     transmissão à sua tela, no território da TV aberta.</p>
                 <div class="cta-row">
-                    <a class="btn primary soon" href="#instalar">Chrome <span class="tag">em breve na loja</span></a>
-                    <a class="btn soon" href="#instalar">Firefox <span class="tag">em breve na loja</span></a>
-                    <a class="btn" href="#instalar">⬇ Instalar agora (2 minutos)</a>
+                    <a class="btn primary" href="#instalar">Instalar agora (2 minutos)</a>
+                    <button class="btn soon" type="button" disabled aria-disabled="true">Chrome <span class="tag">em breve na loja</span></button>
+                    <button class="btn soon" type="button" disabled aria-disabled="true">Firefox <span class="tag">em breve na loja</span></button>
                 </div>
                 <p class="hero-note">Grátis · Código aberto (GPL-3.0) · Zero coleta de dados · Funciona em Chrome, Edge, Brave, Opera e Firefox</p>
 
-                <div class="race" aria-label="Simulação: o mesmo gol chegando em cada tela, no delay medido de cada uma">
+                <div class="race" aria-hidden="true">
                     <div class="race-head">
-                        <span class="race-title">O mesmo gol, em cada tela</span>
+                        <span class="race-title">O mesmo momento, em cada tela</span>
                         <span class="race-clock" aria-hidden="true">0,0s</span>
                     </div>
-                    <div class="race-event"><span class="ball" aria-hidden="true">⚽</span> GOL no estádio!</div>
+                    <div class="race-event"><span class="ball"><span class="live-dot"></span></span> Aconteceu ao vivo!</div>
                     <div class="lane hl" data-delay="3.2">
                         <div class="lane-label">YouTube + <strong>TrueLive</strong></div>
-                        <div class="lane-screen"><span class="lane-wait">aguardando o sinal…</span><span class="lane-goal">⚽ GOOOL!</span></div>
+                        <div class="lane-screen"><span class="lane-wait">aguardando o sinal…</span><span class="lane-goal">AO VIVO!</span></div>
                         <div class="lane-stamp">3,2s</div>
                     </div>
                     <div class="lane" data-delay="7.0">
                         <div class="lane-label">YouTube padrão</div>
-                        <div class="lane-screen"><span class="lane-wait">aguardando o sinal…</span><span class="lane-goal">⚽ GOOOL!</span></div>
+                        <div class="lane-screen"><span class="lane-wait">aguardando o sinal…</span><span class="lane-goal">AO VIVO!</span></div>
                         <div class="lane-stamp">7,0s</div>
                     </div>
                     <div class="lane" data-delay="19">
-                        <div class="lane-label">CazéTV na Copa</div>
-                        <div class="lane-screen"><span class="lane-wait">aguardando o sinal… (é sério, espera)</span><span class="lane-goal">⚽ GOOOL!</span></div>
+                        <div class="lane-label">CazéTV na Copa (exemplo medido)</div>
+                        <div class="lane-screen"><span class="lane-wait">aguardando o sinal… (é sério, espera)</span><span class="lane-goal">AO VIVO!</span></div>
                         <div class="lane-stamp">~19s</div>
                     </div>
                     <p class="race-foot">Simulação em tempo real, delays medidos na mesma transmissão (relógio de ingestão). A TV aberta corre por caminho próprio (~3-5s do estádio) — chegamos no território dela, não à frente.</p>
@@ -75,7 +91,7 @@
                 <div class="bar-row hl">
                     <div class="bar-label">YouTube + TrueLive (Super Ao Vivo)</div>
                     <div class="bar-track"><div class="bar-fill" style="width:16%"></div></div>
-                    <div class="bar-val"><span data-count="3.2" data-comma="1" data-suffix="s medido">3,2s medido</span></div>
+                    <div class="bar-val"><span data-count="3.2" data-suffix="s medido">3,2s medido</span></div>
                 </div>
                 <div class="bar-row">
                     <div class="bar-label">Outras extensões (só aceleram o vídeo)</div>
@@ -143,20 +159,20 @@
             <p class="lead reveal reveal-d1">Você não configura nada. Liga o Super Ao Vivo e ele cuida do resto:</p>
             <div class="cards">
                 <div class="card reveal">
-                    <div class="ico">📏</div>
+                    <div class="ico"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg></div>
                     <h3>Mede o delay de verdade</h3>
                     <p>Usa o relógio interno do player pra saber exatamente quantos segundos você está
                         atrás do ao vivo — e mostra num badge discreto, se você quiser.</p>
                 </div>
                 <div class="card reveal reveal-d1">
-                    <div class="ico">⚡</div>
+                    <div class="ico"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><polygon points="13 2 3 14 11 14 10 22 21 9 13 9"/></svg></div>
                     <h3>Cola na borda do vivo</h3>
                     <p>Parte do vídeo "do futuro" já está baixada no seu computador. O TrueLive
                         reposiciona a reprodução nessa borda — por isso chega mais perto que
                         qualquer extensão que só acelera o vídeo.</p>
                 </div>
                 <div class="card reveal reveal-d2">
-                    <div class="ico">🛡️</div>
+                    <div class="ico"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg></div>
                     <h3>Se protege sozinho</h3>
                     <p>Mede a "respiração" da sua conexão e mantém a distância segura. Se a internet
                         oscilar, ele recua na hora — a velocidade nunca cai e o vídeo não trava.
@@ -164,11 +180,11 @@
                 </div>
             </div>
             <div class="badge-demo reveal">
-                <span class="badge-pill"><span class="bolt" aria-hidden="true">⚡</span><span class="val">7,0s</span></span>
+                <span class="badge-pill"><span class="bolt"><svg class="i-bolt" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><polygon points="13 2 3 14 11 14 10 22 21 9 13 9"/></svg></span><span class="val">7,0s</span></span>
                 <span class="badge-demo-note">O badge no player mostra seu delay real caindo, ao vivo — assim, do jeito que você vai ver.</span>
             </div>
             <div class="hero-shot reveal">
-                <img src="assets/screenshot-1-hero.png?v=3" loading="lazy"
+                <img src="assets/screenshot-1-hero.png?v=6e19acc4" loading="lazy" width="1280" height="800"
                     alt="Player do YouTube com o badge do TrueLive mostrando 2,9 segundos de delay" />
             </div>
         </section>
@@ -176,7 +192,7 @@
         <section class="alt" id="instalar">
             <div class="wrap">
                 <h2>Instalar (2 minutos, sem conhecimento técnico)</h2>
-                <p class="easy-note">✓ Se você sabe baixar um arquivo e dar dois cliques, você consegue.</p>
+                <p class="easy-note"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Se você sabe baixar um arquivo e dar dois cliques, você consegue.</p>
                 <div class="tabs" role="tablist">
                     <button class="tab-btn" role="tab" aria-selected="true" data-panel="p-chrome" type="button">Chrome</button>
                     <button class="tab-btn" role="tab" aria-selected="false" data-panel="p-edge" type="button">Edge / Brave / Opera</button>
@@ -193,8 +209,8 @@
                         <li>No canto superior direito dessa página, ligue a chavinha <strong>"Modo do desenvolvedor"</strong>.
                             <span class="hint">É só um nome assustador — não muda nada no seu Chrome.</span></li>
                         <li>Clique no botão <strong>"Carregar sem compactação"</strong> que apareceu, e escolha a pasta "truelive" do passo 2.</li>
-                        <li>Pronto! Abra uma live no YouTube, clique no ícone de quebra-cabeça 🧩 no topo do Chrome e fixe o ⚡ TrueLive.
-                            <span class="hint">Clique no ⚡ e escolha "Super Ao Vivo". O badge no player mostra seu delay caindo.</span></li>
+                        <li>Pronto! Abra uma live no YouTube, clique no ícone de quebra-cabeça (peça de encaixe) no topo do Chrome e fixe o TrueLive.
+                            <span class="hint">Clique nele e escolha "Super Ao Vivo". O badge no player mostra seu delay caindo.</span></li>
                     </ol>
                 </div>
 
@@ -206,7 +222,7 @@
                         <li>Cole na barra de endereço e aperte Enter — no <strong>Edge</strong>: <code>edge://extensions</code> · no <strong>Brave</strong>: <code>brave://extensions</code> · no <strong>Opera</strong>: <code>opera://extensions</code></li>
                         <li>Ligue o <strong>"Modo do desenvolvedor"</strong> (chavinha no canto da página).</li>
                         <li>Clique em <strong>"Carregar sem compactação"</strong> e escolha a pasta "truelive".</li>
-                        <li>Pronto! Abra uma live, fixe o ⚡ TrueLive na barra e escolha "Super Ao Vivo".</li>
+                        <li>Pronto! Abra uma live, fixe o TrueLive na barra e escolha "Super Ao Vivo".</li>
                     </ol>
                 </div>
 
@@ -223,11 +239,11 @@
         </section>
 
         <section class="wrap" id="apoiar">
-            <h2>Grátis pra sempre. Se ajudou, me pague um café ☕</h2>
+            <h2>Grátis pra sempre. Se ajudou, me pague um café</h2>
             <p class="lead">O TrueLive é feito por uma pessoa, de graça e com código aberto.
                 Doação via PIX — você escolhe o valor no app do seu banco:</p>
             <div class="donate">
-                <div class="qr"><img src="assets/pix-qr.svg?v=2" alt="QR Code PIX para doação" /></div>
+                <div class="qr"><img src="assets/pix-qr.svg?v=51021721" alt="QR Code PIX para doação" width="180" height="180" /></div>
                 <div>
                     <p>Aponte a câmera do app do banco pro QR Code, ou copie o código:</p>
                     <button class="copy-pix" type="button"
@@ -259,9 +275,9 @@
                         qualquer pessoa pode conferir.</p>
                 </details>
                 <details>
-                    <summary>Por que ainda tem 3 segundos? Não dava pra ser 0?</summary>
-                    <p>Não — nem a TV aberta é 0 (ela tem ~3-5s do estádio até sua antena). O sinal
-                        precisa sair do estádio, ser codificado, subir pro YouTube e chegar até você.
+                    <summary>Por que ainda tem 3 segundos de atraso? Não dava pra ser 0?</summary>
+                    <p>Não — nem a TV aberta é 0 (ela tem ~3-5s do evento até sua antena). O sinal
+                        precisa sair do local, ser codificado, subir pro YouTube e chegar até você.
                         Os ~3s são o limite físico do caminho — e é exatamente nele que o TrueLive te coloca.</p>
                 </details>
                 <details>
@@ -282,7 +298,7 @@
 
     <footer>
         <div class="wrap foot-grid">
-            <div>⚡ <strong>TrueLive</strong> — o ao vivo de verdade · GPL-3.0 · © 2026 Vitor Plentz</div>
+            <div><strong>TrueLive</strong> — o ao vivo de verdade · GPL-3.0 · © 2026 Vitor Plentz</div>
             <div>
                 <a href="https://github.com/Pl3ntz/truelive">Código-fonte</a> ·
                 <a href="https://github.com/Pl3ntz/truelive/blob/main/docs/DELAY-BENCHMARK.md">Benchmark</a> ·
@@ -291,7 +307,7 @@
         </div>
     </footer>
 
-    <script src="assets/app.js?v=2"></script>
+    <script src="assets/app.js?v=33009373"></script>
 </body>
 
 </html>

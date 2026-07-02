@@ -22,5 +22,6 @@
 - [ ] LICENSE + THIRD-PARTY-NOTICES no zip (já embarcados)
 
 ## Divulgação
-- [ ] Post de lançamento (ângulo: "chega junto do território da TV aberta — 3,2s medidos, ~16s à frente da CazéTV padrão")
-- [ ] Comunidades: r/futebol, r/CazeTV, X/Twitter tech-BR
+- [ ] Post de lançamento (ângulo genérico: "qualquer live do YouTube no menor atraso que a transmissão permite — 3,2s medidos vs ~7s do player padrão")
+- [ ] Caso para imprensa: Copa 2026 / CazéTV (+15-20s atrás da TV aberta; com TrueLive, território da TV aberta)
+- [ ] Comunidades: X/Twitter tech-BR; esports/gaming; r/futebol e r/CazeTV (via caso Copa)

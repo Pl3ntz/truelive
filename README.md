@@ -1,12 +1,14 @@
-# ⚡ TrueLive
+# TrueLive
 
 **O ao vivo de verdade — assista lives do YouTube com o menor atraso que a sua
 internet permite.**
 
-Quando você assiste uma live no YouTube, está vendo o passado: o player te
-segura vários segundos atrás de propósito, como colchão de segurança — e boa
-parte desse vídeo **já está baixada no seu computador**. Na CazéTV durante a
-Copa 2026, isso significou ver o gol ~20 segundos depois da TV aberta.
+Quando você assiste qualquer live no YouTube — show, gameplay, lançamento,
+notícia, sorteio, culto, aula, jogo — está vendo o passado: o player te segura
+vários segundos atrás de propósito, como colchão de segurança, e boa parte
+desse vídeo **já está baixada no seu computador**. No caso mais famoso, a
+CazéTV na Copa 2026, isso significou ver o gol ~20 segundos depois da TV
+aberta.
 
 O TrueLive elimina esse excesso e te deixa colado no ponto mais recente
 disponível, com proteção automática contra travamentos.
@@ -61,12 +63,12 @@ nada:
 
 - **Automático** — equilíbrio sem pensar: reduz o atraso quando a conexão
   aguenta, mantém mais reserva quando ela oscila.
-- **Super Ao Vivo** ⚡ — força o menor atraso fisicamente possível, com quatro
+- **Super Ao Vivo** — força o menor atraso fisicamente possível, com quatro
   camadas de proteção para a experiência nunca degradar:
   1. **Piso dinâmico medido** — o motor mede a "respiração" da sua conexão e
      descobre o quão perto do vivo dá pra chegar (base conservadora: 2,0s).
      Descer abaixo de 2,5s é conquistado com 3+ minutos de estabilidade provada.
-  2. **Reação preventiva** — picos de bitrate (lances!) aumentam a reserva
+  2. **Reação preventiva** — picos de bitrate (ação na tela) aumentam a reserva
      *antes* de virarem travada.
   3. **Resgate instantâneo** — se a reserva despencar, um único recuo de ~1-2s
      restaura a proteção na hora. A velocidade **nunca** cai abaixo de 1,0x —
@@ -78,7 +80,7 @@ nada:
 
 Badge discreto no canto superior esquerdo (estética "Stats for nerds"):
 
-- Em repouso: `⚡ 2,9s` — seu atraso real, medido fim-a-fim
+- Em repouso: `2,9s` — seu atraso real, medido fim-a-fim
 - Hover: `atraso 2,9s · reserva 2,0s`
 - Âmbar + expandido: reserva fina (o modo já está agindo)
 - Esmaece quando você usa os controles do player
@@ -125,7 +127,7 @@ Arquitetura: `engine/controller.js` (matemática de catch-up, unit-tested) ·
 
 ## Apoie o projeto
 
-Botão "☕ Apoiar o projeto" no popup — PIX (QR/copia-e-cola) gerado localmente.
+Botão "Apoiar o projeto" no popup — PIX (QR/copia-e-cola) gerado localmente.
 
 ## Licença e créditos
 
