@@ -274,6 +274,21 @@ test('one freak delivery gap does not pin the floor; a repeating one does', () =
         `a repeating gap must raise the measured need (${gov2.getState().drawdown})`);
 });
 
+test('quantile floor: the rare deepest valley does not tax every second', () => {
+    const gov = createEdgeGovernor();
+    // many shallow valleys (~2s) + one deep (~5s) inside the window: the
+    // floor should track the shallow majority, leaving the tail to rescues
+    const arrival = i => {
+        if (i >= 380 && i < 400) return 0;             // one 5s valley
+        if (i % 60 >= 52) return 0;                    // 2s valley every 15s
+        return i % 2 === 0 ? 0.6 : 0;                  // 1.2x surplus: valleys repay
+    };
+    simulate(gov, { ticks: 960, arrivalFn: arrival, startReserve: 10 });
+    const need = gov.getState().drawdown;
+    assert.ok(need < 4.0, `floor must follow the shallow majority, got ${need}`);
+    assert.ok(need >= 1.5, `floor must still honor the recurring valleys, got ${need}`);
+});
+
 test('buffer-first: no acceleration while the reserve is thin', () => {
     const gov = createEdgeGovernor();
     // reserve hovers just above danger with weak inflow — must rest at 1.0
