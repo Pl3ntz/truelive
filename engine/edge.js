@@ -54,10 +54,13 @@
         // the safe floor; a rescue is the congestion signal: back off above
         // the level that failed, remember it for a while, try again later.
         // Worst case (budget spent) degrades to exactly the safe floor.
-        const PROBE_CALM_MS = 120000;    // calm to earn probing below the floor
+        // Owner (2026-07-02): optimistic by default — descend toward the
+        // minimum continuously (the "TV at 2x" instinct) and brake on
+        // EVIDENCE (a rescue / thin buffer), not on preemptive statistics.
+        const PROBE_CALM_MS = 45000;     // calm to earn probing below the floor
         const PROBE_BACKOFF = 1.0;       // failed level + this = new lower bound
         const PROBE_FAIL_TTL_MS = 600000; // how long a failed level is remembered
-        const PROBE_MAX_RESCUES = 1;     // rescues within the window that...
+        const PROBE_MAX_RESCUES = 2;     // rescues within the window that...
         const PROBE_RESCUE_WINDOW_MS = 600000; // ...pause probing (hold safe floor)
         const DD_RECENT_WINDOW_MS = 30000; // short valley memory: the probe never
                                            // dives below what JUST happened
@@ -347,8 +350,9 @@
                 // Two-speed descent: ABOVE the safe floor the incident bump
                 // drains fast (the floor already covers the measured valleys —
                 // lingering above it is pure wasted delay); BELOW it, probing
-                // territory, keep the cautious creep.
-                const step = target > safe_floor(nowMs) + 1e-9 ? CREEP * 3 : CREEP;
+                // territory, twice the old crawl — optimistic by default,
+                // the brakes are evidence-driven (Owner rule).
+                const step = target > safe_floor(nowMs) + 1e-9 ? CREEP * 3 : CREEP * 2;
                 target = Math.max(floor, target - step);
             }
             // Rescue sizing, recovery-aware: if arrivals already outpace the
