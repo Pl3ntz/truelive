@@ -99,10 +99,18 @@
         let last_end = null;          // buffered.end of previous tick
         let cum = 0;                  // cumulative (arrival − wallclock) since anchor
         let cum_max = 0;              // running peak of cum
-        let dd_filter = winmax_create();
-        let dd_now = 0;               // windowed max drawdown (the measured need)
+        // Valley EPISODES: each contiguous drawdown excursion is one event.
+        // The floor uses the 2nd-deepest completed episode in the window (BBR
+        // robustness lesson: a max is hostage to one freak outlier — a single
+        // 13s broadcast hiccup must not pin the floor at the ceiling for
+        // minutes; a REPEATING gap enters twice and is honored). The ongoing
+        // episode always counts in full — it is happening right now.
+        let episodes = [];            // completed valleys: {t, v}
+        let ep_max = 0;               // depth of the ongoing valley
+        let in_valley = false;
+        let dd_now = 0;               // the resulting measured need (debug)
         let dd_recent_filter = winmax_create();
-        let dd_recent = 0;            // same statistic over 30s — the probe's floor
+        let dd_recent = 0;            // plain 30s max — the probe's floor
         let reserve_ema = null;
         let inflow_ema = 0;           // smoothed net inflow per tick (s)
         let last_trouble = 0;         // stall, rescue, or failed rescue
@@ -119,12 +127,22 @@
             last_end = null;
             cum = 0;
             cum_max = 0;
-            dd_filter = winmax_create();
+            episodes = [];
+            ep_max = 0;
+            in_valley = false;
             dd_now = 0;
             dd_recent_filter = winmax_create();
             dd_recent = 0;
             reserve_ema = null;
             inflow_ema = 0;
+        }
+
+        // Measured need: deepest of {2nd-deepest completed valley, ongoing valley}.
+        function dd_need(now) {
+            const vs = episodes.filter(e => now - e.t < DD_WINDOW_MS)
+                .map(e => e.v).sort((a, b) => b - a);
+            const completed = vs.length >= 2 ? vs[1] : 0;
+            return Math.max(completed, ep_max);
         }
 
         function abs_gate(now) {
@@ -202,7 +220,16 @@
                         cum += arrival - dt;
                         cum_max = Math.max(cum_max, cum);
                         const drawdown = cum_max - cum;
-                        dd_now = winmax_update(dd_filter, DD_WINDOW_MS, nowMs, drawdown);
+                        if (drawdown > 0.3) {
+                            in_valley = true;
+                            ep_max = Math.max(ep_max, drawdown);
+                        } else if (in_valley && drawdown < 0.1) {
+                            episodes.push({ t: nowMs, v: ep_max });
+                            if (episodes.length > 16) episodes.shift();
+                            in_valley = false;
+                            ep_max = 0;
+                        }
+                        dd_now = dd_need(nowMs);
                         dd_recent = winmax_update(dd_recent_filter, DD_RECENT_WINDOW_MS, nowMs, drawdown);
                         inflow_ema = inflow_ema * 0.8 + (arrival - dt) * 0.2;
                     }

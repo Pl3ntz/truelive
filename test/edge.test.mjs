@@ -256,6 +256,24 @@ test('incident bump above the safe floor drains fast after calm', () => {
     assert.ok(settled < 320, `bump drained only at tick ${settled} (too slow)`);
 });
 
+test('one freak delivery gap does not pin the floor; a repeating one does', () => {
+    const gov = createEdgeGovernor();
+    // calm, then ONE 8s starvation (freak broadcast hiccup), then calm again
+    const oneGap = i => (i >= 400 && i < 432 ? 0 : (i % 2 === 0 ? 0.5 : 0));
+    simulate(gov, { ticks: 1200, arrivalFn: oneGap, startReserve: 12 });
+    const afterFreak = gov.getState().drawdown;
+    assert.ok(afterFreak < 4.0,
+        `a single completed freak valley must not own the floor (need ${afterFreak})`);
+
+    const gov2 = createEdgeGovernor();
+    // the same gap REPEATING inside the window must be honored
+    const twoGaps = i => ((i >= 400 && i < 432) || (i >= 700 && i < 732)
+        ? 0 : (i % 2 === 0 ? 0.5 : 0));
+    simulate(gov2, { ticks: 900, arrivalFn: twoGaps, startReserve: 12 });
+    assert.ok(gov2.getState().drawdown > 4.0,
+        `a repeating gap must raise the measured need (${gov2.getState().drawdown})`);
+});
+
 test('buffer-first: no acceleration while the reserve is thin', () => {
     const gov = createEdgeGovernor();
     // reserve hovers just above danger with weak inflow — must rest at 1.0
