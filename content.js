@@ -12,14 +12,15 @@ let storageListenersAttached = false;
 
 function main(common) {
     function loadSettings() {
-        chrome.storage.local.get(common.storage, data => {
-            sendLoadSettingsEvent(common.resolveSettings(data));
+        chrome.storage.local.get([...common.storage, common.channelMemoryKey], data => {
+            sendLoadSettingsEvent(common.resolveSettings(data), data[common.channelMemoryKey] || {});
         });
     }
 
-    function sendLoadSettingsEvent(settings) {
+    function sendLoadSettingsEvent(settings, channelMemory) {
         const detailObject = {
             ...settings,
+            channelMemory,
             copiedLabel: common.label.supportCopied,
             // Localized aria-labels shipped to the engine (page world has no chrome.i18n).
             a11yLabels: {
@@ -45,11 +46,25 @@ function main(common) {
         if (area === 'local' && common.storage.some(k => k in changes)) loadSettings();
     }
 
+    // Learned per-channel profile (the engine measures in the page world;
+    // we persist it). Local storage only — nothing ever leaves the machine.
+    function onLearned(e) {
+        const d = e.detail;
+        if (!d || typeof d.author !== 'string' || !d.author) return;
+        chrome.storage.local.get([common.channelMemoryKey], data => {
+            const map = common.mergeChannelMemory(data[common.channelMemoryKey], d.author, {
+                target: +d.target, need: +d.need, pipeline: +d.pipeline,
+            });
+            chrome.storage.local.set({ [common.channelMemoryKey]: map });
+        });
+    }
+
     // Guard against double-registration if the content script re-inits in the
     // same page — listeners would otherwise stack up (PR #17).
     if (!storageListenersAttached) {
         storageListenersAttached = true;
         chrome.storage.onChanged.addListener(onEngineSettingsChanged);
+        document.addEventListener('_live_catch_up_learned', onLearned);
     }
 
     document.addEventListener('_live_catch_up_init', () => {

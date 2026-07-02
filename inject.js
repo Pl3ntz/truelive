@@ -199,6 +199,8 @@
     let edge_self_seek_until = 0;  // our rescue seek fires 'waiting' — not a real stall
     let edge_quality_h = 0;        // last seen videoHeight (rendition watch)
     let edge_pipeline_ema = null;  // smoothed ingest->edge pipeline (honest ruler)
+    let edge_seeded = false;       // channel memory applied once per attach
+    let edge_learn_last = 0;       // last time the learned profile was persisted
 
     // Rendition switched: old measurements describe the old rendition, and the
     // buffer wipe of the switch must not read as danger. Re-learn from zero.
@@ -559,6 +561,20 @@
                     apply_playback_rate(1.0);
                 } else if (ev && !ev.paused && ev.buffered.length) {
                     const b_end = ev.buffered.end(ev.buffered.length - 1);
+                    // Channel memory: a channel watched before starts on its
+                    // remembered profile instead of re-learning from zero
+                    // (live measurement overrides the memory within minutes).
+                    if (!edge_seeded) {
+                        edge_seeded = true;
+                        const author = caps.videoData ? player.getVideoData()?.author : undefined;
+                        const mem = author && settings.channelMemory ? settings.channelMemory[author] : undefined;
+                        if (mem) {
+                            edge_governor.seed(now, mem.target, mem.need);
+                            if (Number.isFinite(mem.pipeline) && mem.pipeline > 0) {
+                                edge_pipeline_ema = mem.pipeline;
+                            }
+                        }
+                    }
                     // Edge mode's catch-up ceiling is 2.0x (hls.js cap), not the
                     // Automático preset: minimum delay is the mode's whole point,
                     // and the sigmoid only reaches the ceiling when FAR behind —
@@ -596,6 +612,25 @@
                         floorEst: pinned_floor_est === null ? null : +pinned_floor_est.toFixed(2),
                         ...st,
                     };
+                    // Persist what this channel taught us (local storage only,
+                    // via content.js) — the next session starts on target.
+                    // First save after 60s of measurement, then every 60s.
+                    if (edge_learn_last === 0) {
+                        edge_learn_last = now;
+                    } else if (now - edge_learn_last > 60000 && Number.isFinite(edge_pipeline_ema)) {
+                        edge_learn_last = now;
+                        const author = caps.videoData ? player.getVideoData()?.author : undefined;
+                        if (author) {
+                            document.dispatchEvent(new CustomEvent('_live_catch_up_learned', {
+                                detail: {
+                                    author,
+                                    target: +g.target.toFixed(2),
+                                    need: +st.drawdown.toFixed(2),
+                                    pipeline: +edge_pipeline_ema.toFixed(2),
+                                },
+                            }));
+                        }
+                    }
                 }
             } else if (settings.edge) {
                 // governor unavailable (engine/edge.js failed to load) — the
@@ -720,6 +755,8 @@
         edge_quality_h = 0;
         edge_pipeline_ema = null;   // new stream: new pipeline, new honest ruler
         pinned_floor_est = null;
+        edge_seeded = false;        // re-seed from channel memory on the new stream
+        edge_learn_last = 0;
 
         if (bound_video !== v) {
             // Detach the previous <video>'s listener before binding the new one,
