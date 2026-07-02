@@ -127,3 +127,17 @@ sem resgate, sem suspensão; catch-up só em 1,15-1,25x; 4K estável ~10s
 mergulhou 17,7→10,7s em 90s. Lição honesta: o piso é da TRANSMISSÃO na
 conexão do usuário (esta live entrega 720p com déficits de ~5,5s também)
 — o motor obedece a medição, não a expectativa por classe.
+
+### Validação final do v2 em campo (2026-07-02, Copa 4K60)
+
+Após a rodada completa de calibração (sonda informada pelo vale recente,
+descida em duas velocidades, teto de catch-up 2x, piso por episódios com
+desconto de outlier único, re-ancoragem de déficit permanente):
+
+- Badge: "Delay 9,3s · Buffer 4,1s · Piso desta live ~8,9s" — cavalgando a
+  0,4s do limite físico estimado, a 1,0x, estável, em 4K.
+- Percepção do Owner: áudio ECOANDO com a TV aberta (CazéTV pós-truque do
+  2x) — mesmo nível de delay, sem os congelamentos que a TV come.
+- O piso físico desta live (~8,9s) é da classe de latência do canal
+  (pipeline ~5s) + entrega 4K em rajadas (~4s) — o 3,16s do benchmark
+  segue válido para streams de classe ultra-baixa (régua declarada).
