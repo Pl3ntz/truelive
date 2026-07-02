@@ -29,6 +29,8 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+
 a { color: var(--accent-strong); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
@@ -46,28 +48,29 @@ a:hover { text-decoration: underline; }
 .brand img { width: 30px; height: 30px; border-radius: 8px; }
 .brand:hover { text-decoration: none; }
 
-.top-nav { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+.top-nav { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.top-nav a { padding: 8px 10px; }
 .lang { color: var(--text-dim); border: 1px solid var(--border); padding: 4px 10px; border-radius: 999px; }
 
 /* ------------------------------------------------------------- hero */
 .hero {
-    padding: 56px 0 40px;
+    padding: 34px 0 40px;
     text-align: center;
     background:
         radial-gradient(ellipse 720px 420px at 50% -80px, rgba(41, 121, 255, 0.16), transparent);
 }
 
-.hero h1 { font-size: 46px; line-height: 1.15; margin: 0 0 14px; letter-spacing: -0.02em; }
+.hero h1 { font-size: 42px; line-height: 1.15; margin: 0 0 12px; letter-spacing: -0.02em; }
 .hero h1 em { font-style: normal; color: var(--accent-strong); }
 
 .hero .sub {
-    font-size: 19px;
+    font-size: 18px;
     color: var(--text-dim);
     max-width: 640px;
-    margin: 0 auto 30px;
+    margin: 0 auto 24px;
 }
 
-.cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+.cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
 
 .btn {
     display: inline-flex;
@@ -84,9 +87,9 @@ a:hover { text-decoration: underline; }
 }
 
 .btn:hover { text-decoration: none; transform: translateY(-1px); border-color: var(--accent); }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn.primary:hover { background: #3d86ff; }
-.btn.soon { opacity: 0.55; pointer-events: none; }
+.btn.primary { background: #1a5cd6; border-color: #1a5cd6; color: #fff; }
+.btn.primary:hover { background: var(--accent); }
+.btn.soon { opacity: 0.55; pointer-events: none; cursor: default; font-family: inherit; }
 .btn .tag { font-size: 11px; font-weight: 500; color: var(--text-dim); background: var(--surface-2); padding: 2px 7px; border-radius: 999px; }
 .btn.primary .tag { color: #dbe7ff; background: rgba(255, 255, 255, 0.16); }
 
@@ -104,17 +107,17 @@ a:hover { text-decoration: underline; }
 /* "Corrida do gol": o gol acontece em t=0 e cada tela recebe no seu delay.
    Motor de tempo em app.js; aqui só estados visuais (transform/opacity). */
 .race {
-    margin: 44px auto 0;
+    margin: 24px auto 0;
     max-width: 860px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 26px 28px 22px;
+    padding: 20px 28px 16px;
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
     text-align: left;
 }
 
-.race-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.race-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .race-title { font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-dim); }
 .race-clock {
     font-variant-numeric: tabular-nums;
@@ -134,13 +137,27 @@ a:hover { text-decoration: underline; }
     gap: 10px;
     font-weight: 700;
     font-size: 15px;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
     opacity: 0.45;
     transition: opacity 200ms ease;
 }
 
 .race-event.fired { opacity: 1; }
-.race-event .ball { display: inline-block; font-size: 20px; }
+.race-event .ball { display: inline-flex; }
+.live-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #e5484d;
+    box-shadow: 0 0 10px rgba(229, 72, 77, 0.7);
+    animation: _tl_dot 1.4s ease-in-out infinite;
+}
+
+@keyframes _tl_dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+}
 .race-event.fired .ball { animation: kick 700ms ease; }
 
 @keyframes kick {
@@ -149,7 +166,7 @@ a:hover { text-decoration: underline; }
     100% { transform: translateX(0) rotate(360deg); }
 }
 
-.lane { display: grid; grid-template-columns: 190px 1fr 92px; gap: 14px; align-items: center; padding: 9px 0; border-top: 1px solid var(--border); }
+.lane { display: grid; grid-template-columns: 190px 1fr 92px; gap: 14px; align-items: center; padding: 7px 0; border-top: 1px solid var(--border); }
 .lane-label { font-size: 13.5px; color: var(--text-dim); }
 .lane.hl .lane-label { color: var(--text); font-weight: 600; }
 
@@ -198,7 +215,7 @@ a:hover { text-decoration: underline; }
 .lane.scored .lane-stamp { opacity: 1; color: var(--text); }
 .lane.hl.scored .lane-stamp { color: var(--accent-strong); }
 
-.race-foot { margin-top: 14px; font-size: 12.5px; color: var(--text-dim); }
+.race-foot { margin-top: 10px; font-size: 12.5px; color: var(--text-dim); }
 
 /* ------------------------------------------------------------- badge demo */
 .badge-demo {
@@ -271,7 +288,6 @@ h2 { font-size: 30px; letter-spacing: -0.01em; margin: 0 0 8px; }
 .bars.in-view .bar-row:nth-child(2) .bar-fill { transition-delay: 120ms; }
 .bars.in-view .bar-row:nth-child(3) .bar-fill { transition-delay: 240ms; }
 .bars.in-view .bar-row:nth-child(4) .bar-fill { transition-delay: 360ms; }
-.bars.in-view .bar-row:nth-child(5) .bar-fill { transition-delay: 480ms; }
 .bar-row.hl .bar-fill { background: linear-gradient(90deg, #2979ff, #58a6ff); }
 .bar-row.bad .bar-fill { background: #7a4a4a; }
 
@@ -424,9 +440,6 @@ footer { padding: 44px 0 60px; border-top: 1px solid var(--border); font-size: 1
     .bar-label { text-align: left; }
     .donate { grid-template-columns: 1fr; }
     .donate .qr { max-width: 220px; }
-}
-
-@media (max-width: 860px) {
     .lane { grid-template-columns: 1fr; gap: 4px; }
     .lane-stamp { text-align: left; }
     .race { padding: 20px 18px; }
@@ -437,6 +450,7 @@ footer { padding: 44px 0 60px; border-top: 1px solid var(--border); font-size: 1
     .btn, .card, .bar-fill, .reveal { transition: none; }
     .reveal { opacity: 1; transform: none; }
     .bar-fill, .bars .bar-fill { transform: scaleX(1); }
-    .badge-pill .bolt, .race-event.fired .ball, .lane.scored .lane-goal { animation: none; }
+    .badge-pill .bolt, .race-event.fired .ball, .lane.scored .lane-goal, .live-dot { animation: none; }
+    .lane-wait, .lane-goal { transition: none; }
     .race.running .lane-screen::before { transition: none; transform: scaleX(1); }
 }

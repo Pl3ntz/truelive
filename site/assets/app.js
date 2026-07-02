@@ -164,10 +164,13 @@ if (race) {
 
 // ------------------------------------------------------------- badge demo
 // Réplica do badge do player: delay caindo de 7,0s até 3,2s, em loop suave.
+// Mesmo gate de viewport da corrida (review): rAF só roda com o badge visível.
 const badgeVal = document.querySelector('.badge-pill .val');
 if (badgeVal && !reducedMotion) {
     const FROM = 7.0, TO = 3.2, FALL = 6000, HOLD = 2600;
     let t0 = null;
+    let badgeRaf = null;
+    let badgeVisible = false;
     function badgeTick(now) {
         if (!t0) t0 = now;
         const t = now - t0;
@@ -179,7 +182,18 @@ if (badgeVal && !reducedMotion) {
         } else {
             t0 = now;
         }
-        requestAnimationFrame(badgeTick);
+        if (badgeVisible) badgeRaf = requestAnimationFrame(badgeTick);
     }
-    requestAnimationFrame(badgeTick);
+    new IntersectionObserver(entries => {
+        for (const e of entries) {
+            badgeVisible = e.isIntersecting;
+            if (badgeVisible && badgeRaf === null) {
+                badgeRaf = requestAnimationFrame(badgeTick);
+            } else if (!badgeVisible && badgeRaf !== null) {
+                cancelAnimationFrame(badgeRaf);
+                badgeRaf = null;
+                t0 = null;
+            }
+        }
+    }, { threshold: 0.3 }).observe(badgeVal.closest('.badge-demo'));
 }
