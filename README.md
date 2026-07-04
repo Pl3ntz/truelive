@@ -58,7 +58,7 @@ Análise completa, com 16 fontes, metodologia e lacunas conhecidas:
 
 ## Modos
 
-Dois modos, ambos **se adaptam sozinhos à sua internet**: você nunca configura
+Dois modos, ambos **se adaptam sozinhos à sua internet**. Você nunca configura
 nada:
 
 - **Automático**: equilíbrio sem pensar. Reduz o atraso quando a conexão
@@ -80,7 +80,7 @@ nada:
 
 Badge discreto no canto superior esquerdo (estética "Stats for nerds"):
 
-- Em repouso: `2,9s`: seu atraso real, medido fim-a-fim
+- Em repouso: `2,9s`, seu atraso real, medido fim-a-fim
 - Hover: `atraso 2,9s · reserva 2,0s`
 - Âmbar + expandido: reserva fina (o modo já está agindo)
 - Esmaece quando você usa os controles do player
