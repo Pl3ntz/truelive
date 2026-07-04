@@ -6,7 +6,7 @@
       "message": "Regardez les directs YouTube avec le délai le plus faible possible selon la diffusion et votre connexion. Aucune collecte."
    },
    "tagline": {
-      "message": "Le vrai direct — le délai le plus faible possible"
+      "message": "Le vrai direct : le délai le plus faible possible"
    },
    "sectionMode": {
       "message": "Mode"
@@ -27,7 +27,7 @@
       "message": "Super Direct"
    },
    "modeEdgeDesc": {
-      "message": "Le délai le plus faible que la diffusion et votre connexion permettent — recule tout seul si nécessaire."
+      "message": "Le délai le plus faible que la diffusion et votre connexion permettent. Recule tout seul si nécessaire."
    },
    "sectionIndicators": {
       "message": "Indicateurs du lecteur"

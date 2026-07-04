@@ -6,7 +6,7 @@
       "message": "Mira directos de YouTube con el menor retraso que la transmisión y tu internet permiten. Se adapta solo. Sin recopilar datos."
    },
    "tagline": {
-      "message": "El directo de verdad — el menor delay posible"
+      "message": "El directo de verdad: el menor delay posible"
    },
    "sectionMode": {
       "message": "Modo"
@@ -27,7 +27,7 @@
       "message": "Super En Vivo"
    },
    "modeEdgeDesc": {
-      "message": "El menor delay que la transmisión y tu internet permiten — retrocede solo si hace falta."
+      "message": "El menor delay que la transmisión y tu internet permiten. Retrocede solo si hace falta."
    },
    "sectionIndicators": {
       "message": "Indicadores en el player"
