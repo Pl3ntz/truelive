@@ -70,6 +70,15 @@ node scripts/deploy-site.mjs  # site: hashes + gate + imprime os scp
   no ar; landing e INSTALL.md apontam pra loja como caminho estável.
   **1.1.2 em análise** (submetida pelo Owner em 2026-07-04). Publisher
   `89a24945-…` (Vitor Plentz, não-negociante EEE, email verificado).
+- **1.1.3 pronta localmente, ESPERANDO a 1.1.2 sair da fila.** Build
+  Chrome+Firefox feita, título ASO localizado (chave `extName`), commit
+  `5301b31`. A CWS NÃO deixa cancelar revisão pendente por conta própria:
+  o botão "Reverter para versão anterior" só faz rollback entre versões
+  PUBLICADAS (e a 1.0.0 é a primeira, então dá erro). Upload de novo
+  pacote fica desabilitado enquanto a 1.1.2 está "Revisão pendente".
+  **Ação quando a 1.1.2 for revisada (aprovada OU rejeitada):** subir a
+  1.1.3 (que é superset da 1.1.2 + ASO + limpeza de travessões) e colar a
+  descrição longa de `publishing/STORE_LISTING.md` no campo do dashboard.
 - **Firefox AMO:** slug `truelive`, ainda "Awaiting Review" (API pública
   retorna 401 anônimo em 2026-07-04). Conta Mozilla com 2FA do Owner.
 - **Modelo de distribuição:** loja = estável · GitHub releases = beta
