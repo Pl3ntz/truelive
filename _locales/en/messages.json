@@ -24,7 +24,7 @@
       "message": "Balances delay and stability for your connection, automatically."
    },
    "modeEdge": {
-      "message": "Super Ao Vivo"
+      "message": "Super Live"
    },
    "modeEdgeDesc": {
       "message": "The lowest delay this stream and your internet allow — backs off by itself when needed."
