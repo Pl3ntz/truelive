@@ -13,13 +13,28 @@ const fmt = (n, decimals) => {
 };
 
 // ------------------------------------------------------------- tabs install
-const tabs = document.querySelectorAll('.tab-btn');
+// Padrão ARIA Tabs (WAI-ARIA APG): roving tabindex + setas/Home/End.
+const tabs = [...document.querySelectorAll('.tab-btn')];
 const panels = document.querySelectorAll('.tab-panel');
 
-tabs.forEach(btn => {
-    btn.addEventListener('click', () => {
-        tabs.forEach(b => b.setAttribute('aria-selected', String(b === btn)));
-        panels.forEach(p => { p.hidden = p.id !== btn.dataset.panel; });
+function selectTab(btn, moveFocus) {
+    tabs.forEach(b => {
+        const selected = b === btn;
+        b.setAttribute('aria-selected', String(selected));
+        b.tabIndex = selected ? 0 : -1;
+    });
+    panels.forEach(p => { p.hidden = p.id !== btn.dataset.panel; });
+    if (moveFocus) btn.focus();
+}
+
+tabs.forEach((btn, i) => {
+    btn.tabIndex = btn.getAttribute('aria-selected') === 'true' ? 0 : -1;
+    btn.addEventListener('click', () => selectTab(btn, false));
+    btn.addEventListener('keydown', e => {
+        const moves = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 };
+        if (!(e.key in moves)) return;
+        e.preventDefault();
+        selectTab(tabs[(moves[e.key] + tabs.length) % tabs.length], true);
     });
 });
 

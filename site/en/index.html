@@ -4,8 +4,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TrueLive — lowest delay for YouTube live streams</title>
-    <meta name="description" content="Free, open-source extension that cuts YouTube live stream delay. Zero data collection; adapts to the stream and your connection automatically." />
+    <title>Lowest delay for YouTube live streams — TrueLive</title>
+    <meta name="description" content="Free, open-source extension that cuts YouTube live stream delay. Zero data collection — adapts to the stream and your connection automatically." />
     <link rel="canonical" href="https://truelive.vitorplentz.com.br/en/" />
     <link rel="alternate" hreflang="pt-BR" href="https://truelive.vitorplentz.com.br/" />
     <link rel="alternate" hreflang="en" href="https://truelive.vitorplentz.com.br/en/" />
@@ -24,11 +24,11 @@
     <meta name="twitter:description" content="The lowest delay the stream and your internet allow — a measured 3.2s. Free and open source." />
     <meta name="twitter:image" content="https://truelive.vitorplentz.com.br/assets/og-image.png?v=a794f55f" />
     <link rel="icon" href="../assets/icon.png?v=a84b11e6" />
-    <link rel="stylesheet" href="../assets/style.css?v=d3142f39" />
-    <link rel="alternate" hreflang="pt-BR" href="https://truelive.vitorplentz.com.br/" />
+    <link rel="stylesheet" href="../assets/style.css?v=c77d7005" />
+    <link rel="preconnect" href="https://analytics.vitorplentz.com.br" />
     <script defer src="https://analytics.vitorplentz.com.br/script.js" data-website-id="09e3c322-9299-4694-9ace-4d0268e81416"></script>
     <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"SoftwareApplication","name":"TrueLive","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome, Edge, Brave, Opera, Firefox","inLanguage":"en","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free, open-source extension that cuts YouTube live stream delay to the minimum the stream and your connection allow.","url":"https://truelive.vitorplentz.com.br/en/","installUrl":"https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna","license":"https://www.gnu.org/licenses/gpl-3.0.html"}
+    {"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","name":"TrueLive","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome, Edge, Brave, Opera, Firefox","inLanguage":"en","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free, open-source extension that cuts YouTube live stream delay to the minimum the stream and your connection allow.","url":"https://truelive.vitorplentz.com.br/en/","installUrl":"https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna","license":"https://www.gnu.org/licenses/gpl-3.0.html","publisher":{"@id":"https://truelive.vitorplentz.com.br/#org"}},{"@type":"Organization","@id":"https://truelive.vitorplentz.com.br/#org","name":"TrueLive","url":"https://truelive.vitorplentz.com.br/","logo":"https://truelive.vitorplentz.com.br/assets/icon.png?v=a84b11e6","sameAs":["https://github.com/Pl3ntz/truelive"]},{"@type":"WebSite","name":"TrueLive","url":"https://truelive.vitorplentz.com.br/","inLanguage":"en","publisher":{"@id":"https://truelive.vitorplentz.com.br/#org"}}]}
     </script>
 </head>
 
@@ -89,7 +89,7 @@
         <section class="wrap" id="numbers">
             <span class="eyebrow-label reveal">Benchmark</span>
             <h2 class="reveal">Measured, not promised</h2>
-            <p class="lead reveal reveal-d1">Same machine, same stream, same clock (the player's own). How far behind each
+            <p class="lead reveal reveal-d1">Same machine, same stream, same clock (the player's own). How far behind the live moment each
                 way of watching runs:</p>
             <div class="bars">
                 <div class="bar-row hl">
@@ -202,12 +202,12 @@
                 <h2>Install in 1 click</h2>
                 <p class="easy-note"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> We're on the official Chrome Web Store. No files, no developer mode.</p>
                 <div class="tabs" role="tablist">
-                    <button class="tab-btn" role="tab" aria-selected="true" data-panel="p-chrome" type="button">Chrome</button>
-                    <button class="tab-btn" role="tab" aria-selected="false" data-panel="p-edge" type="button">Edge / Brave / Opera</button>
-                    <button class="tab-btn" role="tab" aria-selected="false" data-panel="p-firefox" type="button">Firefox</button>
+                    <button class="tab-btn" id="tb-chrome" role="tab" aria-selected="true" aria-controls="p-chrome" data-panel="p-chrome" type="button">Chrome</button>
+                    <button class="tab-btn" id="tb-edge" role="tab" aria-selected="false" aria-controls="p-edge" data-panel="p-edge" type="button">Edge / Brave / Opera</button>
+                    <button class="tab-btn" id="tb-firefox" role="tab" aria-selected="false" aria-controls="p-firefox" data-panel="p-firefox" type="button">Firefox</button>
                 </div>
 
-                <div class="tab-panel" id="p-chrome">
+                <div class="tab-panel" id="p-chrome" role="tabpanel" aria-labelledby="tb-chrome" tabindex="0">
                     <ol class="steps">
                         <li><a href="https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna" rel="noopener"><strong>Open TrueLive on the Chrome Web Store</strong></a> and click <strong>"Add to Chrome"</strong>.
                             <span class="hint">Google's official store. Updates arrive automatically.</span></li>
@@ -216,7 +216,7 @@
                     </ol>
                 </div>
 
-                <div class="tab-panel" id="p-edge" hidden>
+                <div class="tab-panel" id="p-edge" role="tabpanel" aria-labelledby="tb-edge" tabindex="0" hidden>
                     <ol class="steps">
                         <li>Easiest path: <a href="https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna" rel="noopener"><strong>install from the Chrome Web Store</strong></a> — Edge, Brave and Opera accept Chrome's store just fine.
                             <span class="hint">Edge shows a prompt asking to "Allow extensions from other stores". Just accept it.</span></li>
@@ -230,7 +230,7 @@
                     </ol>
                 </div>
 
-                <div class="tab-panel" id="p-firefox" hidden>
+                <div class="tab-panel" id="p-firefox" role="tabpanel" aria-labelledby="tb-firefox" tabindex="0" hidden>
                     <ol class="steps">
                         <li>On Firefox, the safe install path is the official store — our version is
                             <strong>under Mozilla review</strong>.
@@ -247,7 +247,7 @@
                             the most tested, recommended for most people. The <strong>beta</strong> is where we
                             try new improvements before they reach the store: you download a <code>.zip</code>
                             file, install it in ~2 minutes following the
-                            <a href="https://github.com/Pl3ntz/truelive/blob/main/INSTALL.md" rel="noopener">walkthrough</a>
+                            <a href="https://github.com/Pl3ntz/truelive/blob/main/INSTALL.md" rel="noopener">walkthrough</a>,
                             and get everything first.</p>
                     </div>
                     <a class="btn" href="https://github.com/Pl3ntz/truelive/releases" rel="noopener">Download the beta <span class="tag">.zip</span></a>
@@ -313,7 +313,7 @@
         </div>
     </footer>
 
-    <script src="../assets/app.js?v=33009373"></script>
+    <script src="../assets/app.js?v=0052981a"></script>
 </body>
 
 </html>

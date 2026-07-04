@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TrueLive — menor delay em lives do YouTube</title>
+    <title>Menor delay em lives do YouTube — TrueLive</title>
     <meta name="description" content="Extensão gratuita e de código aberto que reduz o atraso (delay) de lives do YouTube. Zero coleta de dados; adapta-se à transmissão e à sua internet." />
     <link rel="canonical" href="https://truelive.vitorplentz.com.br/" />
     <link rel="alternate" hreflang="pt-BR" href="https://truelive.vitorplentz.com.br/" />
@@ -24,11 +24,11 @@
     <meta name="twitter:description" content="O menor delay que a transmissão e a sua internet permitem — 3,2s medidos. Grátis e de código aberto." />
     <meta name="twitter:image" content="https://truelive.vitorplentz.com.br/assets/og-image.png?v=a794f55f" />
     <link rel="icon" href="assets/icon.png?v=a84b11e6" />
-    <link rel="stylesheet" href="assets/style.css?v=d3142f39" />
-    <link rel="alternate" hreflang="en" href="https://truelive.vitorplentz.com.br/en/" />
+    <link rel="stylesheet" href="assets/style.css?v=c77d7005" />
+    <link rel="preconnect" href="https://analytics.vitorplentz.com.br" />
     <script defer src="https://analytics.vitorplentz.com.br/script.js" data-website-id="09e3c322-9299-4694-9ace-4d0268e81416"></script>
     <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"SoftwareApplication","name":"TrueLive","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome, Edge, Brave, Opera, Firefox","inLanguage":"pt-BR","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"description":"Extensão gratuita e de código aberto que reduz o atraso de lives do YouTube ao mínimo que a transmissão e a internet do usuário permitem.","url":"https://truelive.vitorplentz.com.br/","installUrl":"https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna","license":"https://www.gnu.org/licenses/gpl-3.0.html"}
+    {"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","name":"TrueLive","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome, Edge, Brave, Opera, Firefox","inLanguage":"pt-BR","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"description":"Extensão gratuita e de código aberto que reduz o atraso de lives do YouTube ao mínimo que a transmissão e a internet do usuário permitem.","url":"https://truelive.vitorplentz.com.br/","installUrl":"https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna","license":"https://www.gnu.org/licenses/gpl-3.0.html","publisher":{"@id":"https://truelive.vitorplentz.com.br/#org"}},{"@type":"Organization","@id":"https://truelive.vitorplentz.com.br/#org","name":"TrueLive","url":"https://truelive.vitorplentz.com.br/","logo":"https://truelive.vitorplentz.com.br/assets/icon.png?v=a84b11e6","sameAs":["https://github.com/Pl3ntz/truelive"]},{"@type":"WebSite","name":"TrueLive","url":"https://truelive.vitorplentz.com.br/","inLanguage":"pt-BR","publisher":{"@id":"https://truelive.vitorplentz.com.br/#org"}}]}
     </script>
 </head>
 
@@ -201,12 +201,12 @@
                 <h2>Instale em 1 clique</h2>
                 <p class="easy-note"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Estamos na loja oficial do Chrome. Sem arquivo, sem modo desenvolvedor.</p>
                 <div class="tabs" role="tablist">
-                    <button class="tab-btn" role="tab" aria-selected="true" data-panel="p-chrome" type="button">Chrome</button>
-                    <button class="tab-btn" role="tab" aria-selected="false" data-panel="p-edge" type="button">Edge / Brave / Opera</button>
-                    <button class="tab-btn" role="tab" aria-selected="false" data-panel="p-firefox" type="button">Firefox</button>
+                    <button class="tab-btn" id="tb-chrome" role="tab" aria-selected="true" aria-controls="p-chrome" data-panel="p-chrome" type="button">Chrome</button>
+                    <button class="tab-btn" id="tb-edge" role="tab" aria-selected="false" aria-controls="p-edge" data-panel="p-edge" type="button">Edge / Brave / Opera</button>
+                    <button class="tab-btn" id="tb-firefox" role="tab" aria-selected="false" aria-controls="p-firefox" data-panel="p-firefox" type="button">Firefox</button>
                 </div>
 
-                <div class="tab-panel" id="p-chrome">
+                <div class="tab-panel" id="p-chrome" role="tabpanel" aria-labelledby="tb-chrome" tabindex="0">
                     <ol class="steps">
                         <li><a href="https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna" rel="noopener"><strong>Abra o TrueLive na Chrome Web Store</strong></a> e clique em <strong>"Usar no Chrome"</strong>.
                             <span class="hint">Loja oficial do Google. Atualizações chegam sozinhas.</span></li>
@@ -215,7 +215,7 @@
                     </ol>
                 </div>
 
-                <div class="tab-panel" id="p-edge" hidden>
+                <div class="tab-panel" id="p-edge" role="tabpanel" aria-labelledby="tb-edge" tabindex="0" hidden>
                     <ol class="steps">
                         <li>O jeito mais fácil: <a href="https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna" rel="noopener"><strong>instale pela Chrome Web Store</strong></a> — Edge, Brave e Opera aceitam a loja do Chrome normalmente.
                             <span class="hint">No Edge, aparece um aviso pedindo pra "Permitir extensões de outras lojas". É só aceitar.</span></li>
@@ -229,7 +229,7 @@
                     </ol>
                 </div>
 
-                <div class="tab-panel" id="p-firefox" hidden>
+                <div class="tab-panel" id="p-firefox" role="tabpanel" aria-labelledby="tb-firefox" tabindex="0" hidden>
                     <ol class="steps">
                         <li>No Firefox, a instalação segura é pela loja oficial — nossa versão está
                             <strong>em análise pela Mozilla</strong>.
@@ -326,7 +326,7 @@
         </div>
     </footer>
 
-    <script src="assets/app.js?v=33009373"></script>
+    <script src="assets/app.js?v=0052981a"></script>
 </body>
 
 </html>
