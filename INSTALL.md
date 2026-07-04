@@ -3,16 +3,19 @@
 > **Não precisa entender de tecnologia.** Se você sabe baixar um arquivo e dar
 > dois cliques, você consegue — leva ~2 minutos.
 
-Quando a extensão for aprovada nas lojas, a instalação vira 1 clique
-(Chrome Web Store / Firefox Add-ons — links estarão aqui e em
-[truelive.vitorplentz.com.br](https://truelive.vitorplentz.com.br)).
-Enquanto isso, ou se você preferir instalar por fora da loja:
+O jeito mais fácil é pela
+[Chrome Web Store](https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna)
+— 1 clique e as atualizações chegam sozinhas. O passo a passo abaixo é pra
+quem prefere instalar por fora da loja **ou quer a versão beta mais nova**
+(ela sai aqui no GitHub primeiro; a loja recebe depois da revisão do Google).
 
 ## Chrome
 
-1. **Baixe o TrueLive**: [clique aqui](https://github.com/Pl3ntz/truelive/releases/latest)
-   e escolha o arquivo `truelive-1.0.0.zip`. Ele vai pra sua pasta de
-   Downloads, como qualquer arquivo.
+1. **Baixe o TrueLive**: [clique aqui](https://github.com/Pl3ntz/truelive/releases),
+   abra a versão do topo da página (a mais recente, beta incluída) e, em
+   **Assets**, clique no primeiro arquivo `.zip` — o nome começa com
+   `truelive-` (o que tem `firefox` no nome é só pro Firefox). Ele vai pra
+   sua pasta de Downloads, como qualquer arquivo.
 2. Encontre o arquivo baixado e **dê dois cliques** nele. Isso cria uma pasta
    chamada `truelive`. *(Essa pasta precisa continuar existindo — não apague
    depois de instalar.)*
