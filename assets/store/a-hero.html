@@ -1,0 +1,59 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  width:1280px; height:800px; overflow:hidden;
+  background:#0a0e1a;
+  background-image: radial-gradient(1100px 700px at 50% -10%, #131c33 0%, #0a0e1a 60%);
+  color:#f2f5fb;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  display:flex; flex-direction:column;
+}
+.stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:56px 90px 24px; }
+.footer {
+  display:flex; align-items:center; justify-content:center; gap:14px;
+  padding:0 0 34px; color:#8fa1c4; font-size:19px;
+}
+.footer .mark { width:26px; height:26px; }
+.footer b { color:#c8d4ea; font-weight:600; }
+.footer .dot { opacity:.5; }
+h1 { font-size:64px; font-weight:700; letter-spacing:-0.02em; text-align:center; }
+.sub { font-size:26px; color:#8fa1c4; text-align:center; margin-top:14px; }
+.accent { color:#4d8dff; }
+.mono { font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+
+.bars { width:100%; max-width:980px; margin-top:64px; display:flex; flex-direction:column; gap:30px; }
+.brow { display:flex; align-items:center; gap:26px; }
+.blabel { width:270px; font-size:23px; color:#c8d4ea; text-align:right; flex:none; }
+.blabel.hot { color:#fff; font-weight:600; }
+.btrack { flex:1; height:34px; background:#161f36; border-radius:17px; position:relative; }
+.bfill { height:100%; border-radius:17px; background:#2c3document; }
+.bval { width:110px; font-size:25px; color:#8fa1c4; flex:none; }
+.bval.hot { color:#4d8dff; font-weight:700; }
+.fill-tl { background:linear-gradient(90deg,#2563eb,#4d8dff); width:17%; height:100%; border-radius:17px; box-shadow:0 0 22px rgba(77,141,255,.45); }
+.fill-tv { background:#3d4c6e; width:21%; height:100%; border-radius:17px; }
+.fill-yt { background:#2a3550; width:37%; height:100%; border-radius:17px; }
+.note { margin-top:46px; font-size:19px; color:#66779b; text-align:center; }
+</style></head><body>
+<div class="stage">
+  <h1>Actually <span class="accent">live</span>.</h1>
+  <p class="sub">3.2 seconds measured from broadcast to your screen — not estimated, not promised</p>
+  <div class="bars">
+    <div class="brow">
+      <div class="blabel hot">YouTube + TrueLive</div>
+      <div class="btrack"><div class="fill-tl"></div></div>
+      <div class="bval hot mono">3.2s</div>
+    </div>
+    <div class="brow">
+      <div class="blabel">Broadcast TV</div>
+      <div class="btrack"><div class="fill-tv"></div></div>
+      <div class="bval mono">3–5s</div>
+    </div>
+    <div class="brow">
+      <div class="blabel">YouTube default</div>
+      <div class="btrack"><div class="fill-yt"></div></div>
+      <div class="bval mono">7.0s</div>
+    </div>
+  </div>
+  <p class="note">Measured with the player's own ingest clock on low-latency streams. Public methodology in the repository.</p>
+</div>
+<div class="footer"><svg class="mark" viewBox="0 0 128 128"><defs><linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#82b4ff"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><rect x="2" y="2" width="124" height="124" rx="28" fill="#141c31"/><g transform="translate(20.8,20.8) scale(1.8)"><polygon points="26,4 12,27 21,27 19,44 36,20 26,20" fill="url(#b)" stroke="url(#b)" stroke-width="2.5" stroke-linejoin="round"/></g></svg><b>TrueLive</b><span class="dot">·</span><span>the lowest delay your stream allows</span><span class="dot">·</span><span>free &amp; open source</span></div></body></html>

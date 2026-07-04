@@ -1,0 +1,57 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  width:1280px; height:800px; overflow:hidden;
+  background:#0a0e1a;
+  background-image: radial-gradient(1100px 700px at 50% -10%, #131c33 0%, #0a0e1a 60%);
+  color:#f2f5fb;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  display:flex; flex-direction:column;
+}
+.stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:56px 90px 24px; }
+.footer {
+  display:flex; align-items:center; justify-content:center; gap:14px;
+  padding:0 0 34px; color:#8fa1c4; font-size:19px;
+}
+.footer .mark { width:26px; height:26px; }
+.footer b { color:#c8d4ea; font-weight:600; }
+.footer .dot { opacity:.5; }
+h1 { font-size:64px; font-weight:700; letter-spacing:-0.02em; text-align:center; }
+.sub { font-size:26px; color:#8fa1c4; text-align:center; margin-top:14px; }
+.accent { color:#4d8dff; }
+.mono { font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+
+.diagram { width:100%; max-width:1000px; margin-top:60px; }
+.track { position:relative; height:56px; background:#161f36; border-radius:12px; overflow:visible; }
+.buffered { position:absolute; left:0; top:0; bottom:0; width:86%; border-radius:12px; background:linear-gradient(90deg,#1b2b4d,#2563eb); }
+.playhead { position:absolute; left:82%; top:-14px; bottom:-14px; width:5px; background:#fff; border-radius:3px; box-shadow:0 0 18px rgba(255,255,255,.7); }
+.phlabel { position:absolute; left:82%; top:-58px; transform:translateX(-50%); font-size:18px; color:#fff; font-weight:600; white-space:nowrap; }
+.livemark { position:absolute; right:0; top:-58px; font-size:18px; color:#ff5d5d; font-weight:700; letter-spacing:.06em; }
+.livetick { position:absolute; right:0; top:-14px; bottom:-14px; width:5px; background:#ff5d5d; border-radius:3px; opacity:.9; }
+.scale { display:flex; justify-content:space-between; margin-top:22px; font-size:17px; color:#66779b; }
+.vs { margin-top:64px; display:grid; grid-template-columns:1fr 1fr; gap:22px; max-width:1000px; width:100%; }
+.vcard { border-radius:14px; padding:24px 28px; font-size:20px; line-height:1.5; }
+.vcard.them { background:#141b2c; border:1px solid #232f4a; color:#8fa1c4; }
+.vcard.us { background:#12203f; border:1px solid #2f5cc0; color:#dce7fb; }
+.vcard b { display:block; margin-bottom:6px; font-size:21px; }
+.vcard.them b { color:#c8d4ea; }
+.vcard.us b { color:#82b4ff; }
+</style></head><body>
+<div class="stage">
+  <h1>It doesn't speed up. It <span class="accent">rides the edge</span>.</h1>
+  <div class="diagram">
+    <div class="track">
+      <div class="buffered"></div>
+      <div class="playhead"></div>
+      <div class="phlabel">you are here</div>
+      <div class="livetick"></div>
+      <div class="livemark">LIVE</div>
+    </div>
+    <div class="scale"><span>already downloaded on your machine</span><span>true broadcast edge</span></div>
+  </div>
+  <div class="vs">
+    <div class="vcard them"><b>Other extensions</b>speed up playback (1.25x) and hope the buffer holds.</div>
+    <div class="vcard us"><b>TrueLive</b>repositions the playhead at the edge of the downloaded buffer — with automatic stall protection.</div>
+  </div>
+</div>
+<div class="footer"><svg class="mark" viewBox="0 0 128 128"><defs><linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#82b4ff"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><rect x="2" y="2" width="124" height="124" rx="28" fill="#141c31"/><g transform="translate(20.8,20.8) scale(1.8)"><polygon points="26,4 12,27 21,27 19,44 36,20 26,20" fill="url(#b)" stroke="url(#b)" stroke-width="2.5" stroke-linejoin="round"/></g></svg><b>TrueLive</b><span class="dot">·</span><span>the lowest delay your stream allows</span><span class="dot">·</span><span>free &amp; open source</span></div></body></html>
