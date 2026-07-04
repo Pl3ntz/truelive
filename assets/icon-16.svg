@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <!-- Hand-hinted 16px variant: bigger bolt, flat fill, no glow — readable in the toolbar. -->
+  <rect x="0.5" y="0.5" width="15" height="15" rx="4" fill="#10182b"/>
+  <rect x="1" y="1" width="14" height="14" rx="3.5" fill="none" stroke="#3d4c6e" stroke-width="1" opacity="0.9"/>
+  <polygon points="9.5,2 4.5,9 7.5,9 6.5,14 12,7.5 8.5,7.5"
+           fill="#4d8dff" stroke="#4d8dff" stroke-width="1" stroke-linejoin="round"/>
+</svg>

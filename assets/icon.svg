@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- TrueLive master icon — grid-built bolt on dark tile. Source of truth for all PNG sizes ≥32. -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#161f36"/>
+      <stop offset="1" stop-color="#0a0e1a"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#82b4ff"/>
+      <stop offset="0.55" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+  </defs>
+
+  <rect x="2" y="2" width="124" height="124" rx="28" fill="url(#tile)"/>
+  <rect x="2.75" y="2.75" width="122.5" height="122.5" rx="27.25" fill="none" stroke="#33415e" stroke-width="1.5" opacity="0.8"/>
+
+  <!-- glow pass -->
+  <g transform="translate(20.8,20.8) scale(1.8)" filter="url(#glow)" opacity="0.4">
+    <polygon points="26,4 12,27 21,27 19,44 36,20 26,20" fill="#3b82f6" stroke="#3b82f6" stroke-width="2.5" stroke-linejoin="round"/>
+  </g>
+  <!-- bolt -->
+  <g transform="translate(20.8,20.8) scale(1.8)">
+    <polygon points="26,4 12,27 21,27 19,44 36,20 26,20" fill="url(#bolt)" stroke="url(#bolt)" stroke-width="2.5" stroke-linejoin="round"/>
+  </g>
+</svg>
