@@ -20,7 +20,11 @@ THIRD-PARTY-NOTICES.md. Contexto completo da construção: `docs/SESSION-LOG.md`
 5. **Sem âncora em futebol:** o produto é pra QUALQUER live (show, gameplay,
    lançamento, notícia). CazéTV/Copa = no máximo um exemplo medido por doc.
 6. **Textos com voz humana** (sem cara de IA) e revisados — pt-BR passa pelo
-   ortografia-reviewer, EN pelo grammar-reviewer.
+   ortografia-reviewer, EN pelo grammar-reviewer. **Proibido travessão "—"
+   em QUALQUER texto voltado ao usuário** (site, locales, README, INSTALL,
+   store listings): é padrão denunciador de texto de IA. Usar vírgula,
+   dois-pontos, ponto ou parênteses. (Este arquivo e docs internas ficam
+   fora da regra.)
 7. **Zero coleta na extensão** (nenhuma requisição externa). O site usa só
    Umami self-hosted (anônimo, sem cookies) — e isso está declarado no FAQ.
 

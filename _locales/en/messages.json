@@ -6,7 +6,7 @@
       "message": "Watch YouTube live streams with the lowest delay the stream and your internet allow. Adapts on its own. No data collection."
    },
    "tagline": {
-      "message": "Truly live — the lowest possible delay"
+      "message": "Truly live: the lowest possible delay"
    },
    "sectionMode": {
       "message": "Mode"
@@ -27,7 +27,7 @@
       "message": "Super Live"
    },
    "modeEdgeDesc": {
-      "message": "The lowest delay this stream and your internet allow — backs off by itself when needed."
+      "message": "The lowest delay this stream and your internet allow. Backs off by itself when needed."
    },
    "sectionIndicators": {
       "message": "Player indicators"
