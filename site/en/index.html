@@ -28,7 +28,7 @@
     <link rel="alternate" hreflang="pt-BR" href="https://truelive.vitorplentz.com.br/" />
     <script defer src="https://analytics.vitorplentz.com.br/script.js" data-website-id="09e3c322-9299-4694-9ace-4d0268e81416"></script>
     <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"SoftwareApplication","name":"TrueLive","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome, Edge, Brave, Opera, Firefox","inLanguage":"en","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free, open-source extension that cuts YouTube live stream delay to the minimum the stream and your connection allow.","url":"https://truelive.vitorplentz.com.br/en/","license":"https://www.gnu.org/licenses/gpl-3.0.html"}
+    {"@context":"https://schema.org","@type":"SoftwareApplication","name":"TrueLive","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome, Edge, Brave, Opera, Firefox","inLanguage":"en","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free, open-source extension that cuts YouTube live stream delay to the minimum the stream and your connection allow.","url":"https://truelive.vitorplentz.com.br/en/","installUrl":"https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna","license":"https://www.gnu.org/licenses/gpl-3.0.html"}
     </script>
 </head>
 
@@ -54,9 +54,9 @@
                     TrueLive cuts that excess and keeps you at the lowest delay
                     <strong>the stream and your internet</strong> allow. Measured on screen: 3.2s.</p>
                 <div class="cta-row">
-                    <a class="btn primary" href="#install">Install now (2 minutes)</a>
-                    <button class="btn soon" type="button" disabled aria-disabled="true">Chrome <span class="tag">store — coming soon</span></button>
-                    <button class="btn soon" type="button" disabled aria-disabled="true">Firefox <span class="tag">store — coming soon</span></button>
+                    <a class="btn primary" href="https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna" rel="noopener">Add to Chrome, 1 click <span class="tag">official store</span></a>
+                    <a class="btn" href="#install">Edge / Brave / Opera</a>
+                    <button class="btn soon" type="button" disabled aria-disabled="true">Firefox <span class="tag">store, coming soon</span></button>
                 </div>
                 <p class="hero-note">Free · Open source (GPL-3.0) · Zero data collection · Works on Chrome, Edge, Brave, Opera and Firefox</p>
 
@@ -199,8 +199,8 @@
         <section class="alt" id="install">
             <div class="wrap">
                 <span class="eyebrow-label">Install</span>
-                <h2>Install in 2 minutes</h2>
-                <p class="easy-note"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> If you can download a file and double-click it, you can do this.</p>
+                <h2>Install in 1 click</h2>
+                <p class="easy-note"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> We're on the official Chrome Web Store. No files, no developer mode.</p>
                 <div class="tabs" role="tablist">
                     <button class="tab-btn" role="tab" aria-selected="true" data-panel="p-chrome" type="button">Chrome</button>
                     <button class="tab-btn" role="tab" aria-selected="false" data-panel="p-edge" type="button">Edge / Brave / Opera</button>
@@ -209,22 +209,19 @@
 
                 <div class="tab-panel" id="p-chrome">
                     <ol class="steps">
-                        <li><a href="https://github.com/Pl3ntz/truelive/releases/latest">Download TrueLive here</a> — click the first <code>.zip</code> file in the list (its name starts with <code>truelive-</code>).
-                            <span class="hint">It lands in your Downloads folder, like any file.</span></li>
-                        <li>Find the downloaded file and <strong>double-click</strong> it.
-                            <span class="hint">This creates a folder called "truelive". Keep that folder — don't delete it later.</span></li>
-                        <li>In Chrome, copy and paste this into the address bar (where you type websites) and press Enter: <code>chrome://extensions</code></li>
-                        <li>In the top-right corner of that page, flip on <strong>"Developer mode"</strong>.
-                            <span class="hint">Scary name, harmless switch. It changes nothing else in your Chrome.</span></li>
-                        <li>Click the <strong>"Load unpacked"</strong> button that appeared, and pick the "truelive" folder from step 2.</li>
+                        <li><a href="https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna" rel="noopener"><strong>Open TrueLive on the Chrome Web Store</strong></a> and click <strong>"Add to Chrome"</strong>.
+                            <span class="hint">Google's official store. Updates arrive automatically.</span></li>
                         <li>Done! Open a live stream on YouTube, click the puzzle-piece icon at the top of Chrome and pin TrueLive.
                             <span class="hint">Click it and choose "Super Live". The in-player badge shows your delay dropping.</span></li>
+                        <li>Prefer installing outside the store? The manual walkthrough lives in <a href="https://github.com/Pl3ntz/truelive/blob/main/INSTALL.md" rel="noopener">INSTALL.md</a>.</li>
                     </ol>
                 </div>
 
                 <div class="tab-panel" id="p-edge" hidden>
                     <ol class="steps">
-                        <li><a href="https://github.com/Pl3ntz/truelive/releases/latest">Download TrueLive here</a> — click the first <code>.zip</code> file in the list (its name starts with <code>truelive-</code>).</li>
+                        <li>Easiest path: <a href="https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna" rel="noopener"><strong>install from the Chrome Web Store</strong></a> — Edge, Brave and Opera accept Chrome's store just fine.
+                            <span class="hint">Edge shows a prompt asking to "Allow extensions from other stores". Just accept it.</span></li>
+                        <li>Prefer manual install? <a href="https://github.com/Pl3ntz/truelive/releases/latest">Download TrueLive here</a> — click the first <code>.zip</code> file in the list (its name starts with <code>truelive-</code>).</li>
                         <li><strong>Double-click</strong> the downloaded file to create the "truelive" folder.
                             <span class="hint">Don't delete that folder afterwards — the extension lives in it.</span></li>
                         <li>Paste into the address bar and press Enter — <strong>Edge</strong>: <code>edge://extensions</code> · <strong>Brave</strong>: <code>brave://extensions</code> · <strong>Opera</strong>: <code>opera://extensions</code></li>
