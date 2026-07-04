@@ -1,5 +1,22 @@
 # Changelog — TrueLive
 
+## 1.1.3 - 2026-07-04
+
+Sem mudança de motor. Foco em descoberta (ASO) e texto.
+
+### Mudado
+- **Título da loja com palavra-chave (ASO)**: o nome exibido na Chrome Web
+  Store deixou de ser só "TrueLive" e passou a liderar com a marca seguida
+  da dor que resolve, localizado por idioma (pt: "YouTube ao vivo com menos
+  atraso"; en: "Lower delay for YouTube live"; es/fr equivalentes). Validação
+  no Google Trends mostrou que a busca pela solução é quase nula (dor
+  latente): a descoberta acontece na busca interna da loja, onde o título
+  pesa. O nome no popup segue limpo ("TrueLive").
+- **Zero travessão em todo texto de usuário**: site, popup (4 idiomas),
+  README e INSTALL passaram a usar vírgula, dois-pontos ou ponto no lugar do
+  "—" (padrão que denuncia texto de IA). Nova lei do produto.
+- **Seção "Apoie" do site** centralizada e com tom mais cordial.
+
 ## 1.1.0 — 2026-07-02
 
 Motor do Super Ao Vivo reescrito (v2) após diagnóstico ao vivo em stream
