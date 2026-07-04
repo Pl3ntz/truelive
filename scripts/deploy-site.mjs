@@ -18,6 +18,7 @@ const SITE = join(ROOT, 'site')
 const ASSETS_DIR = join(SITE, 'assets')
 const HTML_PT = join(SITE, 'index.html')
 const HTML_EN = join(SITE, 'en', 'index.html')
+const SITEMAP = join(SITE, 'sitemap.xml')
 const REMOTE = 'vitor_server:/srv/sites/truelive'
 
 // ---------------------------------------------------------------- utilities
@@ -119,6 +120,19 @@ const main = () => {
     )
   })
 
+  // lastmod do sitemap acompanha o deploy — valor fixo à mão fica stale
+  // (SEO review 2026-07-04: sitemap dizia 07-02 com conteúdo de 07-04).
+  const today = new Date().toISOString().slice(0, 10)
+  const sitemapOriginal = readFileSync(SITEMAP, 'utf8')
+  const sitemapStamped = sitemapOriginal.replace(
+    /<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/g,
+    `<lastmod>${today}</lastmod>`,
+  )
+  if (sitemapStamped !== sitemapOriginal) {
+    writeFileSync(SITEMAP, sitemapStamped)
+    console.log(`\n== Sitemap ==\n  lastmod -> ${today}`)
+  }
+
   console.log('\n== Check estrutural PT×EN ==')
   const diffs = compareStructure(
     readFileSync(HTML_PT, 'utf8'),
@@ -144,6 +158,7 @@ const main = () => {
       (name) => `scp site/assets/${name} ${REMOTE}/assets/${name}`,
     ),
     `scp site/sitemap.xml ${REMOTE}/sitemap.xml`,
+    `scp site/robots.txt ${REMOTE}/robots.txt`,
     `scp ${relative(ROOT, HTML_PT)} ${REMOTE}/index.html`,
     `scp ${relative(ROOT, HTML_EN)} ${REMOTE}/en/index.html`,
   ]

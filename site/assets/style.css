@@ -11,7 +11,7 @@
     --border-strong: rgba(255, 255, 255, 0.16);
     --text: #f4f5f7;
     --text-2: #9ba1ad;
-    --text-3: #71767f;
+    --text-3: #7f858f;
     --accent: #2979ff;
     --accent-2: #6ea4ff;
     --accent-soft: rgba(41, 121, 255, 0.13);
@@ -25,7 +25,7 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: 70px; }
 
 body {
     margin: 0;
