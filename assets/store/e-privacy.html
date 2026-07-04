@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  width:1280px; height:800px; overflow:hidden;
+  background:#0a0e1a;
+  background-image: radial-gradient(1100px 700px at 50% -10%, #131c33 0%, #0a0e1a 60%);
+  color:#f2f5fb;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  display:flex; flex-direction:column;
+}
+.stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:56px 90px 24px; }
+.footer {
+  display:flex; align-items:center; justify-content:center; gap:14px;
+  padding:0 0 34px; color:#8fa1c4; font-size:19px;
+}
+.footer .mark { width:26px; height:26px; }
+.footer b { color:#c8d4ea; font-weight:600; }
+.footer .dot { opacity:.5; }
+h1 { font-size:64px; font-weight:700; letter-spacing:-0.02em; text-align:center; }
+.sub { font-size:26px; color:#8fa1c4; text-align:center; margin-top:14px; }
+.accent { color:#4d8dff; }
+.mono { font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+
+.grid { margin-top:60px; display:grid; grid-template-columns:repeat(2, 440px); gap:22px; }
+.pcard { background:#101827; border:1px solid #232f4a; border-radius:14px; padding:26px 30px; }
+.pcard b { font-size:22px; color:#f2f5fb; display:block; margin-bottom:6px; }
+.pcard span { font-size:18px; color:#8fa1c4; line-height:1.5; }
+.gpl { margin-top:44px; font-size:20px; color:#66779b; }
+.gpl a { color:#4d8dff; }
+</style></head><body>
+<div class="stage">
+  <h1>Nothing leaves your <span class="accent">browser</span>.</h1>
+  <p class="sub">Everything runs locally — the engine, the measurements, all of it</p>
+  <div class="grid">
+    <div class="pcard"><b>No data collection</b><span>Zero analytics, zero tracking, zero telemetry.</span></div>
+    <div class="pcard"><b>No external requests</b><span>The extension never phones home. Ever.</span></div>
+    <div class="pcard"><b>No sign-up</b><span>Install, open a live stream, done.</span></div>
+    <div class="pcard"><b>Open source · GPL-3.0</b><span>Every line auditable on GitHub. Free forever.</span></div>
+  </div>
+</div>
+<div class="footer"><svg class="mark" viewBox="0 0 128 128"><defs><linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#82b4ff"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><rect x="2" y="2" width="124" height="124" rx="28" fill="#141c31"/><g transform="translate(20.8,20.8) scale(1.8)"><polygon points="26,4 12,27 21,27 19,44 36,20 26,20" fill="url(#b)" stroke="url(#b)" stroke-width="2.5" stroke-linejoin="round"/></g></svg><b>TrueLive</b><span class="dot">·</span><span>the lowest delay your stream allows</span><span class="dot">·</span><span>free &amp; open source</span></div></body></html>
