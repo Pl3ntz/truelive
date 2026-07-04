@@ -559,6 +559,24 @@ section.alt {
     font-weight: 600;
 }
 
+.beta-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 22px;
+    flex-wrap: wrap;
+    max-width: 760px;
+    margin-top: 30px;
+    padding: 18px 22px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.beta-box p { margin: 4px 0 0; font-size: 14px; color: var(--text-3); max-width: 480px; }
+
+.beta-box .btn { flex-shrink: 0; white-space: nowrap; }
+
 /* passos como linha do tempo conectada */
 .steps { counter-reset: step; list-style: none; padding: 0; margin: 0; max-width: 760px; position: relative; }
 
