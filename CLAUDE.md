@@ -60,16 +60,21 @@ npm run build:firefox # dist/firefox (zipar pra AMO)
 node scripts/deploy-site.mjs  # site: hashes + gate + imprime os scp
 ```
 
-## Estado das lojas (2026-07-02)
+## Estado das lojas (2026-07-04)
 
-- **Chrome Web Store:** item `hoihhfamhfmnnldkdllmemehhbcogkna`, "Revisão
-  pendente", publica automático pós-review. Publisher `89a24945-…` (Vitor
-  Plentz, não-negociante EEE, email verificado).
-- **Firefox AMO:** slug `truelive`, "Awaiting Review" (~24h). URL futura:
-  addons.mozilla.org/firefox/addon/truelive/. Conta Mozilla com 2FA do Owner.
-- **Pós-aprovação (pendente):** trocar os botões "em breve na loja" da landing
-  pelos links reais; atualizar README/INSTALL; divulgação (ângulo genérico de
-  live + caso Copa/CazéTV pra imprensa — publishing/CHECKLIST.md).
+- **Chrome Web Store: PUBLICADA.** Item `hoihhfamhfmnnldkdllmemehhbcogkna`
+  no ar; landing e INSTALL.md apontam pra loja como caminho estável.
+  **1.1.2 em análise** (submetida pelo Owner em 2026-07-04). Publisher
+  `89a24945-…` (Vitor Plentz, não-negociante EEE, email verificado).
+- **Firefox AMO:** slug `truelive`, ainda "Awaiting Review" (API pública
+  retorna 401 anônimo em 2026-07-04). Conta Mozilla com 2FA do Owner.
+- **Modelo de distribuição:** loja = estável · GitHub releases = beta
+  (pre-release marcada; a landing tem cartão "Baixar a versão beta (.zip)"
+  apontando pra /releases). **Quando a CWS aprovar a 1.1.2:** promover a
+  release v1.1.2 de Pre-release pra Latest no GitHub (estável = loja).
+- **Pós-aprovação Firefox (pendente):** trocar o botão "em breve na loja"
+  da landing pelo link real da AMO; divulgação (ângulo genérico de live +
+  caso Copa/CazéTV pra imprensa — publishing/CHECKLIST.md).
 
 ## Gotchas aprendidos (não re-tropeçar)
 
