@@ -9,6 +9,11 @@ node_modules/
 # Marketing/store assets — não versionados (gerados a partir dos HTML localmente).
 publishing/assets/
 
+# Credenciais da API de publicação da Chrome Web Store (scripts/publish-cws.mjs).
+# NUNCA versionar: o refresh_token publica em nome do Owner sem senha nem 2FA.
+.env
+.env.local
+
 # OS / editor / cloud cruft
 .DS_Store
 Thumbs.db

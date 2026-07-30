@@ -56,38 +56,42 @@ THIRD-PARTY-NOTICES.md. Contexto completo da construção: `docs/SESSION-LOG.md`
 ## Comandos
 
 ```bash
-npm test              # 47 testes (motores, PIX, presets)
+npm test              # 52 testes (motores, PIX, presets, diagnóstico)
 npm run validate      # manifests + arquivos embarcados
 npm run check:locales # 4 locales íntegros
 npm run build         # build/truelive-<versão>.zip (Chrome)
-npm run build:firefox # dist/firefox (zipar pra AMO)
+npm run build:firefox # dist/firefox (CONGELADO, ver Estado das lojas)
+npm run metrics       # coleta métricas públicas -> docs/metrics-history.jsonl
+npm run publish       # sobe o zip da versão atual pra CWS (precisa de .env)
+npm run publish:auth  # setup único das credenciais da API da CWS
 node scripts/deploy-site.mjs  # site: hashes + gate + imprime os scp
 ```
 
-## Estado das lojas (2026-07-04)
+## Estado das lojas (2026-07-30)
 
-- **Chrome Web Store: PUBLICADA.** Item `hoihhfamhfmnnldkdllmemehhbcogkna`
-  no ar; landing e INSTALL.md apontam pra loja como caminho estável.
-  **1.1.2 em análise** (submetida pelo Owner em 2026-07-04). Publisher
-  `89a24945-…` (Vitor Plentz, não-negociante EEE, email verificado).
-- **1.1.3 pronta localmente, ESPERANDO a 1.1.2 sair da fila.** Build
-  Chrome+Firefox feita, título ASO localizado (chave `extName`), commit
-  `5301b31`. A CWS NÃO deixa cancelar revisão pendente por conta própria:
-  o botão "Reverter para versão anterior" só faz rollback entre versões
-  PUBLICADAS (e a 1.0.0 é a primeira, então dá erro). Upload de novo
-  pacote fica desabilitado enquanto a 1.1.2 está "Revisão pendente".
-  **Ação quando a 1.1.2 for revisada (aprovada OU rejeitada):** subir a
-  1.1.3 (que é superset da 1.1.2 + ASO + limpeza de travessões) e colar a
-  descrição longa de `publishing/STORE_LISTING.md` no campo do dashboard.
-- **Firefox AMO:** slug `truelive`, ainda "Awaiting Review" (API pública
-  retorna 401 anônimo em 2026-07-04). Conta Mozilla com 2FA do Owner.
-- **Modelo de distribuição:** loja = estável · GitHub releases = beta
-  (pre-release marcada; a landing tem cartão "Baixar a versão beta (.zip)"
-  apontando pra /releases). **Quando a CWS aprovar a 1.1.2:** promover a
-  release v1.1.2 de Pre-release pra Latest no GitHub (estável = loja).
-- **Pós-aprovação Firefox (pendente):** trocar o botão "em breve na loja"
-  da landing pelo link real da AMO; divulgação (ângulo genérico de live +
-  caso Copa/CazéTV pra imprensa — publishing/CHECKLIST.md).
+- **Chrome Web Store: PUBLICADA.** Item `hoihhfamhfmnnldkdllmemehhbcogkna`.
+  **1.1.2 foi APROVADA em 2026-07-05** (o CLAUDE.md dizia "em análise" por
+  25 dias; conferir a página pública antes de confiar neste bloco).
+  Publisher `89a24945-…`. A 1.1.3 nunca chegou a subir: virou subconjunto
+  da 1.2.2.
+- **1.2.2 pronta pra publicar** (`build/truelive-1.2.2.zip`). Superset da
+  1.1.3: diagnóstico local, guard de órfão, 4 correções de controle do
+  Off/On e título sem marca de terceiro. Colar a descrição longa de
+  `publishing/STORE_LISTING.md` no dashboard no primeiro upload.
+- **Publicação automatizada:** `npm run publish` usa a API da CWS
+  (`scripts/publish-cws.mjs`), sem painel e sem 2FA. Credenciais em `.env`
+  (fora do git). Setup único: `npm run publish:auth`.
+- **CWS não aceita upload novo enquanto há versão em revisão.** Foi o que
+  travou a 1.1.3 por 25 dias, e não dá pra cancelar revisão pendente:
+  "Reverter para versão anterior" só faz rollback entre versões PUBLICADAS.
+- **Firefox AMO: CONGELADO por decisão do Owner (2026-07-30).** A extensão
+  está pública desde 2026-07-05 com a **1.0.0** (duas versões atrás, sem o
+  motor v2). Não shipar Firefox; a landing não promete mais a loja.
+- **Modelo de distribuição:** loja = estável · GitHub releases = beta.
+- **Métrica:** o que é público sai de `npm run metrics`. O que decide se o
+  PRODUTO é bom (desinstalações/instalações) só existe no painel da loja e
+  precisa de export manual. O site instrumenta os 3 CTAs via Umami desde
+  2026-07-30; o dado NÃO é retroativo.
 
 ## Gotchas aprendidos (não re-tropeçar)
 
@@ -104,8 +108,10 @@ node scripts/deploy-site.mjs  # site: hashes + gate + imprime os scp
 - Stream de "latência normal" tem piso ~10s+ que NENHUMA extensão fura — a
   expectativa por classe de latência precisa estar explícita em todo claim.
 - VPS: o Caddyfile é bind-mount **read-only preso por inode** — mudança de
-  vhost = editar `<caminho-do-Caddyfile>` no host (in-place, sem trocar inode)
-  + `docker restart caddy`. Site é servido de `<caminho-remoto>`.
+  vhost = editar o Caddyfile no host **in-place** (sem trocar inode, ou o
+  bind-mount aponta para o arquivo antigo) + `docker restart caddy`.
+  Caminhos do host e alias SSH ficam em `.env` (`DEPLOY_REMOTE`), fora do
+  repo: este repo é público e layout de servidor não se publica.
 - Umami do site: website_id `09e3c322-9299-4694-9ace-4d0268e81416`
   (analytics.vitorplentz.com.br; filtra bots server-side).
 
