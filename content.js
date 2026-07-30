@@ -10,8 +10,23 @@ import(chrome.runtime.getURL('common.js')).then(common => {
 
 let storageListenersAttached = false;
 
+// After the extension reloads/updates, ORPHANED content scripts in already-open
+// tabs still hold live listeners/timers; any chrome.* call from them throws
+// "Extension context invalidated", spamming the console and leaking the poll
+// timer. Gate every chrome.* entry point on this so an orphan quietly no-ops
+// until the tab is refreshed. `chrome.runtime.id` goes undefined the moment the
+// context dies; the try/catch covers the throw-on-access variant.
+const contextValid = () => {
+    try {
+        return !!(chrome.runtime && chrome.runtime.id);
+    } catch {
+        return false;
+    }
+};
+
 function main(common) {
     function loadSettings() {
+        if (!contextValid()) return;
         chrome.storage.local.get(common.storage, data => {
             sendLoadSettingsEvent(common.resolveSettings(data));
         });
@@ -42,6 +57,7 @@ function main(common) {
     // Reload only when an engine setting actually changed — control keys write
     // storage frequently, and re-sending settings on each write is pure churn.
     function onEngineSettingsChanged(changes, area) {
+        if (!contextValid()) return;
         if (area === 'local' && common.storage.some(k => k in changes)) loadSettings();
     }
 
@@ -52,10 +68,21 @@ function main(common) {
         chrome.storage.onChanged.addListener(onEngineSettingsChanged);
     }
 
+    // Diagnostic log relay: the engine (page world) emits a JSON STRING; we
+    // persist it under diagKey (kept OUT of common.storage, so this write never
+    // triggers onEngineSettingsChanged). Nothing leaves the device — the popup
+    // reads this key only when the user chooses to copy/download it.
+    document.addEventListener('_live_catch_up_diag', e => {
+        if (!contextValid()) return;
+        if (typeof e.detail !== 'string') return; // X-ray: a primitive crosses worlds cleanly
+        chrome.storage.local.set({ [common.diagKey]: e.detail });
+    });
+
     document.addEventListener('_live_catch_up_init', () => {
         clearInterval(detect_interval);
         let my_interval;
         my_interval = detect_interval = setInterval(() => {
+            if (!contextValid()) { clearInterval(my_interval); return; }
             const player = document.getElementById("movie_player");
             if (!player) {
                 return;

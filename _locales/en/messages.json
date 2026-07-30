@@ -93,5 +93,32 @@
    "supportIntl": {
       "message": "Donate in US$ (card)",
       "description": "International donation link (USD) for users without PIX"
+   },
+   "reportToggle": {
+      "message": "Report a problem"
+   },
+   "reportTitle": {
+      "message": "Found a bug?"
+   },
+   "reportIntro": {
+      "message": "Copy the diagnostics and paste them into your report. Nothing leaves here on its own: you are the one who sends it."
+   },
+   "reportCopy": {
+      "message": "Copy diagnostics"
+   },
+   "reportCopied": {
+      "message": "Copied!"
+   },
+   "reportDownload": {
+      "message": "Download file (.json)"
+   },
+   "reportOpenIssue": {
+      "message": "Open a report on GitHub"
+   },
+   "reportHint": {
+      "message": "After copying, open the report and paste the diagnostics along with what happened."
+   },
+   "reportEmpty": {
+      "message": "Open a YouTube live first to generate the diagnostics."
    }
 }

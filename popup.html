@@ -64,6 +64,25 @@
             </section>
         </section>
 
+        <section class="report-area">
+            <button id="report-toggle" class="report-toggle" type="button" aria-expanded="false" aria-controls="report-panel">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 9v4" />
+                    <path d="M12 17h.01" />
+                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+                </svg><span id="report-toggle-label"></span>
+            </button>
+            <section id="report-panel" class="report" aria-labelledby="report-title" hidden>
+                <h2 id="report-title" class="report-title"></h2>
+                <p id="report-intro" class="report-intro"></p>
+                <p id="report-empty" class="report-empty" hidden></p>
+                <button id="report-copy" class="report-copy" type="button"></button>
+                <button id="report-download" class="report-download" type="button"></button>
+                <button id="report-issue" class="report-issue" type="button"></button>
+                <p id="report-hint" class="report-hint"></p>
+            </section>
+        </section>
+
         <footer class="app-footer">
             <button id="reset" class="reset" type="button">
                 <span id="reset-label" class="reset-label"></span>

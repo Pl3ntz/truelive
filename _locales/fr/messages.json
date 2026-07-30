@@ -93,5 +93,32 @@
    "supportIntl": {
       "message": "Faire un don en US$ (carte)",
       "description": "International donation link (USD) for users without PIX"
+   },
+   "reportToggle": {
+      "message": "Signaler un problème"
+   },
+   "reportTitle": {
+      "message": "Vous avez trouvé un bug ?"
+   },
+   "reportIntro": {
+      "message": "Copiez le diagnostic et collez-le dans votre signalement. Rien ne part d'ici tout seul : c'est vous qui l'envoyez."
+   },
+   "reportCopy": {
+      "message": "Copier le diagnostic"
+   },
+   "reportCopied": {
+      "message": "Copié !"
+   },
+   "reportDownload": {
+      "message": "Télécharger le fichier (.json)"
+   },
+   "reportOpenIssue": {
+      "message": "Ouvrir un signalement sur GitHub"
+   },
+   "reportHint": {
+      "message": "Après avoir copié, ouvrez le signalement et collez le diagnostic avec ce qui s'est passé."
+   },
+   "reportEmpty": {
+      "message": "Ouvrez d'abord un direct YouTube pour générer le diagnostic."
    }
 }

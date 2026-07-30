@@ -53,6 +53,18 @@ export const label = {
     supportFree: msg('supportFree', 'Livre'),
     supportIntl: msg('supportIntl', 'Doar em US$ (cartão)'),
 
+    // Report a problem — a local diagnostic export. The user is the only sender
+    // (copy/download), so Law 7 ("zero external requests") stays literally true.
+    reportToggle: msg('reportToggle', 'Relatar um problema'),
+    reportTitle: msg('reportTitle', 'Achou um bug?'),
+    reportIntro: msg('reportIntro', 'Copie o diagnóstico e cole no seu relato. Nada sai daqui sozinho: você é quem envia.'),
+    reportCopy: msg('reportCopy', 'Copiar diagnóstico'),
+    reportCopied: msg('reportCopied', 'Copiado!'),
+    reportDownload: msg('reportDownload', 'Baixar arquivo (.json)'),
+    reportOpenIssue: msg('reportOpenIssue', 'Abrir um relato no GitHub'),
+    reportHint: msg('reportHint', 'Depois de copiar, abra o relato e cole o diagnóstico junto com o que aconteceu.'),
+    reportEmpty: msg('reportEmpty', 'Abra uma live do YouTube primeiro para gerar o diagnóstico.'),
+
 
 
 
@@ -84,6 +96,14 @@ export const storage = ['enabled', 'playbackRate', 'showPlaybackRate', 'showLate
 
 /** Mode to restore when the toggle shortcut re-enables playback after Off. */
 export const lastModeKey = 'lastMode';
+
+/**
+ * Diagnostic log key. Deliberately OUT of `storage` (so writing it never
+ * triggers onEngineSettingsChanged / a settings reload) and out of any reset.
+ * Holds a JSON STRING the engine emits; the popup reads it for the
+ * user-initiated bug export. Nothing here is ever transmitted by the extension.
+ */
+export const diagKey = '_diag';
 
 /**
  * Compute the toggle shortcut's action: flip between Off and the last active mode.
@@ -220,6 +240,54 @@ export function deriveMode(d) {
         if (ok) return name;
     }
     return 'custom';
+}
+
+// ---------------------------------------------------------------------------
+// Diagnostic export (bug report). PURE: turns the raw JSON string the engine
+// stored under diagKey into a Markdown block the user can paste into an issue
+// plus a downloadable JSON, and a filename. Engine state ONLY — no video id,
+// URL, title or any identifier (privacy allowlist). The popup supplies meta
+// (extension version, browser+major label, active mode, timestamp stamp);
+// keeping this pure makes it unit-testable (test/diag.test.mjs).
+// ---------------------------------------------------------------------------
+export function buildDiagExport(raw, meta = {}) {
+    let data = {};
+    try { data = raw ? JSON.parse(raw) : {}; } catch { data = {}; }
+    const events = Array.isArray(data.events) ? data.events : [];
+    const samples = Array.isArray(data.samples) ? data.samples : [];
+    const caps = (data.caps && typeof data.caps === 'object')
+        ? Object.keys(data.caps).filter(k => data.caps[k]).join(',') : '';
+
+    const tally = {};
+    for (const e of events) { const k = (e && e.k) ? e.k : '?'; tally[k] = (tally[k] || 0) + 1; }
+    const tallyStr = Object.entries(tally).map(([k, n]) => `${k}×${n}`).join(', ') || 'nenhum';
+    const hiddenSamples = samples.filter(s => s && s.h).length;
+
+    const out = {
+        truelive: meta.version || '?',
+        browser: meta.browser || '?',
+        mode: meta.mode || '?',
+        session: data.sid ?? null,
+        caps,
+        events,
+        samples,
+    };
+    const json = JSON.stringify(out, null, 2);
+    const markdown = [
+        '- TrueLive: ' + out.truelive,
+        '- Navegador: ' + out.browser,
+        '- Modo: ' + out.mode,
+        '- Sessão: ' + out.session + ' (' + events.length + ' eventos, ' + samples.length
+            + ' amostras, ' + hiddenSamples + ' com aba oculta)',
+        '- Player: ' + (caps || 'sem dados'),
+        '- Eventos: ' + tallyStr,
+        '',
+        '```json',
+        JSON.stringify({ sid: out.session, caps, events, samples }),
+        '```',
+    ].join('\n');
+    const filename = 'truelive-diagnostico-' + (meta.stamp || 'log') + '.json';
+    return { json, markdown, filename, empty: events.length === 0 && samples.length === 0 };
 }
 
 export function value(v, fallback) {

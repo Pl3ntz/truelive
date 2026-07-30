@@ -210,6 +210,7 @@
             // rearm (clear a suspension) only on a DROP — a lighter rendition
             // earns a fresh chance; a RISE on a suspended connection doesn't
             edge_governor.qualityChange(now, v.videoHeight < edge_quality_h);
+            log_push_event('quality', { from: edge_quality_h, to: v.videoHeight, drop: v.videoHeight < edge_quality_h ? 1 : 0 });
             edge_self_seek_until = now + 4000; // refill 'waiting' isn't a stall
         }
         edge_quality_h = v.videoHeight;
@@ -228,11 +229,13 @@
             // attach, before back-buffer accumulates). Still trouble: block
             // tightening — but a normal stream start can't trip a handover.
             edge_governor.noteTrouble(now);
+            log_push_event('trouble', {});
             return;
         }
         edge_self_seek_until = now + 1500; // the seek fires 'waiting'; not a real stall
         v.currentTime = back;
         edge_governor.noteRescue(now, end - v.currentTime);
+        log_push_event('rescue', { back: +(end - v.currentTime).toFixed(2), to: +rescueTo.toFixed(2) });
     }
 
     function video_instance() {
@@ -433,6 +436,90 @@
     let current_settings;
     let last_active_ping = 0;
 
+    // --- Hidden-tab tick driver (F3) ----------------------------------------
+    // The hot loop used to be driven ONLY by setInterval(…, 250); a background
+    // tab throttles that timer to ~1/min and the engine falls asleep. The
+    // <video>'s 'timeupdate' event keeps firing ~4Hz even hidden (media is not
+    // throttled), so it becomes a second entry door for the tick — coalesced
+    // to the same cadence. `engine_running` gates it so a hidden-tab timeupdate
+    // can't run a tick while the engine is OFF.
+    let last_engine_tick = 0;
+    let engine_running = false;
+
+    // --- Diagnostic ring buffer (local; user-exported, never auto-sent) ------
+    // Feeds the popup's "Report a problem" export AND validates F3: every sample
+    // records document.hidden, so a hidden-tab timeline with ADVANCING relative
+    // timestamps proves the engine kept ticking (a gap denounces throttling).
+    // Engine state ONLY — no video id / URL / title (Law 7 + privacy allowlist).
+    // Timestamps are RELATIVE to the session start (never wall-clock), so the
+    // log can't fingerprint the session. Two FIFO sub-rings keep a burst of
+    // samples from ever evicting the notable event that matters.
+    const LOG_EVENT_CAP = 120;
+    const LOG_SAMPLE_CAP = 90;
+    let log_events = [];
+    let log_samples = [];
+    let log_sid = 0;
+    let log_start = 0;
+    let log_prev_suspended = false;
+    let log_flush_timer = 0;
+
+    function log_now() { return log_start ? Date.now() - log_start : 0; }
+
+    // Immediate flush: dispatch straight to content.js (storage.local.set is NOT
+    // timer-throttled in a background tab, unlike setTimeout — so notable events
+    // persist even while hidden, surviving a "bug then close the tab").
+    function log_emit() {
+        document.dispatchEvent(new CustomEvent('_live_catch_up_diag', {
+            detail: JSON.stringify({
+                v: 1, sid: log_sid, start: log_start,
+                caps, events: log_events, samples: log_samples,
+            }),
+        }));
+    }
+
+    function log_flush(immediate) {
+        if (immediate) {
+            clearTimeout(log_flush_timer);
+            log_flush_timer = 0;
+            log_emit();
+            return;
+        }
+        if (log_flush_timer) return; // trailing debounce, coalesces sample churn
+        log_flush_timer = setTimeout(() => { log_flush_timer = 0; log_emit(); }, 2000);
+    }
+
+    function log_push_event(kind, fields) {
+        log_events.push({ t: log_now(), k: kind, h: document.hidden ? 1 : 0, ...fields });
+        if (log_events.length > LOG_EVENT_CAP) log_events.splice(0, log_events.length - LOG_EVENT_CAP);
+        log_flush(true); // notable: crash-safe persist now
+    }
+
+    // Heartbeat sample — reuses the already-rounded __truelive_debug when edge
+    // mode built it this tick; falls back to a minimal snapshot otherwise, so
+    // samples ALWAYS advance and prove tick liveness regardless of mode.
+    function log_push_sample() {
+        const d = window.__truelive_debug;
+        log_samples.push({
+            t: log_now(), h: document.hidden ? 1 : 0,
+            rate: d ? d.rate : applied_rate,
+            reserve: d ? d.reserve : null,
+            floor: d ? d.floor : null,
+            drawdown: d ? d.drawdown : null,
+            suspended: (d && d.suspended) ? 1 : 0,
+        });
+        if (log_samples.length > LOG_SAMPLE_CAP) log_samples.splice(0, log_samples.length - LOG_SAMPLE_CAP);
+        log_flush(false);
+    }
+
+    function log_open_session(cap_summary) {
+        log_sid += 1;
+        log_start = Date.now();
+        log_events = [];
+        log_samples = [];
+        log_prev_suspended = false;
+        log_push_event('attach', { caps: cap_summary });
+    }
+
     // --- Resilience state (R1/R2/R3) ----------------------------------------
     // The engine drives entirely off UNDOCUMENTED player methods. `caps` records
     // which ones actually exist (probed once per attach); the hot loop is guarded
@@ -456,6 +543,7 @@
         if (now < edge_self_seek_until) return; // our own rescue seek, not a real stall
         if (now < stall_cooldown_until || now - last_stall < 5000) return;
         last_stall = now;
+        log_push_event('stall', {}); // a real stall (frozen screen), any mode
         // A REAL stall (frozen screen) is what counts toward the graceful
         // handover — an invisible rescue step-back no longer does (v2).
         if (current_settings?.edge && edge_governor) edge_governor.noteStall(now);
@@ -512,6 +600,7 @@
         engine_degraded = true;
         clearInterval(interval);
         hideAllIndicators();
+        log_push_event('degrade', { reason: String(reason).slice(0, 60) });
         console.warn(`[TrueLive] Paused: the YouTube player API looks different (${reason}). It will retry on the next video/navigation.`);
     }
 
@@ -537,6 +626,7 @@
         if (active_now - last_active_ping > 2000) {
             last_active_ping = active_now;
             document.dispatchEvent(new CustomEvent('_live_catch_up_active'));
+            log_push_sample(); // diagnostic heartbeat (also the F3 proof)
         }
 
         let edge_suspended = false;
@@ -566,6 +656,10 @@
                     const g = edge_governor.tick(now, b_end, b_end - ev.currentTime,
                         Math.max(2.0, settings.playbackRate));
                     edge_suspended = g.suspended;
+                    if (g.suspended !== log_prev_suspended) {
+                        log_push_event(g.suspended ? 'suspend' : 'resume', {});
+                        log_prev_suspended = g.suspended;
+                    }
                     if (g.suspended) {
                         // weak-connection handover: behave as Automático
                         set_playbackRate(settings.playbackRate, latency, health, settings.bufferTarget, true);
@@ -647,8 +741,24 @@
             run_tick(settings);
             tick_errors = 0;
         } catch (e) {
+            log_push_event('tickerr', { msg: String(e?.message || 'exception').slice(0, 80), n: tick_errors + 1 });
             if (++tick_errors >= MAX_TICK_ERRORS) degrade(e?.message || 'exception');
         }
+    }
+
+    // The ONLY new entry door for the tick (guarded_tick itself is unchanged).
+    // Both the 250ms interval AND the <video>'s 'timeupdate' route through here.
+    // The 240ms gate sits just below the 250ms interval, so in the FOREGROUND
+    // the interval always passes and behaviour is identical to before; in a
+    // hidden tab the timeupdate coalesces to >=240ms, preserving the CREEP/EMA
+    // constants tuned at 250ms. `engine_running` blocks ticks while the motor
+    // is OFF.
+    function on_engine_tick() {
+        if (!engine_running) return;
+        const now = Date.now();
+        if (now - last_engine_tick < 240) return;
+        last_engine_tick = now;
+        guarded_tick();
     }
 
     document.addEventListener('_live_catch_up_load_settings', e => {
@@ -662,10 +772,25 @@
         clearInterval(interval);
         if (engine_degraded) return; // paused until the next navigation retries
         if (settings.enabled || settings.skip || settings.showPlaybackRate || settings.showLatency || settings.showHealth || settings.showEstimation || settings.showCurrent || settings.showPinned) {
-            interval = setInterval(guarded_tick, 250);
+            engine_running = true;
+            interval = setInterval(on_engine_tick, 250);
         } else {
+            engine_running = false;
             reset_playbackRate();
             hideAllIndicators();
+        }
+    });
+
+    // F3-2: coming back to the foreground, force one fresh tick immediately
+    // (don't wait for the throttled interval to unfreeze). If the tab was
+    // asleep for a while the governor re-anchors on its own (MAX_TICK_GAP_S).
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            last_engine_tick = 0;
+            on_engine_tick();
+            // Samples collected while hidden were held by the throttled debounce
+            // timer; persist them now, right before the user might open the popup.
+            log_flush(true);
         }
     });
 
@@ -708,6 +833,11 @@
         engine_degraded = false;
         tick_errors = 0;
 
+        // Fresh stream = fresh diagnostic session (the engine state resets here,
+        // so old ticks describe the old stream). Records which private player
+        // APIs this attach actually found.
+        log_open_session(Object.keys(caps).filter(k => caps[k]).join(','));
+
         // Fresh stream, fresh controller state: EMAs/hysteresis measured on the
         // previous live must not steer the first seconds of this one.
         // (applied_rate is kept — apply_playback_rate's divergence logic already
@@ -726,8 +856,12 @@
             // so the old element can be garbage-collected after a live→live
             // navigation instead of being pinned by the closure (PR #17). The
             // `ratechange` listener was dropped entirely — nothing consumes it.
-            if (bound_video) bound_video.removeEventListener('waiting', on_video_waiting);
+            if (bound_video) {
+                bound_video.removeEventListener('waiting', on_video_waiting);
+                bound_video.removeEventListener('timeupdate', on_engine_tick);
+            }
             v.addEventListener('waiting', on_video_waiting);
+            v.addEventListener('timeupdate', on_engine_tick); // drives the tick in hidden tabs
             bound_video = v;
         }
 

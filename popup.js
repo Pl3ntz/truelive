@@ -280,6 +280,104 @@ function renderSupport() {
     });
 }
 
+// --------------------------------------------------------------- Report a problem
+// A local diagnostic export. The engine accumulates engine-only state in a ring
+// buffer (persisted under diagKey); here the user copies it into a report or
+// downloads it. The extension never sends anything — the user is the sender, so
+// Law 7 ("zero external requests") stays literally true. No new permission.
+const ISSUE_URL = 'https://github.com/Pl3ntz/truelive/issues/new?template=bug_report.md';
+
+// Browser + MAJOR version only (never the full UA string — the one line with a
+// fingerprint flavour). Enough to reproduce ~95% of bugs.
+function browserLabel() {
+    const ua = navigator.userAgent || '';
+    let m;
+    if ((m = ua.match(/Firefox\/(\d+)/))) return 'Firefox ' + m[1];
+    if ((m = ua.match(/Edg\/(\d+)/))) return 'Edge ' + m[1];
+    if ((m = ua.match(/OPR\/(\d+)/))) return 'Opera ' + m[1];
+    if ((m = ua.match(/Chrome\/(\d+)/))) return 'Chrome ' + m[1];
+    return 'Desconhecido';
+}
+
+function fileStamp() {
+    // YYYY-MM-DD-HHmmss — filename-safe, no colons.
+    return new Date().toISOString().slice(0, 19).replace(/T/, '-').replace(/:/g, '');
+}
+
+function renderReport() {
+    const toggle = $('#report-toggle');
+    const panel = $('#report-panel');
+    $('#report-toggle-label').textContent = L.reportToggle;
+    $('#report-title').textContent = L.reportTitle;
+    $('#report-intro').textContent = L.reportIntro;
+    $('#report-hint').textContent = L.reportHint;
+
+    const copyBtn = $('#report-copy');
+    const downloadBtn = $('#report-download');
+    const issueBtn = $('#report-issue');
+    const emptyMsg = $('#report-empty');
+    copyBtn.textContent = L.reportCopy;
+    copyBtn.setAttribute('aria-live', 'polite');
+    downloadBtn.textContent = L.reportDownload;
+    issueBtn.textContent = L.reportOpenIssue;
+    emptyMsg.textContent = L.reportEmpty;
+
+    let copyTimer;
+
+    const buildExport = async () => {
+        const stored = await getStorage([common.diagKey]);
+        return common.buildDiagExport(stored[common.diagKey], {
+            version: chrome.runtime.getManifest().version,
+            browser: browserLabel(),
+            mode: common.deriveMode(state),
+            stamp: fileStamp(),
+        });
+    };
+
+    // Reflect whether any diagnostic data exists yet: copy/download stay disabled
+    // (and the empty hint shows) until the user has opened a live. "Open on
+    // GitHub" is always available — a bug report doesn't require a captured log.
+    const syncEmptyState = async () => {
+        const stored = await getStorage([common.diagKey]);
+        const empty = common.buildDiagExport(stored[common.diagKey]).empty;
+        emptyMsg.hidden = !empty;
+        copyBtn.disabled = empty;
+        downloadBtn.disabled = empty;
+    };
+
+    copyBtn.addEventListener('click', async () => {
+        const { markdown } = await buildExport();
+        navigator.clipboard.writeText(markdown);
+        copyBtn.textContent = L.reportCopied;
+        copyBtn.classList.add('copied');
+        clearTimeout(copyTimer);
+        copyTimer = setTimeout(() => { copyBtn.textContent = L.reportCopy; copyBtn.classList.remove('copied'); }, 2500);
+    });
+
+    downloadBtn.addEventListener('click', async () => {
+        const { json, filename } = await buildExport();
+        // Blob + <a download>: a local save, no 'downloads' permission needed.
+        const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+        const a = el('a', { href: url, download: filename });
+        document.body.append(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 0);
+    });
+
+    // A navigation the USER initiates (same category as the donation link), not
+    // a fetch/XHR by the extension. The log is NOT put in the URL (too long) —
+    // the user pastes what they copied.
+    issueBtn.addEventListener('click', () => chrome.tabs.create({ url: ISSUE_URL }));
+
+    toggle.addEventListener('click', () => {
+        const open = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!open));
+        panel.hidden = open;
+        if (!open) syncEmptyState();
+    });
+}
+
 // --------------------------------------------------------------- Refresh
 function refresh() {
     const mode = common.deriveMode(state);
@@ -310,6 +408,7 @@ function refresh() {
     renderAdvancedToggle();
     renderReset();
     renderSupport();
+    renderReport();
     refresh();
 
     // Keep the UI in sync with changes made elsewhere while the popup is open

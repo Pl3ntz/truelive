@@ -27,9 +27,7 @@ assignees: ''
 
 ## Ambiente
 
-- **Navegador e versão:** <!-- ex.: Chrome 138 / Firefox 128 -->
-- **Versão da extensão:** <!-- veja em chrome://extensions ou about:addons -->
-- **Modo em uso:** <!-- Automático, Suave, Equilibrado, Próximo, Latência Mínima -->
+- **Modo em uso:** <!-- Desligado, Automático ou Super Ao Vivo -->
 - **Sistema operacional:** <!-- ex.: Windows 11, macOS 14, Ubuntu 24.04 -->
 
 ## Live afetada
@@ -37,10 +35,16 @@ assignees: ''
 <!-- URL da transmissão ao vivo onde o problema ocorre, se puder compartilhar.
      Ajuda muito reproduzir o cenário exato. -->
 
-## Capturas de tela / console
+## Diagnóstico
 
-<!-- Se possível, anexe prints. Para erros de JavaScript, abra o DevTools
-     (F12 > Console) e cole a mensagem aqui. -->
+<!-- No popup da extensão, abra "Relatar um problema" e clique em "Copiar
+     diagnóstico". Cole o bloco aqui dentro (ele já traz navegador, versão e
+     modo, então os campos acima ficam preenchidos automaticamente). O
+     diagnóstico é técnico e local: não inclui a URL nem o título do vídeo. -->
+
+```
+(cole o diagnóstico aqui)
+```
 
 ## Contexto adicional
 
