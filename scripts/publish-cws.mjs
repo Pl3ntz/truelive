@@ -14,7 +14,7 @@
 // do Owner: quem tiver o arquivo publica. Nunca comitar, nunca colar em chat.
 
 import { readFileSync, existsSync, appendFileSync } from 'node:fs';
-import { createInterface } from 'node:readline/promises';
+import { createServer } from 'node:http';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,9 +22,6 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const ENV = join(root, '.env');
 const ITEM_ID = 'hoihhfamhfmnnldkdllmemehhbcogkna';
 const SCOPE = 'https://www.googleapis.com/auth/chromewebstore';
-// Fluxo de app instalado: o codigo aparece na propria tela do Google e o Owner
-// cola aqui. Evita subir servidor local so pra receber um redirect.
-const REDIRECT = 'urn:ietf:wg:oauth:2.0:oob';
 
 // Carrega o .env para dentro de process.env (nao sobrescreve o que ja veio do
 // ambiente, pra CI poder injetar sem editar arquivo). Ler credencial de
@@ -69,6 +66,31 @@ async function accessToken() {
     return d.access_token;
 }
 
+// Sobe um servidor efemero em 127.0.0.1 numa porta livre (porta 0 = o SO
+// escolhe) e resolve com o `code` da primeira requisicao que trouxer um. O
+// navegador do Owner recebe uma resposta legivel em vez de "conexao recusada".
+function abrirReceptor() {
+    return new Promise(resolve => {
+        let entregar;
+        const esperado = new Promise((ok, falha) => { entregar = { ok, falha }; });
+        const server = createServer((req, res) => {
+            const q = new URL(req.url, 'http://127.0.0.1').searchParams;
+            const code = q.get('code');
+            const erro = q.get('error');
+            res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+            res.end(code ? 'Autorizado. Pode fechar esta aba.' : `Falhou: ${erro || 'sem codigo'}`);
+            if (code) entregar.ok(code); else entregar.falha(new Error(erro || 'sem codigo'));
+        });
+        server.listen(0, '127.0.0.1', () => {
+            resolve({ server, port: server.address().port, esperarCodigo: () => esperado });
+        });
+    });
+}
+
+// Autorizacao por loopback: o Google devolve o codigo para um servidor local
+// efemero em 127.0.0.1, que o captura sozinho. Evita os dois problemas do fluxo
+// anterior (copiar/colar codigo na mao): ele exigia um terminal interativo, que
+// nem sempre existe, e usava o redirect "oob", que o Google desencoraja.
 async function auth() {
     if (!process.env.CWS_CLIENT_ID || !process.env.CWS_CLIENT_SECRET) {
         console.log('\nFalta a credencial do Google Cloud (uma vez so, ~5 min).');
@@ -77,21 +99,26 @@ async function auth() {
         process.exit(1);
     }
 
+    const { server, port, esperarCodigo } = await abrirReceptor();
+    const redirect = `http://127.0.0.1:${port}`;
     const url = 'https://accounts.google.com/o/oauth2/auth?' + new URLSearchParams({
         client_id: process.env.CWS_CLIENT_ID,
-        redirect_uri: REDIRECT,
+        redirect_uri: redirect,
         response_type: 'code',
         scope: SCOPE,
         access_type: 'offline',
         prompt: 'consent',           // forca vir refresh_token, nao so access
     });
-    console.log('\n1. Abra esta URL, entre com a conta dona da extensao e autorize:\n');
+    console.log('\nAbra esta URL, entre com a conta dona da extensao e autorize:\n');
     console.log('   ' + url + '\n');
-    console.log('2. O Google mostra um codigo na tela. Cole ele aqui.\n');
+    console.log('Aguardando a autorizacao (o codigo volta sozinho)...');
 
-    const rl = createInterface({ input: process.stdin, output: process.stdout });
-    const code = (await rl.question('   Codigo: ')).trim();
-    rl.close();
+    let code;
+    try {
+        code = await esperarCodigo();
+    } finally {
+        server.close();
+    }
 
     const r = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
@@ -101,7 +128,7 @@ async function auth() {
             client_secret: process.env.CWS_CLIENT_SECRET,
             code,
             grant_type: 'authorization_code',
-            redirect_uri: REDIRECT,
+            redirect_uri: redirect,
         }),
     });
     const d = await r.json();
@@ -109,7 +136,7 @@ async function auth() {
         throw new Error(`troca do codigo falhou (${r.status}): ${d.error_description || d.error || 'sem refresh_token'}`);
     }
     appendFileSync(ENV, `\nCWS_REFRESH_TOKEN=${d.refresh_token}\n`);
-    console.log('\nOK. refresh_token gravado no .env.');
+    console.log('\nOK. Token gravado no .env.');
     console.log('Daqui pra frente e so:  npm run build && npm run publish\n');
 }
 
