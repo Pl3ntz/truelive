@@ -274,6 +274,50 @@ test('one freak delivery gap does not pin the floor; a repeating one does', () =
         `a repeating gap must raise the measured need (${gov2.getState().drawdown})`);
 });
 
+// Same real-time stream (media arrives at a fixed rate per REAL second),
+// sampled at a fixed 250ms cadence vs a jittered 200-260ms one — the cadence
+// the new hidden-tab driver produces (interval + coalesced 'timeupdate', gated
+// at 240ms). Drives gov.tick with a varying nowMs ONLY; edge.js is untouched.
+// Proves the driver change can't perturb the governor's steady state.
+function simulateCadence(gov, { ticks, ratePerSec, dtFn, startReserve, maxRate = 1.25, t0 = 1_000_000 }) {
+    let bufferedEnd = 100;
+    let currentTime = bufferedEnd - startReserve;
+    let rate = 1.0;
+    let now = t0;
+    let last = null;
+    for (let i = 0; i < ticks; i++) {
+        const dtMs = dtFn(i);
+        now += dtMs;
+        const dt = dtMs / 1000;
+        bufferedEnd += ratePerSec * dt;               // media over REAL elapsed time
+        currentTime = Math.min(bufferedEnd, currentTime + rate * dt);
+        let reserve = bufferedEnd - currentTime;
+        const out = gov.tick(now, bufferedEnd, reserve, maxRate);
+        if (out.rescue && !out.suspended) {
+            currentTime = Math.max(0, bufferedEnd - out.rescueTo);
+            reserve = bufferedEnd - currentTime;
+            gov.noteRescue(now, reserve);
+        }
+        rate = out.suspended ? 1.0 : out.rate;
+        last = { reserve, ...out };
+    }
+    return last;
+}
+
+test('cadence invariance: 250ms-fixed vs 200-260ms-jittered converge alike', () => {
+    const cfg = { ticks: 2000, ratePerSec: 1.0, startReserve: 6 };
+    const fixed = simulateCadence(createEdgeGovernor(), { ...cfg, dtFn: () => 250 });
+    // deterministic jitter in [200,260]ms — the driver's real spread
+    const jittered = simulateCadence(createEdgeGovernor(), { ...cfg, dtFn: i => 200 + ((i * 37) % 61) });
+    assert.equal(fixed.suspended, false);
+    assert.equal(jittered.suspended, false);
+    assert.equal(fixed.suspended, jittered.suspended, 'suspension state must match');
+    assert.ok(Math.abs(fixed.target - jittered.target) < 0.2,
+        `target drifted with cadence: fixed ${fixed.target} vs jittered ${jittered.target}`);
+    assert.ok(Math.abs(fixed.floor - jittered.floor) < 0.2,
+        `floor drifted with cadence: fixed ${fixed.floor} vs jittered ${jittered.floor}`);
+});
+
 test('buffer-first: no acceleration while the reserve is thin', () => {
     const gov = createEdgeGovernor();
     // reserve hovers just above danger with weak inflow — must rest at 1.0
