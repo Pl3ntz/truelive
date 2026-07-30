@@ -1,5 +1,45 @@
 # Changelog — TrueLive
 
+## 1.2.2 - 2026-07-30
+
+Correções de controle: em vários caminhos o Desligado não desligava de fato, e
+ligar de novo podia não surtir efeito até recarregar a página.
+
+### Corrigido
+- **Desligado agora força a velocidade de volta para 1,0x.** O detector de
+  divergência existe para nunca brigar com quem escolheu uma velocidade na mão,
+  mas a travinha dele também bloqueava o retorno ao normal: quem apertava
+  Desligado ficava com o vídeo acelerado para sempre. O desligamento passa por
+  fora da travinha e a limpa, então o motor também re-engata direito depois.
+  Velocidades abaixo de 1,0x seguem intocadas: são escolha do espectador.
+- **Desligado não deixa mais nada nosso na tela nem rodando.** `enabled` virou
+  a chave mestra. Antes, qualquer indicador ligado (e o do player vem ligado por
+  padrão) mantinha o loop de 250ms e o chip no player enquanto o seletor dizia
+  "Desligado": o modo dizia uma coisa e a tela dizia outra.
+- **Ligar um modo agora revive um motor que havia desistido.** A trava de
+  desistência só era liberada por um reattach, ou seja, uma navegação. Depois
+  dela, trocar o modo no popup não fazia nada até um F5. Ligar passou a valer
+  como pedido explícito de nova tentativa: a trava sai, o contador de erros
+  zera e as capacidades do player são re-sondadas. Se a API realmente tiver
+  mudado, o tick desiste de novo e registra uma vez, como antes.
+- **Content script órfão manda o motor se recolher.** Quando a extensão é
+  recarregada ou atualizada, o script das abas já abertas fica órfão e nunca
+  mais consegue repassar mudança de configuração, então a página seguia rodando
+  a configuração antiga indefinidamente. Isso acontece em campo a cada
+  atualização da loja. O órfão não alcança mais as APIs da extensão, mas ainda
+  alcança o DOM, e usa o próprio batimento da página para avisar. Vale a partir
+  da próxima atualização, porque depende deste código já estar nas duas pontas.
+
+### Mudado
+- **Título da loja sem a marca de terceiro.** Passou a descrever a dor sem
+  citar o YouTube no nome ("TrueLive: menos delay nas lives" e equivalentes nos
+  4 idiomas). A política de Impersonation e Propriedade Intelectual da Chrome
+  Web Store proíbe uso de marca alheia que sugira autorização, com precedente
+  de remoção, e a fiscalização das políticas novas começou em 1º de agosto de
+  2026. O ganho era de descoberta; a perda possível era a listagem inteira, que
+  hoje é o nosso único canal de aquisição. A descrição segue citando o YouTube,
+  onde o uso é descritivo e defensável.
+
 ## 1.1.3 - 2026-07-04
 
 Sem mudança de motor. Foco em descoberta (ASO) e texto.

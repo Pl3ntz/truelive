@@ -68,6 +68,20 @@ function main(common) {
         chrome.storage.onChanged.addListener(onEngineSettingsChanged);
     }
 
+    // Orphan watchdog. Once this content script is orphaned, NOTHING driven by
+    // chrome.* runs again (storage.onChanged never fires, the poll is cleared),
+    // so we cannot notice it from our own side. The page keeps dispatching
+    // `_live_catch_up_active` every ~2s though, and DOM events still reach us,
+    // so we borrow that as the heartbeat: the first beat after the context dies
+    // tells the engine to stand down instead of running stale settings forever.
+    let orphanAnnounced = false;
+    document.addEventListener('_live_catch_up_active', () => {
+        if (contextValid() || orphanAnnounced) return;
+        orphanAnnounced = true;
+        clearInterval(detect_interval);
+        document.dispatchEvent(new CustomEvent('_live_catch_up_orphaned'));
+    });
+
     // Diagnostic log relay: the engine (page world) emits a JSON STRING; we
     // persist it under diagKey (kept OUT of common.storage, so this write never
     // triggers onEngineSettingsChanged). Nothing leaves the device — the popup

@@ -164,10 +164,20 @@
         apply_playback_rate(controller.calcPlaybackRate(speed, latency, health, bufferTarget, auto));
     }
 
-    function reset_playbackRate() {
-        if (applied_rate !== 1.0 && !yielded_to_user) {
-            apply_playback_rate(1.0);
-        }
+    // Off means hands off, and that has to hold even when the divergence
+    // detector has latched `yielded_to_user`. Field bug: the viewer pressed Off
+    // and the video stayed accelerated forever, because both reset_playbackRate
+    // and apply_playback_rate bail out while the latch is set (the latch exists
+    // so we never fight a viewer who picked a speed). On an explicit shutdown we
+    // go around it and clear it, so the engine also re-arms cleanly next time.
+    // Only rates ABOVE 1.0 are touched: someone deliberately watching at 0.75x
+    // is expressing a choice we never made, so we leave it alone.
+    function force_normal_rate() {
+        if (!player?.setPlaybackRate || !player?.getPlaybackRate) return;
+        const cur = player.getPlaybackRate();
+        if (isFinite(cur) && cur > 1.01) player.setPlaybackRate(1.0);
+        applied_rate = 1.0;
+        yielded_to_user = false;
     }
 
     // Catch-up control logic + its tunables/state now live in
@@ -632,7 +642,7 @@
         let edge_suspended = false;
         if (caps.setRate && caps.getRate) {
             if (!settings.enabled) {
-                reset_playbackRate();
+                force_normal_rate();
                 pinned_floor_est = null;
             } else if (settings.edge && edge_governor) {
                 // ONE buffer metric governs edge mode: the video.buffered
@@ -770,15 +780,52 @@
         }
         apply_a11y_labels(settings.a11yLabels);
         clearInterval(interval);
-        if (engine_degraded) return; // paused until the next navigation retries
-        if (settings.enabled || settings.skip || settings.showPlaybackRate || settings.showLatency || settings.showHealth || settings.showEstimation || settings.showCurrent || settings.showPinned) {
-            engine_running = true;
-            interval = setInterval(on_engine_tick, 250);
-        } else {
-            engine_running = false;
-            reset_playbackRate();
-            hideAllIndicators();
+        // Turning a mode ON is an explicit retry request, so it must be able to
+        // revive a degraded engine. Before this, `engine_degraded` could only be
+        // cleared by a (re)attach, i.e. a navigation: once the engine had given
+        // up, the popup switched modes and NOTHING happened until an F5. That is
+        // the "coloco em Off, ligo de novo e não ativa" report. Re-probe caps
+        // against the player that exists NOW; if the API really is gone, the next
+        // tick degrades again and logs once, exactly as before.
+        if (engine_degraded) {
+            if (!settings.enabled) return;
+            engine_degraded = false;
+            tick_errors = 0;
+            if (player) caps = probe_caps(player);
         }
+        // `enabled` is the MASTER switch: Off leaves nothing of ours on screen
+        // and nothing of ours running. Previously any indicator toggle (and
+        // showPinned defaults to true) kept the 250ms tick and the player chip
+        // alive while the selector read "Desligado" — the mode said one thing
+        // and the player said another, which reads as "it won't turn off".
+        if (!settings.enabled) {
+            engine_running = false;
+            force_normal_rate();
+            hideAllIndicators();
+            return;
+        }
+        // `enabled` alone is enough to run: it is the whole point of the mode.
+        // (Regression guard: an earlier cut of the master-switch change dropped
+        // `enabled` from this condition, so turning ON with every indicator off
+        // started nothing at all.) The indicator flags only matter for a viewer
+        // who wants the chips while the engine itself is idle.
+        engine_running = true;
+        interval = setInterval(on_engine_tick, 250);
+    });
+
+    // The content script went orphan (extension reloaded/updated while this tab
+    // stayed open). It can no longer reach chrome.*, so it will never relay a
+    // settings change again: from here on the popup writes storage, shows the new
+    // mode, and we would keep running the OLD settings forever. That is the
+    // "pressed Off and it stays on" report, and in the field it happens to every
+    // open tab on every store update. The orphan can still reach the DOM, so it
+    // tells us to stand down; a tab reload brings a fresh pair back.
+    document.addEventListener('_live_catch_up_orphaned', () => {
+        clearInterval(interval);
+        engine_running = false;
+        current_settings = null;
+        force_normal_rate();
+        hideAllIndicators();
     });
 
     // F3-2: coming back to the foreground, force one fresh tick immediately
