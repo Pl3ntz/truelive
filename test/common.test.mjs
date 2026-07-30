@@ -10,6 +10,14 @@ test('deriveMode round-trips every preset', () => {
     }
 });
 
+test('empty storage resolves to the factory-default mode (edge), never custom', () => {
+    // v1.2.0 invariant: a fresh install (no saved settings) must light up
+    // exactly `defaultMode` in the popup — never "custom", which would leave
+    // no mode selected. Guards the resolveSettings-vs-preset drift trap.
+    assert.equal(common.defaultMode, 'edge');
+    assert.equal(common.deriveMode(common.resolveSettings({})), common.defaultMode);
+});
+
 test('deriveMode returns "custom" for an off-grid combination', () => {
     const custom = { enabled: true, auto: false, bufferTarget: 7.0, playbackRate: 1.25, skip: true, skipThreathold: 30 };
     assert.equal(common.deriveMode(custom), 'custom');
@@ -49,10 +57,13 @@ test('toggleEnabledAction restores the remembered mode when currently off', () =
     assert.equal(r.remember, undefined); // nothing to remember while turning on
 });
 
-test('toggleEnabledAction falls back to auto when off with no memory', () => {
-    assert.equal(common.deriveMode(common.toggleEnabledAction(common.presets.off, undefined).apply), 'auto');
-    assert.equal(common.deriveMode(common.toggleEnabledAction(common.presets.off, 'off').apply), 'auto');
-    assert.equal(common.deriveMode(common.toggleEnabledAction(common.presets.off, 'bogus').apply), 'auto');
+test('toggleEnabledAction falls back to the factory-default mode when off with no memory', () => {
+    // Default mode is Super Ao Vivo (edge) as of v1.2.0 — turning ON from Off
+    // with no remembered/valid mode lands on the factory default, not "auto".
+    assert.equal(common.defaultMode, 'edge');
+    assert.equal(common.deriveMode(common.toggleEnabledAction(common.presets.off, undefined).apply), common.defaultMode);
+    assert.equal(common.deriveMode(common.toggleEnabledAction(common.presets.off, 'off').apply), common.defaultMode);
+    assert.equal(common.deriveMode(common.toggleEnabledAction(common.presets.off, 'bogus').apply), common.defaultMode);
 });
 
 test('toggleEnabledAction does not remember an off-grid custom mode', () => {
@@ -67,7 +78,7 @@ test('toggleEnabledAction treats legacy {enabled:false} data as off', () => {
     // deriveMode reports "custom" — the toggle must still turn playback back ON
     // on the first key press instead of rewriting "off".
     assert.equal(common.deriveMode(common.toggleEnabledAction({ enabled: false }, 'edge').apply), 'edge');
-    assert.equal(common.deriveMode(common.toggleEnabledAction({ enabled: false }, undefined).apply), 'auto');
+    assert.equal(common.deriveMode(common.toggleEnabledAction({ enabled: false }, undefined).apply), common.defaultMode);
 });
 
 test('resolveSettings applies defaults, clamps and snaps', () => {

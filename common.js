@@ -117,7 +117,7 @@ export function toggleEnabledAction(data, lastMode) {
     // skip left at its default), which deriveMode reports as "custom". Without
     // this, the first key press would rewrite "off" instead of turning back on.
     if (!value(data.enabled, defaultEnabled)) {
-        const restore = (lastMode && lastMode !== 'off' && presets[lastMode]) ? lastMode : 'auto';
+        const restore = (lastMode && lastMode !== 'off' && presets[lastMode]) ? lastMode : defaultMode;
         return { apply: presets[restore], remember: undefined };
     }
     const mode = deriveMode(data);
@@ -144,9 +144,12 @@ export const defaultShowPinned = true;
 // `bufferTarget` = how many seconds of (smoothed) buffer each mode keeps; less
 // buffer means closer to live but needs a better connection. `auto` lets the
 // engine pick the target from the measured connection.
-export const defaultAuto = true;
-export const defaultEdge = false;
-export const defaultBufferTarget = 6.0;
+// These mirror presets[defaultMode] (Super Ao Vivo) — the factory-default mode.
+// resolveSettings derives empty-storage defaults straight from that preset, so
+// these stay in lockstep with it (single source of truth is `defaultMode`).
+export const defaultAuto = false;
+export const defaultEdge = true;
+export const defaultBufferTarget = 3.5;
 export const minBufferTarget = 2.0;
 export const maxBufferTarget = 15.0;
 export const stepBufferTarget = 0.5;
@@ -190,6 +193,14 @@ export const presets = {
     },
 };
 
+// Factory-default mode: a fresh install (empty storage) lands here. Deriving
+// the primitive defaults from this preset guarantees BY CONSTRUCTION that
+// deriveMode(resolveSettings({})) === defaultMode — no drifting loose constants.
+// Super Ao Vivo is the product's moat, so it ships on by default (opt-out, not
+// opt-in). Users who already saved settings are untouched: only empty storage
+// (new install) resolves to this preset.
+export const defaultMode = 'edge';
+
 // Order shown in the UI, with display metadata.
 export const modeOrder = ['off', 'auto', 'edge'];
 
@@ -206,20 +217,26 @@ export const modeMeta = {
  * @param {Object} d - Raw data as read from `chrome.storage.local`.
  */
 export function resolveSettings(d) {
+    // Empty storage resolves to the factory-default mode's preset. The
+    // mode-defining keys (enabled/playbackRate/auto/bufferTarget/skip/
+    // skipThreathold/edge) take their defaults straight from it, so a new
+    // install lands EXACTLY on `defaultMode` (deriveMode === defaultMode).
+    // The indicator toggles aren't part of any preset — they keep their own.
+    const base = presets[defaultMode];
     return {
-        enabled: value(d.enabled, defaultEnabled),
-        playbackRate: limitValue(d.playbackRate, defaultPlaybackRate, minPlaybackRate, maxPlaybackRate, stepPlaybackRate),
+        enabled: value(d.enabled, base.enabled),
+        playbackRate: limitValue(d.playbackRate, base.playbackRate, minPlaybackRate, maxPlaybackRate, stepPlaybackRate),
         showPlaybackRate: value(d.showPlaybackRate, defaultShowPlaybackRate),
         showLatency: value(d.showLatency, defaultShowLatency),
         showHealth: value(d.showHealth, defaultShowHealth),
         showEstimation: value(d.showEstimation, defaultShowEstimation),
         showCurrent: value(d.showCurrent, defaultShowCurrent),
         showPinned: value(d.showPinned, defaultShowPinned),
-        bufferTarget: limitValue(d.bufferTarget, defaultBufferTarget, minBufferTarget, maxBufferTarget, stepBufferTarget),
-        auto: value(d.auto, defaultAuto),
-        skip: value(d.skip, defaultSkip),
-        skipThreathold: value(d.skipThreathold, defaultSkipThreathold),
-        edge: value(d.edge, defaultEdge),
+        bufferTarget: limitValue(d.bufferTarget, base.bufferTarget, minBufferTarget, maxBufferTarget, stepBufferTarget),
+        auto: value(d.auto, base.auto),
+        skip: value(d.skip, base.skip),
+        skipThreathold: value(d.skipThreathold, base.skipThreathold),
+        edge: value(d.edge, base.edge),
     };
 }
 
