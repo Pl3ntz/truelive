@@ -13,11 +13,11 @@ Delays absolutos medidos/derivados são **ingest→espectador** (método `ingest
 |---|---|---|---|
 | **TrueLive — Super Ao Vivo (edge-riding)** | **3,16s** (medido, reserva 1,6s — piso antigo) | Benchmark A/B/C controlado, mesma máquina/stream esports, via `ingestionTime` [1] | MEDIUM |
 | Edge-riding @ 1,75s de headroom (validação R&D) | 3,1–3,6s | Medido ao vivo, 40s sem stalls, live Lofi Girl [2] | MEDIUM |
-| **TrueLive — Super Ao Vivo (config atual, piso 2,0s)** | **~3,5–3,6s** (esperado, não re-medido) | Derivado do código (`EDGE_ABS_FLOOR=2.0`) + componente fixo medido ≈1,56s [3] | HIGH |
+| **TrueLive — Super Ao Vivo (config atual, piso 2,0s)** | **~3,5–3,6s** (esperado, não re-medido) | Derivado do código (`FLOOR_ABS=2.0`, engine/edge.js) + componente fixo medido ≈1,56s [3] | HIGH |
 | live-catch-up, modo smooth opt-in (stream ultra-low) | 3,3–3,9s (não medido ponta-a-ponta) | Derivado do código (threshold 2×segduration) + offset medido [4] | HIGH* |
 | TV aberta digital ISDB-Tb (vs estádio) † | ~3–5s | Estimativas convergentes de imprensa/indústria (Copa 2026) [5] | MEDIUM |
 | YouTube nativo — Ultra-low latency | <5s (doc oficial); 2–5s | Doc do YouTube + secundárias derivativas, sem medição independente [6] | MEDIUM |
-| TrueLive — pós-instabilidade (piso travado 2,5s por 3min) | ~4,0–4,1s (esperado) | Derivado do código (`inject.js:271`) + componente fixo medido [3] | HIGH |
+| TrueLive — pós-instabilidade (piso travado 2,5s por 3min) | ~4,0–4,1s (esperado) | Derivado do código (`abs_gate()`, engine/edge.js) + componente fixo medido [3] | HIGH |
 | live-catch-up, smooth com threshold manual 3,0s | 4,3–4,9s (não medido) | Derivado do código + offset medido [4] | HIGH* |
 | ZeroDelay upstream (catch-up 1.25x, buffer 3,5s) | **4,49s**, serrilhado 3,2–6,7s, 10 micro-stalls/28s | Benchmark A/B/C, mesma máquina/stream [1] | MEDIUM |
 | ZeroDelay — modo Latência Mínima | 4,8–6,8s | Derivado do código (buffer 3,5s + histerese 1,5s) + offset medido; cross-check ~4,8s [7] | MEDIUM |
@@ -37,9 +37,9 @@ Delays absolutos medidos/derivados são **ingest→espectador** (método `ingest
 
 **Fundamento de todas as derivações:** delay ≈ buffer mantido + offset playhead→ingest de **1,3–1,85s** (medido: 3,1–3,6s @ headroom 1,75s; piso de pipeline ingest→CDN ~1,3s) [2] — MEDIUM (1 stream, 1 conexão).
 
-**Piso físico:** edge-riding a 0,75s de headroom atinge 2,38s por instantes, mas stalla em ~10s e termina em ~5,3s **permanente** — pior que não tentar. Piso prático de headroom: ~1,5–2s [2]. Por isso o TrueLive trava a reserva em 2,0s (`EDGE_ABS_FLOOR`), sobe para 2,5s após instabilidade, e suspende o edge-riding por 10min após 2 stalls em 5min [3].
+**Piso físico:** edge-riding a 0,75s de headroom atinge 2,38s por instantes, mas stalla em ~10s e termina em ~5,3s **permanente** — pior que não tentar. Piso prático de headroom: ~1,5–2s [2]. Por isso o TrueLive trava a reserva em 2,0s (`FLOOR_ABS`, engine/edge.js), sobe para 2,5s após instabilidade, e suspende o edge-riding por 10min após 2 stalls em 5min [3].
 
-**Concorrentes sem número de delay declarado:** YouTube Live Stream Latency Mitigator (yudai, ~10.000 usuários — aceleração de playback, exibe delay mas não promete número) [11]; YouTube Live Chat Anti-lag (57 usuários — threshold configurável 1–30s, único com snap-to-edge além do TrueLive) [12]; Tool For YouTube Live Streams Enhancer (159 usuários — só catch-up) [13]. Nenhum concorrente pesquisado usa reposicionamento direto do playhead (edge-riding).
+**Concorrentes sem número de delay declarado:** YouTube Live Stream Latency Mitigator (yudai, ~10.000 usuários — aceleração de playback, exibe delay mas não promete número) [11]; YouTube Live Chat Anti-lag (57 usuários — threshold configurável 1–30s, único com snap-to-edge além do TrueLive) [12]; Tool For YouTube Live Streams Enhancer (159 usuários — só catch-up) [13]. Entre os concorrentes, só o Anti-lag [12] também faz snap-to-edge; na TrueLive o recuo do playhead existe apenas como resgate de emergência, e o diferencial real não é esse atuador e sim o piso adaptativo medido por chegada de segmento somado à sonda AIMD (ver `docs/RESEARCH.md`, Motor v2).
 
 **Claims de marketing NÃO usados como medição:** ZeroDelay "reduz até 80%" é promessa do desenvolvedor repetida pela imprensa, sem qualquer teste independente — a redução medida real (nesta base) é 6,99s→3,16s ≈ **55%** [1][14]. Delay Off "45s→~6s" é autorreportado no README, sem metodologia, extensão não publicada em loja [15]. Workaround manual de 2x na CazéTV rende ~5s de ganho (teste Canaltech) [16].
 
@@ -51,7 +51,7 @@ Medições próprias usam latência fim-a-fim **ingest→olho**: `latência = Da
 
 1. `docs/RESEARCH.md:78-88` — benchmark A/B/C (2026-07-02, mesma máquina/stream esports): 6,99s OFF · 4,49s upstream · 3,16s TrueLive
 2. `zerodelay-test/EDGE-RIDING-FINDINGS.md` (2026-07-02) — 7,3s live head padrão (:16), ~4,8s equivalente modo mínimo (:17), 3,1–3,6s @ 1,75s (:18), falha @ 0,75s → 5,3s permanente (:19), estrutura do piso (:29-33)
-3. `inject.js` (TrueLive): `EDGE_ABS_FLOOR=2.0` (:209), `EDGE_START=2.75` (:213), `EDGE_DANGER=1.5` (:216-217), `EDGE_RESCUE_TO=2.5` (:218), suspensão 2 stalls/5min → 10min (:224-226), piso dinâmico (:269-271)
+3. `engine/edge.js` (TrueLive): `FLOOR_ABS=2.0` (:30), `START=2.75` (:35), `DANGER=1.5` (:37), `RESCUE_TO=2.5` (:38), suspensão 2 stalls/5min → 10min (`SUSPEND_STALLS`=2/`SUSPEND_WINDOW_MS`=300000/`SUSPEND_MS`=600000, :65-67), piso dinâmico via `abs_gate()` → `DEEP_CALM_FLOOR=2.5` ou `FLOOR_ABS=2.0` (:150-153)
 4. github.com/yudai-tiny-developer/live-catch-up @ 663b128 (v1.24.1, 2026-06-01): `inject.js:102-116,129-146,280`; `common.js:24,35,37,42`
 5. https://98fmnatal.com.br/brasil/entenda-a-diferenca-de-delay-entre-tv-aberta-e-streaming-na-copa/343053/ · https://set.org.br/set-news/guerra-do-delay-nas-transmissoes-da-copa-do-mundo/ (medição relativa: UHF +0 / satélite +2s / streaming +11s)
 6. https://support.google.com/youtube/answer/7444635 (doc oficial: <5s ultra-low, <10s low)

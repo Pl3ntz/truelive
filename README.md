@@ -50,8 +50,11 @@ relógio de ingestão do próprio player, mesma máquina e mesma stream:
 | CazéTV na Copa 2026 | +15-20s atrás da Globo | medição independente (Canaltech) |
 
 Redução real medida: **~55%** do delay (7,0s → 3,2s), e não os "80%" que
-concorrentes prometem sem medição. Nenhuma outra extensão pesquisada usa
-edge-riding (reposicionamento do playhead); todas só aceleram o vídeo.
+concorrentes prometem sem medição. Como os concorrentes, o TrueLive acelera o
+vídeo (curva sigmoide clampada em 1,0x), mas o diferencial é que ele **mede**
+quão perto do vivo a sua conexão permite chegar (piso por drawdown de chegada
+de segmento) e sonda esse limite com AIMD; o recuo do playhead fica reservado
+só como resgate de emergência.
 
 Análise completa, com 16 fontes, metodologia e lacunas conhecidas:
 [docs/DELAY-BENCHMARK.md](docs/DELAY-BENCHMARK.md).
@@ -93,8 +96,7 @@ Desligável em Opções → Indicadores no player.
 - **Manual:** clone o repo → `chrome://extensions` → Modo do desenvolvedor →
   "Carregar sem compactação" → selecione a pasta.
 
-Atalhos: `Alt+Shift+Y` liga/desliga · `Alt+Shift+L` pula pro ao vivo
-(`⌘+Shift+…` no Mac).
+Atalhos: `Alt+Shift+Y` liga/desliga (`⌘+Shift+Y` no Mac).
 
 ## Como funciona (técnico)
 
@@ -103,8 +105,9 @@ frente do ponto de reprodução mesmo "ao vivo". O TrueLive:
 
 1. mede o atraso real fim-a-fim pelo relógio de ingestão do player
    (`getProgressState().ingestionTime`);
-2. reposiciona o playhead na borda do conteúdo baixado (nudge direto), técnica
-   que os catch-ups tradicionais (só aceleração 1.25x) não usam;
+2. acelera proporcionalmente rumo à borda (curva sigmoide da família hls.js,
+   passos de 0,05, nunca abaixo de 1,0x); o reposicionamento do playhead sobra
+   só como resgate quando a reserva entra na zona de perigo;
 3. mantém a posição com um controlador de buffer (EMA + derivada de dreno) e as
    4 camadas de proteção acima.
 
@@ -121,7 +124,9 @@ npm run build:firefox
 ```
 
 Arquitetura: `engine/controller.js` (matemática de catch-up, unit-tested) ·
-`inject.js` (motor no mundo da página: edge-riding, freio, suspensão, badge) ·
+`engine/edge.js` (o cérebro do Super Ao Vivo: piso medido por drawdown, rate
+sigmoide clampada em 1,0x, sonda AIMD) · `inject.js` (wiring no mundo da página:
+liga o governador ao player, resgate de emergência, suspensão, badge) ·
 `content.js` (ponte storage→página) · `popup.js/html/css` (UI) · `pix.js`
 (gerador BR Code local para doações).
 

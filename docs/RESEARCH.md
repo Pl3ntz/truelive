@@ -83,9 +83,12 @@ Mínima em conexão instável. Candidato a contribuição upstream no ZeroDelay.
 | Upstream (catch-up 1.25x, buffer 3,5s) | 4,49s | serrilhado 3,2–6,7s, 10 micro-stalls/28s |
 | **TrueLive Super Ao Vivo** | **3,16s** | estável, cavalgando a 1,6s |
 
-Nenhum concorrente pesquisado (ZeroDelay, Live Stream Latency Mitigator,
-userscripts Greasyfork) usa reposicionamento direto do playhead — todos apenas
-aceleram a reprodução.
+Como todos os concorrentes pesquisados (ZeroDelay, Live Stream Latency
+Mitigator, userscripts Greasyfork), a TrueLive reduz o delay acelerando a
+reprodução (curva sigmoide, quantizada 0,05, clampeada ≥1,0x). O
+diferencial não é o tipo de atuador, é o piso adaptativo MEDIDO por chegada
+de segmento (drawdown do fluxo líquido) somado à sonda AIMD abaixo desse
+piso; o seek fica reservado só ao resgate de emergência (ver "Motor v2").
 
 ## Motor v2 (2026-07-02) — redução gradual, medição por chegada
 

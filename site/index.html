@@ -11,7 +11,7 @@
     <link rel="alternate" hreflang="en" href="https://truelive.vitorplentz.com.br/en/" />
     <link rel="alternate" hreflang="x-default" href="https://truelive.vitorplentz.com.br/" />
     <meta property="og:title" content="TrueLive: o ao vivo de verdade" />
-    <meta property="og:description" content="O menor delay que a transmissão e a sua internet permitem: 3,2s medidos. Grátis e de código aberto." />
+    <meta property="og:description" content="O menor delay que a transmissão e a sua internet permitem: 3,2s medido (piso antigo; calibração atual ~3,5s). Grátis e de código aberto." />
     <meta property="og:image" content="https://truelive.vitorplentz.com.br/assets/og-image.png?v=a794f55f" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -21,7 +21,7 @@
     <meta property="og:site_name" content="TrueLive" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="TrueLive: o ao vivo de verdade" />
-    <meta name="twitter:description" content="O menor delay que a transmissão e a sua internet permitem: 3,2s medidos. Grátis e de código aberto." />
+    <meta name="twitter:description" content="O menor delay que a transmissão e a sua internet permitem: 3,2s medido (piso antigo; calibração atual ~3,5s). Grátis e de código aberto." />
     <meta name="twitter:image" content="https://truelive.vitorplentz.com.br/assets/og-image.png?v=a794f55f" />
     <link rel="icon" href="assets/icon.png?v=a84b11e6" />
     <link rel="stylesheet" href="assets/style.css?v=3240be46" />
@@ -52,7 +52,7 @@
                 <h1>O ao vivo <em>de verdade</em>.<br />Não 20 segundos atrás.</h1>
                 <p class="sub">O YouTube te segura alguns segundos atrás do ao vivo, de propósito.
                     O TrueLive corta esse excesso e te deixa no menor delay que a
-                    <strong>transmissão e a sua internet</strong> permitem. Medido na tela: 3,2s.</p>
+                    <strong>transmissão e a sua internet</strong> permitem. Medido na tela: 3,2s (piso antigo; calibração atual ~3,5s).</p>
                 <div class="cta-row">
                     <a class="btn primary" href="https://chromewebstore.google.com/detail/truelive/hoihhfamhfmnnldkdllmemehhbcogkna" rel="noopener">Adicionar ao Chrome, 1 clique <span class="tag">loja oficial</span></a>
                     <a class="btn" href="#instalar">Edge / Brave / Opera</a>
@@ -81,7 +81,7 @@
                         <div class="lane-screen"><span class="lane-wait">aguardando o sinal… (é sério, espera)</span><span class="lane-goal">AO VIVO!</span></div>
                         <div class="lane-stamp">~19s</div>
                     </div>
-                    <p class="race-foot">Simulação em tempo real, delays medidos na mesma transmissão (relógio de ingestão). A TV aberta corre por caminho próprio (~3-5s do estádio): chegamos no território dela, não à frente.</p>
+                    <p class="race-foot">Simulação em tempo real, delays medidos na mesma transmissão (relógio de ingestão). Os 3,2s são a melhor medição histórica (piso antigo); a calibração atual projeta ~3,5s. A TV aberta corre por caminho próprio (~3-5s do estádio): chegamos no território dela, não à frente.</p>
                 </div>
             </div>
         </div>
@@ -114,12 +114,14 @@
                 </div>
             </div>
             <p class="bars-foot">Redução real medida: <strong>~55%</strong> do delay, e não os "80%" que
-                outros prometem sem medir. A TV aberta corre por outro caminho (~3-5s medidos do
+                outros prometem sem medir. (Os 3,2s são a nossa melhor medição histórica, no piso antigo; a calibração atual projeta ~3,5s.) A TV aberta corre por outro caminho (~3-5s medidos do
                 estádio, régua diferente): com TrueLive você chega no <strong>território</strong> dela,
                 perto o bastante pra gritar quase junto com o vizinho, não à frente. Metodologia completa, 16 fontes e limitações declaradas no
                 <a href="https://github.com/Pl3ntz/truelive/blob/main/docs/DELAY-BENCHMARK.md">benchmark público</a>.
-                Somos a única extensão que reposiciona o vídeo na borda do que já foi baixado
-                (edge-riding). Todas as outras apenas aceleram a reprodução.</p>
+                O TrueLive também acelera a reprodução pra te aproximar do vivo (sempre 1,0x
+                ou mais, nunca em câmera lenta), mas é a única extensão que mede quão perto do
+                ao vivo a sua conexão consegue chegar e ainda sonda logo abaixo desse limite,
+                deixando o recuo do vídeo só como resgate de emergência.</p>
         </section>
 
         <section class="alt" id="expectativa">
@@ -174,8 +176,9 @@
                     <div class="ico"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><polygon points="13 2 3 14 11 14 10 22 21 9 13 9"/></svg></div>
                     <h3>Cola na borda do vivo</h3>
                     <p>Parte do vídeo "do futuro" já está baixada no seu computador. O TrueLive
-                        reposiciona a reprodução nessa borda. Por isso chega mais perto que
-                        qualquer extensão que só acelera o vídeo.</p>
+                        acelera pra te colar nessa borda (sempre 1,0x ou mais, nunca em câmera
+                        lenta) e mede quão perto a sua conexão aguenta chegar, sondando logo
+                        abaixo desse limite.</p>
                 </div>
                 <div class="card reveal reveal-d2">
                     <div class="ico"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg></div>
