@@ -68,7 +68,7 @@ Detalhes no CLAUDE.md (Roadmap).
 
 ### Onde está cada coisa
 - Repo: github.com/Pl3ntz/truelive (release v1.0.0 com os 2 zips)
-- Site: truelive.vitorplentz.com.br · fonte em `site/` · VPS `<caminho-remoto>`
+- Site: truelive.vitorplentz.com.br · fonte em `site/` · destino no VPS em `DEPLOY_REMOTE` (`.env`)
 - Analytics: analytics.vitorplentz.com.br → site "TrueLive"
 - Benchmark: docs/DELAY-BENCHMARK.md · Pesquisa: docs/RESEARCH.md
 - Publicação: publishing/ (listing, privacy, checklist, screenshots)

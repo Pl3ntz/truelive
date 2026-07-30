@@ -19,7 +19,12 @@ const ASSETS_DIR = join(SITE, 'assets')
 const HTML_PT = join(SITE, 'index.html')
 const HTML_EN = join(SITE, 'en', 'index.html')
 const SITEMAP = join(SITE, 'sitemap.xml')
-const REMOTE = '<host>:<caminho-remoto>'
+// Destino do scp, no formato <host-ssh>:<caminho>. Vem do ambiente porque este repo é PÚBLICO:
+// o alias SSH e o layout de diretórios do servidor não são segredo forte, mas são infraestrutura
+// e não têm por que ficar publicados. Definido em .env (não versionado, ver .gitignore).
+// Sem a variável o script continua funcionando — ele só IMPRIME os comandos, então o placeholder
+// deixa claro o que substituir.
+const REMOTE = process.env.DEPLOY_REMOTE || '<host>:<caminho-remoto>'
 
 // ---------------------------------------------------------------- utilities
 
