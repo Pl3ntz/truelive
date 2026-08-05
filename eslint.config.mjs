@@ -23,7 +23,7 @@ export default [
     // is ALSO loaded as CommonJS in Node/tests, so it legitimately touches
     // `module`/`exports`; those globals are harmless for inject.js, which ignores them.
     {
-        files: ['inject.js', 'engine/controller.js'],
+        files: ['inject.js', 'engine/controller.js', 'engine/edge.js'],
         languageOptions: {
             sourceType: 'script',
             globals: { ...globals.browser, ...globals.commonjs, ZeroDelay: 'writable' },
